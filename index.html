@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="PURSUE — a 3D action-adventure retelling of 1 Samuel 30. Play as David and recover everything." />
+    <title>PURSUE — 1 Samuel 30</title>
+  </head>
+  <body>
+    <!-- WebGL canvas is injected here by the engine -->
+    <div id="app"></div>
+
+    <!-- ===================== HTML/CSS UI OVERLAY ===================== -->
+    <div id="ui-root">
+      <!-- Persistent top bar: objective, stamina, compass -->
+      <header id="hud">
+        <div id="hud-objective">
+          <span class="hud-label">OBJECTIVE</span>
+          <span id="objective-text">Reach the Desert Edge</span>
+        </div>
+        <div id="hud-stamina">
+          <span class="hud-label">STAMINA</span>
+          <div id="stamina-track"><div id="stamina-fill"></div></div>
+        </div>
+        <div id="hud-compass">
+          <span class="hud-label">HEADING</span>
+          <span id="compass-text">N 0°</span>
+        </div>
+      </header>
+
+      <!-- Interaction prompt (Press E ... ) -->
+      <div id="prompt" class="hidden"><span id="prompt-text"></span></div>
+
+      <!-- Transient alert (detections etc.) -->
+      <div id="alert-banner" class="hidden"><span id="alert-text"></span></div>
+
+      <!-- Narrative / dialogue modal -->
+      <div id="modal-root" class="hidden">
+        <div id="modal-card">
+          <h2 id="modal-title"></h2>
+          <p id="modal-speaker" class="hidden"></p>
+          <p id="modal-body"></p>
+          <div id="modal-buttons"></div>
+        </div>
+      </div>
+
+      <!-- Pointer-lock resume hint -->
+      <div id="resume-hint" class="hidden">Click to capture the mouse &nbsp;·&nbsp; ESC releases it</div>
+    </div>
+
+    <!-- Start / title screen -->
+    <div id="start-screen">
+      <div id="start-card">
+        <h1>PURSUE</h1>
+        <p class="subtitle">A retelling of 1 Samuel 30</p>
+        <p class="story">
+          Ziklag is burning. The Amalekites have taken your families into the wilderness.
+          Two hundred of your men are too exhausted to cross the brook — you press on with four hundred.
+          Find the Egyptian servant. Descend upon the camp. <em>Recover all.</em>
+        </p>
+        <div class="controls-grid">
+          <div><b>WASD / Arrows</b><span>Move</span></div>
+          <div><b>Mouse</b><span>Look around</span></div>
+          <div><b>Shift</b><span>Run (uses stamina)</span></div>
+          <div><b>E / Space</b><span>Interact &amp; advance</span></div>
+        </div>
+        <button id="start-button" class="primary-button">Begin the Pursuit</button>
+      </div>
+    </div>
+
+    <!-- Victory overlay -->
+    <div id="victory-screen" class="hidden">
+      <div id="victory-card">
+        <h1>Victory!</h1>
+        <p class="verse">
+          David recovered all that the Amalekites had taken, and rescued his two wives.
+          Nothing was missing, whether small or great, sons or daughters, spoil or anything
+          that had been taken. David recovered all.
+        </p>
+        <p class="citation">(1 Samuel 30:18–19)</p>
+        <button id="restart-button" class="primary-button">Play Again</button>
+      </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading"><div class="spinner"></div><span>Preparing the wilderness…</span></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
