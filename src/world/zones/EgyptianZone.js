@@ -6,16 +6,18 @@
  * canyon mouth at the north edge, which leads into the Amalekite camp.
  */
 import * as THREE from 'three';
-import { Mat } from '../../utils/materials.js';
+import { Mat, Geo } from '../../utils/materials.js';
 import {
   createRockField, createDryBush, createPalm, createBeacon, createRock,
-  createOliveTree, createGrassField, createWildflowers,
+  createOliveTree, createGrassField, createWildflowers, createMountainRidge,
+  createBirdFlock, createButterflies, createGrazingSheep, createHumanoid, createJar,
 } from '../props/PropFactory.js';
 import { createServant } from '../../entities/EgyptianServant.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
+import { applyTerrainColors } from '../../utils/terrain.js';
 
 export const EGYPT = {
   spawn: { x: -2, z: 30, yaw: 0 },
@@ -45,7 +47,7 @@ export function createEgyptianZone() {
   const sun = new THREE.DirectionalLight(0xffd89a, 1.4);
   sun.position.set(-34, 62, 30);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 170;
   sun.shadow.camera.left = -40;
@@ -67,7 +69,13 @@ export function createEgyptianZone() {
     pos.setY(i, egyptHeight(x, z));
   }
   groundGeo.computeVertexNormals();
-  const ground = new THREE.Mesh(groundGeo, Mat.sandLight());
+  applyTerrainColors(groundGeo, {
+    colorA: new THREE.Color(0xf2e2b8), colorB: new THREE.Color(0xc9c078),
+    colorC: new THREE.Color(0x8a8a50), scale: 0.05, strength: 0.55, seed: 19,
+  });
+  const groundMat = Mat.sandLight().clone();
+  groundMat.vertexColors = true;
+  const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.receiveShadow = true;
   group.add(ground);
 
@@ -127,13 +135,74 @@ export function createEgyptianZone() {
     colliders.push({ x, z, r: 1.1 });
   });
 
-  const grass = createGrassField(2600, { minX: -44, maxX: 44, minZ: -40, maxZ: 38 }, 13, egyptHeight,
+  const grass = createGrassField(5200, { minX: -44, maxX: 44, minZ: -40, maxZ: 38 }, 13, egyptHeight,
     { color: 0x95a05a, height: 0.7, dryness: 0.45 });
-  group.add(grass);
-  updaters.push((t) => grass.userData.update(t));
+  const farField = createGrassField(3400, { minX: -120, maxX: 120, minZ: -140, maxZ: -50 }, 14, egyptHeight,
+    { color: 0xa8a862, height: 0.9, dryness: 0.5 });
+  group.add(grass, farField);
+  updaters.push((t) => { grass.userData.update(t); farField.userData.update(t); });
 
-  const flowers = createWildflowers(240, { minX: -38, maxX: 38, minZ: -34, maxZ: 32 }, 17, egyptHeight);
+  const flowers = createWildflowers(420, { minX: -38, maxX: 38, minZ: -34, maxZ: 32 }, 17, egyptHeight);
   group.add(flowers);
+
+  // grazing sheep + butterflies over the fields
+  [[-12, 24], [16, 20], [-22, 2], [26, -4], [4, -20], [-30, -14]].forEach(([x, z], i) => {
+    const sheep = createGrazingSheep(i + 1);
+    sheep.position.set(x, egyptHeight(x, z), z);
+    group.add(sheep);
+    updaters.push((t) => sheep.userData.update(t));
+  });
+  const flies = createButterflies(18, { minX: -36, maxX: 36, minZ: -30, maxZ: 30 }, egyptHeight, 21);
+  group.add(flies);
+  updaters.push((t) => flies.userData.update(t));
+
+  // villagers at work: a woman at the hand-mill, a girl carrying a water jar
+  const workerPalette = {
+    skin: Mat.skin(),
+    cloth: Mat.tunicServant(),
+    cloth2: Mat.tunicEarth(),
+    hair: Mat.hair(),
+  };
+  const miller = createHumanoid(workerPalette, 'grinding', { detail: 'full', beard: 'none', hairStyle: 'long' });
+  const mx = -4; const mz = 12;
+  miller.position.set(mx, egyptHeight(mx, mz), mz);
+  miller.rotation.y = 2.2;
+  group.add(miller);
+  const millBase = new THREE.Mesh(Geo.cyl(), Mat.rockDark());
+  millBase.scale.set(1.15, 0.22, 1.15);
+  millBase.position.set(mx, egyptHeight(mx, mz) + 0.11, mz);
+  const millStone = new THREE.Mesh(Geo.cyl(), Mat.rock());
+  millStone.scale.set(0.75, 0.16, 0.75);
+  millStone.position.set(mx, egyptHeight(mx, mz) + 0.32, mz);
+  group.add(millBase, millStone);
+  updaters.push((t) => {
+    const p = miller.userData.parts;
+    p.armL.rotation.x = -1.25 + Math.sin(t * 2.1) * 0.32;
+    p.armR.rotation.x = -1.05 + Math.sin(t * 2.1 + 0.8) * 0.28;
+    p.torso.rotation.z = Math.sin(t * 2.1) * 0.05;
+  });
+
+  const carrier = createHumanoid(workerPalette, 'carryingJar', { detail: 'full', beard: 'none', hairStyle: 'long' });
+  const cx0 = 10; const cz0 = 16;
+  carrier.position.set(cx0, egyptHeight(cx0, cz0), cz0);
+  carrier.rotation.y = -0.6;
+  const jar = createJar(5);
+  jar.scale.setScalar(0.55);
+  jar.position.set(0, 1.92, 0);
+  carrier.add(jar);
+  group.add(carrier);
+  updaters.push((t) => {
+    carrier.position.y = egyptHeight(cx0, cz0) + Math.abs(Math.sin(t * 1.6)) * 0.035;
+    carrier.rotation.z = Math.sin(t * 1.6) * 0.025;
+  });
+
+  // horizon ridges + birds
+  const ridge = createMountainRidge(17, { width: 520, height: 60, depth: 30, color: 0xb8a074 });
+  ridge.position.set(0, -8, -170);
+  group.add(ridge);
+  const birds = createBirdFlock(8, new THREE.Vector3(0, 0, -30), 42, 30, 27);
+  group.add(birds);
+  updaters.push((t) => birds.userData.update(t));
 
   // ------------------------------------------------- camp road beacon
   const beacon = createBeacon('Amalekite Camp', 0xff8c4a);
@@ -170,7 +239,7 @@ export function createEgyptianZone() {
     spawn: EGYPT.spawn,
     bounds: EGYPT.bounds,
     colliders,
-    fog: { color: 0xd9c49a, density: 0.006 },
+    fog: { color: 0xd9c49a, density: 0.0048 },
     sun,
     sky,
     groundHeight: egyptHeight,

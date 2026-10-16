@@ -983,3 +983,178 @@ export function createCypress(seed = 1) {
 export function createReeds(count, area, seed = 1, groundHeight = () => 0) {
   return createGrassField(count, area, seed, groundHeight, { color: 0x7a8a3c, height: 1.5 });
 }
+
+// ==================================================== landscape & life
+/**
+ * Distant mountain ridge — a jagged silhouette strip that reads as
+ * landscape depth once fog blends it into the sky.
+ */
+export function createMountainRidge(seed = 1, {
+  width = 420, height = 46, depth = 30, segments = 72, color = 0x6a7488,
+} = {}) {
+  const positions = [];
+  const r = (n) => seededRandom(seed * 41 + n);
+  const hAt = (i) => {
+    const t = i / segments;
+    return height * (
+      0.35
+      + 0.4 * Math.abs(Math.sin(t * 7 + seed))
+      + 0.25 * Math.abs(Math.sin(t * 17 + seed * 2.3))
+      + 0.15 * r(i * 1.7)
+    );
+  };
+  for (let i = 0; i < segments; i++) {
+    const x0 = -width / 2 + (i / segments) * width;
+    const x1 = -width / 2 + ((i + 1) / segments) * width;
+    const h0 = hAt(i);
+    const h1 = hAt(i + 1);
+    // front-facing fan triangle (mountains as an infinite wall)
+    positions.push(x0, 0, 0, x1, 0, 0, x0, h0, 0);
+    positions.push(x1, 0, 0, x1, h1, 0, x0, h0, 0);
+    // thickness skirt
+    positions.push(x0, 0, 0, x0, h0, 0, x0, 0, -depth);
+    positions.push(x0, h0, 0, x0, h0 * 0.2, -depth, x0, 0, -depth);
+    positions.push(x1, 0, 0, x1, 0, -depth, x1, h1, 0);
+    positions.push(x1, h1, 0, x1, 0, -depth, x1, h1 * 0.2, -depth);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geo.computeVertexNormals();
+  const mat = new THREE.MeshLambertMaterial({ color, flatShading: true });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.receiveShadow = false;
+  mesh.castShadow = false;
+  return mesh;
+}
+
+/**
+ * Circling bird flock — tiny chevrons with flapping wings.
+ * group.userData.update(time) animates the flight.
+ */
+export function createBirdFlock(count, center = new THREE.Vector3(), radius = 40, height = 30, seed = 1) {
+  const g = new THREE.Group();
+  const birds = [];
+  const bodyMat = new THREE.MeshBasicMaterial({ color: 0x241f26 });
+
+  for (let i = 0; i < count; i++) {
+    const r = (n) => seededRandom(seed * 17 + i * 3.1 + n);
+    const bird = new THREE.Group();
+    const body = new THREE.Mesh(Geo.box(), bodyMat);
+    body.scale.set(0.16, 0.1, 0.5);
+    const wingL = new THREE.Mesh(Geo.box(), bodyMat);
+    wingL.scale.set(0.9, 0.05, 0.3);
+    wingL.position.set(-0.5, 0.05, 0);
+    const wingR = new THREE.Mesh(Geo.box(), bodyMat);
+    wingR.scale.set(0.9, 0.05, 0.3);
+    wingR.position.set(0.5, 0.05, 0);
+    bird.add(body, wingL, wingR);
+    g.add(bird);
+    birds.push({
+      bird, wingL, wingR,
+      phase: r(1) * Math.PI * 2,
+      speed: 0.14 + r(2) * 0.12,
+      radius: radius * (0.55 + r(3) * 0.55),
+      height: height * (0.7 + r(4) * 0.6),
+      flap: 6 + r(5) * 5,
+    });
+  }
+
+  g.userData.update = (t) => {
+    for (const b of birds) {
+      const a = b.phase + t * b.speed;
+      b.bird.position.set(
+        center.x + Math.cos(a) * b.radius,
+        b.height + Math.sin(t * 0.4 + b.phase) * 2.2,
+        center.z + Math.sin(a) * b.radius,
+      );
+      b.bird.rotation.y = -a - Math.PI / 2;
+      const flap = Math.sin(t * b.flap + b.phase * 3) * 0.65;
+      b.wingL.rotation.z = flap;
+      b.wingR.rotation.z = -flap;
+    }
+  };
+  return g;
+}
+
+/**
+ * Butterflies — bright two-wing flakes drifting over the meadow.
+ * group.userData.update(time) wanders them along slow lissajous paths.
+ */
+export function createButterflies(count, area, groundHeight = () => 0, seed = 1) {
+  const g = new THREE.Group();
+  const palette = [0xffd24a, 0xff8ac2, 0x8ad8ff, 0xfff4e0, 0xff6a4a];
+  const items = [];
+  for (let i = 0; i < count; i++) {
+    const r = (n) => seededRandom(seed * 53 + i * 2.9 + n);
+    const mat = new THREE.MeshBasicMaterial({
+      color: palette[Math.floor(r(1) * palette.length)],
+      side: THREE.DoubleSide,
+    });
+    const fly = new THREE.Group();
+    const wingL = new THREE.Mesh(Geo.plane(), mat);
+    wingL.scale.setScalar(0.16);
+    wingL.position.x = -0.09;
+    const wingR = new THREE.Mesh(Geo.plane(), mat);
+    wingR.scale.setScalar(0.16);
+    wingR.position.x = 0.09;
+    fly.add(wingL, wingR);
+    g.add(fly);
+    items.push({
+      fly, wingL, wingR,
+      cx: randRange(area.minX, area.maxX),
+      cz: randRange(area.minZ, area.maxZ),
+      phase: r(2) * Math.PI * 2,
+      speed: 0.35 + r(3) * 0.4,
+      span: 1.6 + r(4) * 2.2,
+    });
+  }
+  g.userData.update = (t) => {
+    for (const b of items) {
+      const x = b.cx + Math.sin(t * b.speed + b.phase) * b.span;
+      const z = b.cz + Math.cos(t * b.speed * 0.7 + b.phase * 1.7) * b.span;
+      const y = groundHeight(x, z) + 0.7 + Math.sin(t * 1.3 + b.phase) * 0.35;
+      b.fly.position.set(x, y, z);
+      b.fly.rotation.y = t * b.speed + b.phase;
+      const flap = Math.sin(t * 14 + b.phase) * 0.95;
+      b.wingL.rotation.y = flap;
+      b.wingR.rotation.y = -flap;
+    }
+  };
+  return g;
+}
+
+/** A live grazing sheep — head dips to the grass and lifts, ears twitch. */
+export function createGrazingSheep(seed = 1) {
+  const g = new THREE.Group();
+  const r = (n) => seededRandom(seed * 4.7 + n);
+  g.add(mesh(Geo.ico(), Mat.fleece(), 1.15, 0.85, 1.55, 0, 0.55, 0));
+  for (let l = 0; l < 4; l++) {
+    const lx = (l % 2 === 0 ? -1 : 1) * 0.32;
+    const lz = (l < 2 ? -1 : 1) * 0.5;
+    g.add(mesh(Geo.box(), Mat.hair(), 0.14, 0.36, 0.14, lx, 0.17, lz));
+  }
+  const head = new THREE.Group();
+  head.position.set(0, 0.68, 0.85);
+  head.add(mesh(Geo.box(), Mat.goatHide(), 0.42, 0.4, 0.55, 0, 0, 0.28));
+  head.add(mesh(Geo.box(), Mat.goatHide(), 0.3, 0.16, 0.2, 0, 0.1, 0.62));
+  g.add(head);
+  g.rotation.y = r(1) * Math.PI * 2;
+  g.userData.update = (t) => {
+    const graze = (Math.sin(t * 0.5 + seed) + 1) / 2; // 0..1 slow cycle
+    head.rotation.x = graze * 0.9 - 0.25;
+    head.position.y = 0.68 - graze * 0.34;
+  };
+  return g;
+}
+
+/** A water jar — for carrying poses and courtyard dressing. */
+export function createJar(seed = 1, mat = null) {
+  const r = (n) => seededRandom(seed * 8.8 + n);
+  const m = mat ?? Mat.rockDark();
+  const g = new THREE.Group();
+  g.add(mesh(Geo.sphere(), m, 0.5, 0.62, 0.5, 0, 0.3, 0));
+  g.add(mesh(Geo.cyl(), m, 0.16, 0.32, 0.16, 0, 0.72, 0));
+  g.add(mesh(Geo.torus(), m, 0.18, 0.045, 0.18, 0, 0.86, 0));
+  g.rotation.y = r(1) * Math.PI;
+  return g;
+}

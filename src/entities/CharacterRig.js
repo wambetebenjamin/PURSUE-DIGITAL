@@ -251,7 +251,9 @@ export function createDetailedHuman(opts = {}) {
   for (const mesh of buildPivot(P.torso)) torsoGroup.add(mesh);
 
   const headGroup = new THREE.Group();
-  headGroup.position.set(0, 0.44, 0);
+  // 7.5-head figure: the head reads ~0.26 units against a 1.95 body
+  headGroup.position.set(0, 0.475, 0.012);
+  headGroup.scale.setScalar(0.78);
   for (const mesh of buildPivot(P.head)) headGroup.add(mesh);
   torsoGroup.add(headGroup);
 
@@ -351,6 +353,30 @@ function applyPose(pose, g, p) {
       p.armL.rotation.z = 0.25;
       p.armR.rotation.x = -1.5;
       p.armR.rotation.z = -0.3;
+      break;
+
+    case 'grinding':
+      // kneeling at the hand-mill, both arms working the stone
+      g.position.y = -0.46;
+      p.torso.rotation.x = 0.22;
+      p.head.rotation.x = 0.34;
+      p.legL.rotation.x = -1.5;
+      p.legR.rotation.x = -1.5;
+      p.legL.rotation.z = 0.42;
+      p.legR.rotation.z = -0.42;
+      p.armL.rotation.x = -1.25;
+      p.armR.rotation.x = -1.05;
+      p.armL.rotation.z = 0.35;
+      p.armR.rotation.z = -0.35;
+      break;
+
+    case 'carryingJar':
+      // both arms raised to steady a jar on the crown of the head
+      p.armL.rotation.z = 2.95;
+      p.armR.rotation.z = -2.95;
+      p.armL.rotation.x = -0.45;
+      p.armR.rotation.x = -0.45;
+      p.head.rotation.x = -0.06;
       break;
 
     case 'reclining':

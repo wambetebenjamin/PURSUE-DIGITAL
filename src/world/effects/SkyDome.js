@@ -30,10 +30,20 @@ const FRAG = /* glsl */ `
     float sd = max(dot(d, normalize(uSunDir)), 0.0);
     col += uSunColor * (pow(sd, 900.0) * 2.4 + pow(sd, 22.0) * uSunGlow);
 
-    // streaky sunset cloud bands
+    // streaky sunset bands near the horizon
     float bands = sin(d.y * 24.0 + sin(d.x * 5.0 + uTime * 0.015) * 2.6 + d.z * 3.2);
-    float mask = smoothstep(0.02, 0.22, d.y) * (1.0 - smoothstep(0.5, 0.95, d.y));
-    col += uSunColor * smoothstep(0.84, 1.0, bands) * mask * 0.14;
+    float bandMask = smoothstep(0.02, 0.2, d.y) * (1.0 - smoothstep(0.42, 0.8, d.y));
+    col += uSunColor * smoothstep(0.84, 1.0, bands) * bandMask * 0.12;
+
+    // drifting soft cloud layers (slow, layered sine noise)
+    float drift = uTime * 0.008;
+    float n = sin(d.x * 5.5 + drift * 3.0) * 0.5
+            + sin(d.x * 11.0 + d.z * 6.5 + drift * 5.0) * 0.3
+            + sin(d.y * 18.0 + d.z * 9.0 + drift * 2.0) * 0.2;
+    float cloud = smoothstep(0.18, 0.72, n * 0.5 + 0.5);
+    float cloudMask = smoothstep(0.08, 0.3, d.y) * (1.0 - smoothstep(0.6, 1.0, d.y));
+    vec3 cloudCol = mix(vec3(1.0), uSunColor, 0.35);
+    col = mix(col, cloudCol, cloud * cloudMask * 0.42);
 
     gl_FragColor = vec4(col, 1.0);
   }

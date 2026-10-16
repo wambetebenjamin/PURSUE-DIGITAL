@@ -13,13 +13,14 @@ import { Mat } from '../../utils/materials.js';
 import {
   createTent, createBonfire, createCage, createHumanoid,
   createRockField, createBeacon, createTreasurePile, createSpilledAmphora,
-  createRug, createCamel,
+  createRug, createCamel, createMountainRidge,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { VISION } from '../../constants.js';
 import { seededRandom, randRange, wrapAngle } from '../../utils/math.js';
+import { applyTerrainColors } from '../../utils/terrain.js';
 
 export const CAMP = {
   spawn: { x: 0, z: 56, yaw: 0 },
@@ -125,7 +126,7 @@ export function createCampZone() {
   const sun = new THREE.DirectionalLight(0x7e8fe0, 0.6); // neon moonlight
   sun.position.set(-30, 52, -18);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 170;
   sun.shadow.camera.left = -44;
@@ -147,11 +148,27 @@ export function createCampZone() {
     pos.setY(i, campHeight(x, z));
   }
   groundGeo.computeVertexNormals();
+  applyTerrainColors(groundGeo, {
+    colorA: new THREE.Color(0x9a7c5c), colorB: new THREE.Color(0x5a4230),
+    colorC: new THREE.Color(0x2c1e18), scale: 0.05, strength: 0.55, seed: 43,
+  });
   const groundMat = Mat.rockDark().clone();
-  groundMat.color.set(0x4a3526); // trodden dark earth
+  groundMat.color.set(0x8a7058); // trodden dark earth × vertex colors
+  groundMat.vertexColors = true;
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.receiveShadow = true;
   group.add(ground);
+
+  // moonlit ridge silhouettes closing the valley
+  const rim1 = createMountainRidge(73, { width: 520, height: 62, depth: 30, color: 0x241c3a });
+  rim1.position.set(0, -10, -175);
+  const rim2 = createMountainRidge(79, { width: 420, height: 48, depth: 26, color: 0x2a2244 });
+  rim2.position.set(-150, -8, -110);
+  rim2.rotation.y = 0.5;
+  const rim3 = createMountainRidge(83, { width: 420, height: 50, depth: 26, color: 0x2a2244 });
+  rim3.position.set(160, -8, -100);
+  rim3.rotation.y = -0.55;
+  group.add(rim1, rim2, rim3);
 
   // valley rim rocks
   const rim = createRockField(40, { minX: -80, maxX: 80, minZ: -85, maxZ: 88 }, 55);

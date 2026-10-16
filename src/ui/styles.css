@@ -1,7 +1,34 @@
 /* ============================================================
    PURSUE — HTML/CSS UI overlay (sits above the WebGL canvas)
    Responsive: flex + clamp() so resizing never breaks the layout.
+
+   Typography: EB Garamond (literary serif) + Inter (humanist sans),
+   embedded from OFL sources — no web fonts, no template styling.
    ============================================================ */
+
+@font-face {
+  font-family: 'EB Garamond';
+  src: url('../assets/fonts/EBGaramond.ttf') format('truetype');
+  font-weight: 400 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'EB Garamond';
+  src: url('../assets/fonts/EBGaramond-Italic.ttf') format('truetype');
+  font-weight: 400 800;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../assets/fonts/Inter.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 :root {
   --panel-bg: rgba(12, 14, 22, 0.72);
@@ -541,8 +568,8 @@ body {
    ============================================================ */
 
 :root {
-  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
-  --sans: 'Segoe UI', 'Helvetica Neue', system-ui, Arial, sans-serif;
+  --serif: 'EB Garamond', 'Iowan Old Style', Palatino, Georgia, serif;
+  --sans: 'Inter', 'Segoe UI', system-ui, Arial, sans-serif;
   --card-accent: #ffb45e;
   --card-glow: rgba(255, 180, 94, 0.35);
 }
@@ -1126,4 +1153,144 @@ body {
 
 #victory-card .citation {
   color: var(--vc-cyan);
+}
+
+
+/* ============================================================
+   TYPOGRAPHY v3 — natural, editorial, human
+   (overrides the letter-spaced uppercase of earlier passes)
+   ============================================================ */
+
+.hud-label {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: rgba(233, 226, 214, 0.62);
+  margin-bottom: 3px;
+}
+
+#objective-text {
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: clamp(15px, 2vw, 21px);
+}
+
+#compass-text {
+  font-family: var(--sans);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+#prompt-text {
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--text);
+}
+
+#prompt-text::first-line {
+  color: inherit;
+}
+
+.primary-button {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: 14px 30px;
+}
+
+#modal-phase {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  opacity: 0.85;
+}
+
+#modal-speaker {
+  font-family: var(--sans);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  padding: 5px 12px;
+}
+
+#modal-body {
+  font-family: var(--serif);
+  font-size: clamp(17px, 2.3vw, 21px);
+  line-height: 1.72;
+}
+
+#modal-cite {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  opacity: 0.72;
+}
+
+#start-card .subtitle {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(15px, 2vw, 19px);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  color: #ffd8ea;
+}
+
+#start-card .story {
+  font-family: var(--serif);
+}
+
+.controls-grid b {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+#start-card .controls-grid span {
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: #d9c8b8;
+}
+
+#victory-card .verse {
+  font-family: var(--serif);
+}
+
+#victory-card .citation {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+#loading span {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  text-transform: none;
+}
+
+#alert-text {
+  font-family: var(--sans);
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
 }

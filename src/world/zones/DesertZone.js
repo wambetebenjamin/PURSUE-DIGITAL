@@ -9,12 +9,14 @@ import * as THREE from 'three';
 import { Mat } from '../../utils/materials.js';
 import {
   createRockField, createPalm, createDryBush, createBeacon, createRock, createHumanoid,
-  createReeds,
+  createReeds, createGrassField, createMountainRidge, createBirdFlock,
+  createButterflies, createGrazingSheep,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
+import { applyTerrainColors } from '../../utils/terrain.js';
 
 export const DESERT = {
   spawn: { x: 0, z: 112, yaw: 0 },
@@ -56,7 +58,7 @@ export function createDesertZone() {
   const sun = new THREE.DirectionalLight(0xfff2d0, 1.8); // blazing Miami noon
   sun.position.set(46, 70, 26);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 190;
   sun.shadow.camera.left = -44;
@@ -78,7 +80,13 @@ export function createDesertZone() {
     pos.setY(i, desertHeight(x, z));
   }
   groundGeo.computeVertexNormals();
-  const ground = new THREE.Mesh(groundGeo, Mat.sand());
+  applyTerrainColors(groundGeo, {
+    colorA: new THREE.Color(0xfff0d0), colorB: new THREE.Color(0xd9be86),
+    colorC: new THREE.Color(0x9a8258), scale: 0.03, strength: 0.4, seed: 11,
+  });
+  const groundMat = Mat.sand().clone();
+  groundMat.vertexColors = true;
+  const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.receiveShadow = true;
   group.add(ground);
 
@@ -138,11 +146,39 @@ export function createDesertZone() {
     colliders.push({ x, z, r: 1.1 * s });
   }
 
-  // reed beds along both banks
-  const reedsL = createReeds(420, { minX: -40, maxX: -8, minZ: -9, maxZ: 9 }, 61, desertHeight);
-  const reedsR = createReeds(420, { minX: 8, maxX: 40, minZ: -9, maxZ: 9 }, 62, desertHeight);
-  group.add(reedsL, reedsR);
-  updaters.push((t) => { reedsL.userData.update(t); reedsR.userData.update(t); });
+  // reed beds + green river-meadow grass along both banks
+  const reedsL = createReeds(700, { minX: -40, maxX: -8, minZ: -9, maxZ: 9 }, 61, desertHeight);
+  const reedsR = createReeds(700, { minX: 8, maxX: 40, minZ: -9, maxZ: 9 }, 62, desertHeight);
+  const bankGrass = createGrassField(2400, { minX: -46, maxX: 46, minZ: -16, maxZ: 16 }, 63,
+    desertHeight, { color: 0x8fa04c, height: 0.75, dryness: 0.3 });
+  group.add(reedsL, reedsR, bankGrass);
+  updaters.push((t) => {
+    reedsL.userData.update(t); reedsR.userData.update(t); bankGrass.userData.update(t);
+  });
+
+  // grazing sheep on the far bank + butterflies over the grass
+  [[-18, 13], [-24, -12], [14, 15], [22, -13]].forEach(([x, z], i) => {
+    const sheep = createGrazingSheep(i + 1);
+    sheep.position.set(x, desertHeight(x, z), z);
+    group.add(sheep);
+    updaters.push((t) => sheep.userData.update(t));
+  });
+  const flies = createButterflies(14, { minX: -34, maxX: 34, minZ: -14, maxZ: 14 }, desertHeight, 9);
+  group.add(flies);
+  updaters.push((t) => flies.userData.update(t));
+
+  // distant ridge lines close the horizon
+  const ridgeL = createMountainRidge(3, { width: 460, height: 52, depth: 26, color: 0xb89a72 });
+  ridgeL.position.set(-120, -4, -190);
+  ridgeL.rotation.y = 0.35;
+  const ridgeR = createMountainRidge(7, { width: 460, height: 58, depth: 26, color: 0xb89a72 });
+  ridgeR.position.set(130, -6, -200);
+  ridgeR.rotation.y = -0.4;
+  group.add(ridgeL, ridgeR);
+
+  const birds = createBirdFlock(7, new THREE.Vector3(0, 0, -40), 46, 34, 13);
+  group.add(birds);
+  updaters.push((t) => birds.userData.update(t));
 
   // ------------------------------------ the 200 who could not cross
   // exhausted Israelites collapsing onto the left sandstone ledge (v. 9-10)
@@ -266,7 +302,7 @@ export function createDesertZone() {
     spawn: DESERT.spawn,
     bounds: DESERT.bounds,
     colliders,
-    fog: { color: 0xe8dcb4, density: 0.0068 },
+    fog: { color: 0xe8dcb4, density: 0.005 },
     sun,
     sky,
     groundHeight: desertHeight,

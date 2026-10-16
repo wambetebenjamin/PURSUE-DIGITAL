@@ -16,12 +16,13 @@ import * as THREE from 'three';
 import { Mat, Geo } from '../../utils/materials.js';
 import {
   createRockField, createRock, createChariotWreck, createShieldDebris,
-  createHumanoid, createCrown, createBeacon,
+  createHumanoid, createCrown, createBeacon, createMountainRidge,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
+import { applyTerrainColors } from '../../utils/terrain.js';
 
 export const GILBOA = {
   spawn: { x: 0, z: 30, yaw: 0 },
@@ -58,7 +59,7 @@ export function createGilboaZone() {
   const sun = new THREE.DirectionalLight(0xc9d4e2, 0.8); // diffused, near-shadowless
   sun.position.set(10, 70, 20);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 190;
   sun.shadow.camera.left = -42;
@@ -78,9 +79,26 @@ export function createGilboaZone() {
     pos.setY(i, gilboaHeight(pos.getX(i), pos.getZ(i)));
   }
   groundGeo.computeVertexNormals();
-  const ground = new THREE.Mesh(groundGeo, Mat.basalt());
+  applyTerrainColors(groundGeo, {
+    colorA: new THREE.Color(0xb8bcc4), colorB: new THREE.Color(0x6a7078),
+    colorC: new THREE.Color(0x3a2c28), scale: 0.05, strength: 0.5, seed: 37,
+  });
+  const groundMat = Mat.basalt().clone();
+  groundMat.vertexColors = true;
+  const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.receiveShadow = true;
   group.add(ground);
+
+  // storm ridges enclosing the valley
+  const far1 = createMountainRidge(61, { width: 520, height: 74, depth: 36, color: 0x4a525c });
+  far1.position.set(0, -14, -180);
+  const far2 = createMountainRidge(67, { width: 420, height: 52, depth: 30, color: 0x565e68 });
+  far2.position.set(-140, -8, -120);
+  far2.rotation.y = 0.55;
+  const far3 = createMountainRidge(71, { width: 420, height: 56, depth: 30, color: 0x565e68 });
+  far3.position.set(150, -8, -110);
+  far3.rotation.y = -0.55;
+  group.add(far1, far2, far3);
 
   // sharp volcanic outcrops — the ridge line
   const rim = createRockField(34, { minX: -70, maxX: 70, minZ: -72, maxZ: 50 }, 81);

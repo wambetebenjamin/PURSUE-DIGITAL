@@ -71,15 +71,15 @@ export const Mat = {
   })),
 
   // --- Characters ---
-  skin: () => cached('skin', () => new THREE.MeshLambertMaterial({ color: 0xd8b898, map: fleshTexture('#a06b45', [2, 2]), flatShading: true })),
-  skinDark: () => cached('skinDark', () => new THREE.MeshLambertMaterial({ color: 0xb89878, map: fleshTexture('#7a5236', [2, 2]), flatShading: true })),
-  hair: () => cached('hair', () => new THREE.MeshLambertMaterial({ color: 0x241a12, flatShading: true })),
-  tunicDavid: () => cached('tunicDavid', () => new THREE.MeshLambertMaterial({ color: 0xd8b898, map: clothTexture(0x8c5a38, [3, 3]), flatShading: true })),
-  sashDavid: () => cached('sashDavid', () => new THREE.MeshLambertMaterial({ color: 0x8c2f24, flatShading: true })),
-  tunicServant: () => cached('tunicServant', () => new THREE.MeshLambertMaterial({ color: 0xc7b291, flatShading: true })),
-  tunicAmalekite: () => cached('tunicAmalekite', () => new THREE.MeshLambertMaterial({ color: 0x7d3b2e, flatShading: true })),
-  tunicAmalekiteAlt: () => cached('tunicAmalekiteAlt', () => new THREE.MeshLambertMaterial({ color: 0x5e4632, flatShading: true })),
-  tunicCaptive: () => cached('tunicCaptive', () => new THREE.MeshLambertMaterial({ color: 0x5b6b7a, flatShading: true })),
+  skin: () => cached('skin', () => new THREE.MeshLambertMaterial({ color: 0xd8b898, map: fleshTexture('#a06b45', [2, 2]) })),
+  skinDark: () => cached('skinDark', () => new THREE.MeshLambertMaterial({ color: 0xb89878, map: fleshTexture('#7a5236', [2, 2]) })),
+  hair: () => cached('hair', () => new THREE.MeshLambertMaterial({ color: 0x241a12 })),
+  tunicDavid: () => cached('tunicDavid', () => new THREE.MeshLambertMaterial({ color: 0xd8b898, map: clothTexture(0x8c5a38, [3, 3]) })),
+  sashDavid: () => cached('sashDavid', () => new THREE.MeshLambertMaterial({ color: 0x8c2f24 })),
+  tunicServant: () => cached('tunicServant', () => new THREE.MeshLambertMaterial({ color: 0xc7b291 })),
+  tunicAmalekite: () => cached('tunicAmalekite', () => new THREE.MeshLambertMaterial({ color: 0x7d3b2e })),
+  tunicAmalekiteAlt: () => cached('tunicAmalekiteAlt', () => new THREE.MeshLambertMaterial({ color: 0x5e4632 })),
+  tunicCaptive: () => cached('tunicCaptive', () => new THREE.MeshLambertMaterial({ color: 0x5b6b7a })),
 
   // --- PHASE 4-7 PBR accents (prompt-specified Metallic/Roughness values) ---
   // "Blood-spattered steel (Metallic 1.0, Roughness 0.15)"
@@ -119,22 +119,22 @@ export const Mat = {
   grassTurf: () => cached('grassTurf', () => new THREE.MeshLambertMaterial({ color: 0xffffff, map: grassTexture([18, 18]), flatShading: true })),
 
   // --- livestock / wagons / tribute (PHASE 5-6) ---
-  fleece: () => cached('fleece', () => new THREE.MeshLambertMaterial({ color: 0xe6dccb, flatShading: true })),
-  goatHide: () => cached('goatHide', () => new THREE.MeshLambertMaterial({ color: 0x8d7358, flatShading: true })),
-  cattleHide: () => cached('cattleHide', () => new THREE.MeshLambertMaterial({ color: 0x6e4b32, flatShading: true })),
-  muleHide: () => cached('muleHide', () => new THREE.MeshLambertMaterial({ color: 0x7a6248, flatShading: true })),
-  camelHide: () => cached('camelHide', () => new THREE.MeshLambertMaterial({ color: 0xa8875e, flatShading: true })),
+  fleece: () => cached('fleece', () => new THREE.MeshLambertMaterial({ color: 0xe6dccb })),
+  goatHide: () => cached('goatHide', () => new THREE.MeshLambertMaterial({ color: 0x8d7358 })),
+  cattleHide: () => cached('cattleHide', () => new THREE.MeshLambertMaterial({ color: 0x6e4b32 })),
+  muleHide: () => cached('muleHide', () => new THREE.MeshLambertMaterial({ color: 0x7a6248 })),
+  camelHide: () => cached('camelHide', () => new THREE.MeshLambertMaterial({ color: 0xa8875e })),
   canvasTarp: () => cached('canvasTarp', () => new THREE.MeshLambertMaterial({ color: 0xb09a72, flatShading: true })),
   cedarWood: () => cached('cedarWood', () => new THREE.MeshLambertMaterial({ color: 0xd9b494, map: woodTexture(0x6b3f24, [2, 2]), flatShading: true })),
 
   // --- PHASE 5-6 fine attire (saturated distribution palette) ---
-  elderPurple: () => cached('elderPurple', () => new THREE.MeshLambertMaterial({ color: 0x5a2a5e, flatShading: true })),
-  elderMadder: () => cached('elderMadder', () => new THREE.MeshLambertMaterial({ color: 0x8c2f24, flatShading: true })),
-  tunicIndigo: () => cached('tunicIndigo', () => new THREE.MeshLambertMaterial({ color: 0x4b5568, flatShading: true })),
-  tunicEarth: () => cached('tunicEarth', () => new THREE.MeshLambertMaterial({ color: 0x6b543c, flatShading: true })),
-  tunicBattleWorn: () => cached('tunicBattleWorn', () => new THREE.MeshLambertMaterial({ color: 0x5c4a3e, flatShading: true })),
+  elderPurple: () => cached('elderPurple', () => new THREE.MeshLambertMaterial({ color: 0x5a2a5e })),
+  elderMadder: () => cached('elderMadder', () => new THREE.MeshLambertMaterial({ color: 0x8c2f24 })),
+  tunicIndigo: () => cached('tunicIndigo', () => new THREE.MeshLambertMaterial({ color: 0x4b5568 })),
+  tunicEarth: () => cached('tunicEarth', () => new THREE.MeshLambertMaterial({ color: 0x6b543c })),
+  tunicBattleWorn: () => cached('tunicBattleWorn', () => new THREE.MeshLambertMaterial({ color: 0x5c4a3e })),
 
-  leatherDark: () => cached('leatherDark', () => new THREE.MeshLambertMaterial({ color: 0xb8a894, map: leatherTexture(0x3a2c20, [3, 3]), flatShading: true })),
+  leatherDark: () => cached('leatherDark', () => new THREE.MeshLambertMaterial({ color: 0xb8a894, map: leatherTexture(0x3a2c20, [3, 3]) })),
   brass: () => cached('brass', () => new THREE.MeshStandardMaterial({ color: 0xb08d3e, metalness: 0.9, roughness: 0.42, flatShading: true })),
 
   // --- Misc shared ---

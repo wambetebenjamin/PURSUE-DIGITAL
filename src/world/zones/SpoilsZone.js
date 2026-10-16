@@ -17,11 +17,14 @@ import {
   createRockField, createRock, createHerd, createBaggageWagon,
   createOutcrop, createBeacon, createHumanoid, createDryBush,
   createGrassField, createOliveTree, createWildflowers, createPalm,
+  createMountainRidge, createBirdFlock, createButterflies, createGrazingSheep,
+  createJar,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
+import { applyTerrainColors } from '../../utils/terrain.js';
 
 export const SPOILS = {
   spawn: { x: 0, z: 34, yaw: 0 },
@@ -56,7 +59,7 @@ export function createSpoilsZone() {
   const sun = new THREE.DirectionalLight(0xffe2a8, 1.6);
   sun.position.set(30, 52, -38); // low-north-west: backlights the herd dust
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 180;
   sun.shadow.camera.left = -46;
@@ -76,7 +79,13 @@ export function createSpoilsZone() {
     pos.setY(i, spoilsHeight(pos.getX(i), pos.getZ(i)));
   }
   groundGeo.computeVertexNormals();
-  const ground = new THREE.Mesh(groundGeo, Mat.sandLight());
+  applyTerrainColors(groundGeo, {
+    colorA: new THREE.Color(0xf2e2b0), colorB: new THREE.Color(0xb8b878),
+    colorC: new THREE.Color(0x7a8a4c), scale: 0.055, strength: 0.6, seed: 23,
+  });
+  const groundMat = Mat.sandLight().clone();
+  groundMat.vertexColors = true;
+  const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.receiveShadow = true;
   group.add(ground);
 
@@ -207,12 +216,53 @@ export function createSpoilsZone() {
   }
 
   // ------------------------------------- green river-meadow at the ford
-  const meadow = createGrassField(1800, { minX: -42, maxX: 42, minZ: -26, maxZ: 22 }, 41,
+  const meadow = createGrassField(4400, { minX: -46, maxX: 46, minZ: -30, maxZ: 26 }, 41,
     spoilsHeight, { color: 0x7d8f48, height: 0.6, dryness: 0.35 });
-  group.add(meadow);
-  updaters.push((t) => meadow.userData.update(t));
-  const blooms = createWildflowers(180, { minX: -36, maxX: 36, minZ: -20, maxZ: 18 }, 43, spoilsHeight);
+  const farMeadow = createGrassField(3200, { minX: -130, maxX: 130, minZ: -120, maxZ: -52 }, 42,
+    spoilsHeight, { color: 0x95a058, height: 0.85, dryness: 0.45 });
+  group.add(meadow, farMeadow);
+  updaters.push((t) => { meadow.userData.update(t); farMeadow.userData.update(t); });
+  const blooms = createWildflowers(340, { minX: -36, maxX: 36, minZ: -20, maxZ: 18 }, 43, spoilsHeight);
   group.add(blooms);
+
+  // live grazers keeping the meadow honest
+  [[-12, 18], [10, 20], [-20, 14], [18, 12], [0, 24], [-30, 18], [28, 16]].forEach(([x, z], i) => {
+    const sheep = createGrazingSheep(i + 1);
+    sheep.position.set(x, spoilsHeight(x, z), z);
+    group.add(sheep);
+    updaters.push((t) => sheep.userData.update(t));
+  });
+  const flies = createButterflies(16, { minX: -34, maxX: 34, minZ: -18, maxZ: 20 }, spoilsHeight, 31);
+  group.add(flies);
+  updaters.push((t) => flies.userData.update(t));
+
+  // freed families bringing water jars across the meadow
+  const jarPalette = {
+    skin: Mat.skin(), cloth: Mat.tunicCaptive(), cloth2: Mat.tunicServant(), hair: Mat.hair(),
+  };
+  [[-14, 22, 0.4], [8, 26, -2.2]].forEach(([x, z, ry], i) => {
+    const carrier = createHumanoid(jarPalette, 'carryingJar',
+      { detail: 'low', beard: 'none', hairStyle: 'long' });
+    carrier.position.set(x, spoilsHeight(x, z), z);
+    carrier.rotation.y = ry;
+    carrier.scale.setScalar(0.92);
+    const jar = createJar(10 + i);
+    jar.scale.setScalar(0.5);
+    jar.position.set(0, 1.92, 0);
+    carrier.add(jar);
+    group.add(carrier);
+    updaters.push((t) => {
+      carrier.position.y = spoilsHeight(x, z) + Math.abs(Math.sin(t * 1.5 + i)) * 0.035;
+    });
+  });
+
+  // horizon ridges + birds
+  const ridge = createMountainRidge(47, { width: 560, height: 64, depth: 30, color: 0xc9a878 });
+  ridge.position.set(0, -10, -165);
+  group.add(ridge);
+  const birds = createBirdFlock(8, new THREE.Vector3(0, 0, -20), 40, 32, 47);
+  group.add(birds);
+  updaters.push((t) => birds.userData.update(t));
   [[-40, 20], [38, 18], [-44, -8], [42, -12]].forEach(([x, z], i) => {
     const tree = createOliveTree(30 + i);
     tree.position.set(x, spoilsHeight(x, z), z);
@@ -271,7 +321,7 @@ export function createSpoilsZone() {
     spawn: SPOILS.spawn,
     bounds: SPOILS.bounds,
     colliders,
-    fog: { color: 0xdbc492, density: 0.0058 },
+    fog: { color: 0xdbc492, density: 0.0045 },
     sun,
     sky,
     groundHeight: spoilsHeight,

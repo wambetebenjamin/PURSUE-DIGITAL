@@ -93,17 +93,23 @@ speaker chips and scripture citations.
 
 ## Characters, sound & themes
 
-- **Character rigs** (`src/entities/CharacterRig.js`) — anatomically-proportioned figures
-  with sculpted skull/jaw/brow/cheek masses, eyes, noses, layered hair and beards, tunics,
-  belts, sashes, lamellar armor plates with rivets, and strapped sandals. Geometry is merged
+- **Character rigs** (`src/entities/CharacterRig.js`) — 7.5-head anatomically-proportioned
+  figures with smooth-shaded sculpted skull/jaw/brow/cheek masses, eyes, noses, layered hair
+  and beards, tunics, belts, sashes, lamellar armor plates with rivets, and strapped sandals;
+  working poses (hand-mill grinding, jar-carrying) bring the villages to life. Geometry is merged
   per material inside each animated pivot (~8 draw calls per figure). David wears leather
   lamellar and carries a sheathed sword; Saul wears dented royal bronze under a crown.
 - **Surface textures** (`src/utils/textures.js`) — every ground, wall, cloth, wood and skin
   material is painted at runtime on ≤512² canvases (mottled sand, grass blades, weave
   crosshatch, wood grain, stone pocks, flesh pores).
-- **Fields** — wind-swept instanced grass, wheat with grain heads, wildflowers, reed beds,
-  and gnarled olive trees across the arid fields, the river-meadow at Besor, and the
-  terraced hills of Hebron (one draw call per field, shader wind).
+- **Living landscapes** — wind-swept instanced grass seas (10k+ blades per vista), wheat
+  with grain heads, wildflowers, reed beds, olive groves, layered mountain ridgelines that
+  fog into the sky, drifting cloud banks, circling bird flocks, butterflies over the meadows,
+  and grazing sheep that lift their heads. Ground meshes carry vertex-color terrain
+  variation (dry ridges, green hollows, damp patches) beneath painted surface textures.
+- **Real type** — EB Garamond and Inter (OFL, embedded at build time): literary serif for
+  scripture and titles, humanist sans for the interface. Natural sentence-case labels —
+  no letter-spaced template styling.
 - **Procedural audio** (`src/audio/AudioEngine.js`) — the Web Audio API synthesizes every
   sound: layered ambience (wind, fire crackle, brook water, crickets, birdsong, rain),
   tonal pads per phase, war drums under the battle cards, and SFX (stride-synced footsteps,

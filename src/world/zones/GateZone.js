@@ -16,12 +16,14 @@ import { Mat, Geo } from '../../utils/materials.js';
 import {
   createCityGate, createChest, createMule, createHumanoid,
   createBeacon, createTreasurePile, createWheatField, createGrassField,
-  createOliveTree, createCypress, createPalm,
+  createOliveTree, createCypress, createPalm, createMountainRidge,
+  createBirdFlock, createButterflies, createJar,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
+import { applyTerrainColors } from '../../utils/terrain.js';
 
 export const GATE = {
   spawn: { x: 0, z: 26, yaw: 0 },
@@ -53,7 +55,7 @@ export function createGateZone() {
   const sun = new THREE.DirectionalLight(0xffd8a0, 1.5);
   sun.position.set(-46, 34, 30); // low-east: long angled shadows on the flagstones
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 170;
   sun.shadow.camera.left = -42;
@@ -73,7 +75,13 @@ export function createGateZone() {
     pos.setY(i, gateHeight(pos.getX(i), pos.getZ(i)));
   }
   groundGeo.computeVertexNormals();
-  const ground = new THREE.Mesh(groundGeo, Mat.flagstone());
+  applyTerrainColors(groundGeo, {
+    colorA: new THREE.Color(0xe8dccc), colorB: new THREE.Color(0xb8ac94),
+    colorC: new THREE.Color(0x8a7e68), scale: 0.08, strength: 0.35, seed: 29,
+  });
+  const groundMat = Mat.flagstone().clone();
+  groundMat.vertexColors = true;
+  const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.receiveShadow = true;
   group.add(ground);
 
@@ -139,6 +147,50 @@ export function createGateZone() {
     group.add(palm);
     colliders.push({ x, z, r: 0.5 });
   });
+
+  // workers of the city: a woman at the mill, a girl with a jar, jars stacked
+  const cityPalette = {
+    skin: Mat.skin(), cloth: Mat.tunicServant(), cloth2: Mat.elderMadder(), hair: Mat.hair(),
+  };
+  const miller = createHumanoid(cityPalette, 'grinding',
+    { detail: 'low', beard: 'none', hairStyle: 'long' });
+  miller.position.set(-9, gateHeight(-9, 10), 10);
+  miller.rotation.y = 1.1;
+  group.add(miller);
+  updaters.push((t) => {
+    const p = miller.userData.parts;
+    p.armL.rotation.x = -1.25 + Math.sin(t * 2.0) * 0.3;
+    p.armR.rotation.x = -1.05 + Math.sin(t * 2.0 + 0.9) * 0.26;
+  });
+  const carrier = createHumanoid(cityPalette, 'carryingJar',
+    { detail: 'low', beard: 'none', hairStyle: 'long' });
+  carrier.position.set(8, gateHeight(8, 12), 12);
+  carrier.rotation.y = -1.2;
+  const headJar = createJar(6);
+  headJar.scale.setScalar(0.52);
+  headJar.position.set(0, 1.92, 0);
+  carrier.add(headJar);
+  group.add(carrier);
+  updaters.push((t) => {
+    carrier.position.y = gateHeight(8, 12) + Math.abs(Math.sin(t * 1.7)) * 0.035;
+    carrier.rotation.z = Math.sin(t * 1.7) * 0.025;
+  });
+  [[-3, 15], [3.2, 15.6], [-4.2, 16.4]].forEach(([x, z], i) => {
+    const jar = createJar(20 + i);
+    jar.position.set(x, gateHeight(x, z), z);
+    group.add(jar);
+  });
+
+  // life over the fields: butterflies + birds + far ridges
+  const flies = createButterflies(14, { minX: -30, maxX: 30, minZ: -18, maxZ: 16 }, gateHeight, 37);
+  group.add(flies);
+  updaters.push((t) => flies.userData.update(t));
+  const ridge = createMountainRidge(53, { width: 620, height: 70, depth: 34, color: 0xb8a488 });
+  ridge.position.set(0, -4, -210);
+  group.add(ridge);
+  const birds = createBirdFlock(9, new THREE.Vector3(0, 0, -40), 48, 34, 53);
+  group.add(birds);
+  updaters.push((t) => birds.userData.update(t));
 
   // ------------------------------------------------- elders of Judah
   const elderPalettes = [
@@ -243,7 +295,7 @@ export function createGateZone() {
     spawn: GATE.spawn,
     bounds: GATE.bounds,
     colliders,
-    fog: { color: 0xd9c19a, density: 0.005 },
+    fog: { color: 0xd9c19a, density: 0.004 },
     sun,
     sky,
     groundHeight: gateHeight,

@@ -6,6 +6,7 @@
  */
 import * as THREE from 'three';
 import { postFX } from './PostFX.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 export class Engine {
   /**
@@ -33,6 +34,14 @@ export class Engine {
     mountEl.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
+
+    // image-based fill light: soft studio env keeps skin, metal and cloth
+    // from reading as plastic under pure Lambert shading
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.06).texture;
+    this.scene.environmentIntensity = 0.38;
+    pmrem.dispose();
+
     this.camera = new THREE.PerspectiveCamera(
       62,
       window.innerWidth / window.innerHeight,

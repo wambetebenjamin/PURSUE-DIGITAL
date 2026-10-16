@@ -6,11 +6,15 @@
  */
 import * as THREE from 'three';
 import { Mat, Geo } from '../../utils/materials.js';
-import { createBurntHouse, createCharredTree, createBeacon, createGateWithDrifts } from '../props/PropFactory.js';
+import {
+  createBurntHouse, createCharredTree, createBeacon, createGateWithDrifts,
+} from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
+import { applyTerrainColors } from '../../utils/terrain.js';
+import { createBirdFlock } from '../props/PropFactory.js';
 
 export const ZIKLAG = {
   spawn: { x: 0, z: 26, yaw: 0 },
@@ -41,7 +45,7 @@ export function createZiklagZone() {
   const sun = new THREE.DirectionalLight(0xffb060, 1.1);
   sun.position.set(-38, 20, 26);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 160;
   sun.shadow.camera.left = -42;
@@ -70,7 +74,13 @@ export function createZiklagZone() {
     pos.setY(i, ziklagHeight(x, z));
   }
   groundGeo.computeVertexNormals();
-  const ground = new THREE.Mesh(groundGeo, Mat.ashGround());
+  applyTerrainColors(groundGeo, {
+    colorA: new THREE.Color(0xb8a898), colorB: new THREE.Color(0x6a5648),
+    colorC: new THREE.Color(0x3a2c22), scale: 0.045, strength: 0.5, seed: 3,
+  });
+  const groundMat = Mat.ashGround().clone();
+  groundMat.vertexColors = true;
+  const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.receiveShadow = true;
   group.add(ground);
 
@@ -285,13 +295,18 @@ export function createZiklagZone() {
   });
   group.add(smokeA.points, smokeB.points, smokeC.points, embers.points, smokeColumn.points, dustStreams.points, heatShimmer.points, sandDrift.points);
 
+  // scavenger birds circling the smoke column
+  const birds = createBirdFlock(8, new THREE.Vector3(10, 0, -10), 34, 26, 5);
+  group.add(birds.points ?? birds);
+  updaters.push((t) => birds.userData.update(t));
+
   return {
     name: 'STATE_0_ZIKLAG',
     group,
     spawn: ZIKLAG.spawn,
     bounds: ZIKLAG.bounds,
     colliders,
-    fog: { color: 0x3a2a22, density: 0.014 },
+    fog: { color: 0x3a2a22, density: 0.011 },
     sun,
     sky,
     groundHeight: ziklagHeight,
