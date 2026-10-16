@@ -5,6 +5,7 @@
  * and ember particles. A glowing beacon marks the "Desert Edge" waypoint.
  */
 import * as THREE from 'three';
+import { QUALITY } from '../../core/quality.js';
 import { Mat, Geo } from '../../utils/materials.js';
 import {
   createBurntHouse, createCharredTree, createBeacon, createGateWithDrifts,
@@ -45,7 +46,7 @@ export function createZiklagZone() {
   const sun = new THREE.DirectionalLight(0xffb060, 1.1);
   sun.position.set(-38, 20, 26);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 160;
   sun.shadow.camera.left = -42;

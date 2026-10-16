@@ -12,6 +12,7 @@
  * polished flagstones.
  */
 import * as THREE from 'three';
+import { QUALITY } from '../../core/quality.js';
 import { Mat, Geo } from '../../utils/materials.js';
 import {
   createCityGate, createChest, createMule, createHumanoid,
@@ -55,7 +56,7 @@ export function createGateZone() {
   const sun = new THREE.DirectionalLight(0xffd8a0, 1.5);
   sun.position.set(-46, 34, 30); // low-east: long angled shadows on the flagstones
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 170;
   sun.shadow.camera.left = -42;

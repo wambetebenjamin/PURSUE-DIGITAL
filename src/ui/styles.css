@@ -1294,3 +1294,274 @@ body {
   letter-spacing: 0.01em;
   text-transform: none;
 }
+
+/* ============================================================
+   MOBILE PLAY — touch controls, safe areas, small screens
+   ============================================================ */
+
+html,
+body {
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#game-canvas {
+  touch-action: none;
+}
+
+/* keep chrome clear of notches */
+#hud {
+  padding-left: max(clamp(10px, 2.2vw, 28px), env(safe-area-inset-left));
+  padding-right: max(clamp(64px, 8vw, 88px), env(safe-area-inset-right));
+  padding-top: max(clamp(8px, 1.6vh, 16px), env(safe-area-inset-top));
+}
+
+#start-card,
+#victory-card,
+#modal-card {
+  margin-left: env(safe-area-inset-left);
+  margin-right: env(safe-area-inset-right);
+}
+
+/* ---------------------------------------------- touch control deck */
+#touch-ui {
+  display: none;
+}
+
+body.touch-mode #touch-ui {
+  display: block;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8;
+}
+
+/* dynamic joystick visuals */
+#joy-base {
+  position: absolute;
+  width: 128px;
+  height: 128px;
+  margin: -64px 0 0 -64px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.28);
+  background: rgba(16, 12, 26, 0.30);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+#joy-base.active {
+  opacity: 1;
+}
+
+#joy-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.34);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  will-change: transform;
+}
+
+/* action buttons */
+#touch-buttons {
+  position: absolute;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(24px, calc(env(safe-area-inset-bottom) + 18px));
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  pointer-events: none;
+}
+
+.touch-btn {
+  pointer-events: auto;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.34);
+  background: rgba(18, 12, 30, 0.5);
+  color: #fff2e2;
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: transform 0.08s ease, background 0.12s ease;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#btn-use {
+  width: 96px;
+  height: 96px;
+  font-size: 17px;
+  background: rgba(255, 46, 136, 0.42);
+  border-color: rgba(255, 150, 200, 0.6);
+}
+
+.touch-btn.held,
+.touch-btn:active {
+  transform: scale(0.93);
+  background: rgba(255, 210, 120, 0.5);
+}
+
+#btn-run.on {
+  background: rgba(47, 224, 255, 0.42);
+  border-color: rgba(150, 235, 255, 0.65);
+  box-shadow: 0 0 22px rgba(47, 224, 255, 0.4);
+}
+
+/* larger audio hit target on touch */
+body.touch-mode #audio-toggle {
+  width: 48px;
+  height: 48px;
+}
+
+/* desktop: no touch deck; touch: no pointer-lock hint / crosshair */
+body.touch-mode #resume-hint {
+  display: none !important;
+}
+
+body.touch-mode #app canvas {
+  cursor: default;
+}
+
+/* controls list swaps per device */
+.controls-touch {
+  display: none;
+}
+
+body.touch-mode .controls-desktop {
+  display: none;
+}
+
+body.touch-mode .controls-touch {
+  display: grid;
+}
+
+/* portrait hint */
+#rotate-hint {
+  position: absolute;
+  top: max(72px, calc(env(safe-area-inset-top) + 64px));
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 30;
+  padding: 10px 18px;
+  border-radius: 999px;
+  background: rgba(20, 12, 32, 0.82);
+  border: 1px solid rgba(255, 200, 130, 0.4);
+  color: #ffe9c8;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13.5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (orientation: landscape) {
+  #rotate-hint {
+    display: none !important;
+  }
+}
+
+/* ------------------------------------------ compact phone layouts */
+@media (max-width: 640px) {
+  #hud {
+    gap: 10px;
+  }
+
+  #hud-stamina {
+    display: none; /* stamina still shown via the run-button ring later; keep view clean */
+  }
+
+  body.touch-mode #hud-stamina {
+    display: block;
+    flex: 0 1 120px;
+    min-width: 80px;
+  }
+
+  #start-card {
+    padding: clamp(18px, 4vh, 28px) clamp(16px, 4vw, 24px);
+    border-radius: 18px;
+  }
+
+  #start-card h1 {
+    letter-spacing: 0.14em;
+    margin-right: -0.14em;
+  }
+
+  .controls-grid {
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  #modal-card {
+    border-radius: 16px;
+    padding: clamp(20px, 4vh, 30px) clamp(18px, 5vw, 26px);
+  }
+
+  .primary-button {
+    width: 100%;
+    padding: 15px 20px;
+  }
+
+  #modal-buttons {
+    margin-top: 18px;
+  }
+
+  .palm-silhouette {
+    width: clamp(120px, 30vw, 200px);
+    opacity: 0.9;
+  }
+}
+
+/* short landscape phones (gameplay) */
+@media (max-height: 440px) and (orientation: landscape) {
+  #hud {
+    padding-top: 6px;
+    padding-bottom: 4px;
+  }
+
+  .hud-label {
+    display: none;
+  }
+
+  #start-card .story {
+    font-size: 14px;
+    line-height: 1.55;
+    max-height: 26vh;
+    overflow-y: auto;
+  }
+
+  #start-card h1 {
+    font-size: clamp(38px, 9vh, 64px);
+  }
+
+  .palm-silhouette {
+    width: clamp(110px, 18vw, 190px);
+  }
+
+  #touch-buttons {
+    bottom: max(12px, calc(env(safe-area-inset-bottom) + 8px));
+  }
+
+  .touch-btn {
+    width: 68px;
+    height: 68px;
+    font-size: 13px;
+  }
+
+  #btn-use {
+    width: 78px;
+    height: 78px;
+    font-size: 15px;
+  }
+}

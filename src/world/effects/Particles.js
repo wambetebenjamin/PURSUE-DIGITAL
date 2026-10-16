@@ -5,6 +5,7 @@
  * One THREE.Points draw call per emitter, regardless of particle count.
  */
 import * as THREE from 'three';
+import { qualityCount } from '../../core/quality.js';
 import { randRange } from '../../utils/math.js';
 
 const VERT = /* glsl */ `
@@ -54,7 +55,7 @@ const FRAG = /* glsl */ `
 export class ParticleEmitter {
   constructor(cfg) {
     this.cfg = cfg;
-    this.count = cfg.count;
+    this.count = qualityCount(cfg.count, 24);
     this.origin = cfg.origin.clone();
     this._t = 0;
 

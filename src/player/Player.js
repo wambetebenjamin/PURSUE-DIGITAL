@@ -118,13 +118,20 @@ export class Player {
    * @param {{x:number,z:number,r:number}[]} colliders
    */
   update(dt, cameraYaw, elapsed, bounds, colliders) {
-    // --- movement input in camera space ---
+    // --- movement input in camera space (keyboard or touch joystick) ---
     let ix = 0;
     let iz = 0;
-    if (this.input.isDown(CONTROLS.forward)) iz += 1;
-    if (this.input.isDown(CONTROLS.back)) iz -= 1;
-    if (this.input.isDown(CONTROLS.right)) ix += 1;
-    if (this.input.isDown(CONTROLS.left)) ix -= 1;
+    const joy = this.input.moveAxis;
+    const joyMagnitude = joy ? Math.hypot(joy.x, joy.y) : 0;
+    if (joyMagnitude > 0.08) {
+      ix = joy.x;
+      iz = joy.y;
+    } else {
+      if (this.input.isDown(CONTROLS.forward)) iz += 1;
+      if (this.input.isDown(CONTROLS.back)) iz -= 1;
+      if (this.input.isDown(CONTROLS.right)) ix += 1;
+      if (this.input.isDown(CONTROLS.left)) ix -= 1;
+    }
 
     _forward.set(-Math.sin(cameraYaw), 0, -Math.cos(cameraYaw));
     _right.set(Math.cos(cameraYaw), 0, -Math.sin(cameraYaw));
@@ -134,12 +141,13 @@ export class Player {
       .addScaledVector(_right, ix);
 
     const hasInput = _dir.lengthSq() > 0.0001;
+    const analogScale = Math.min(1, joyMagnitude > 0.08 ? joyMagnitude : 1);
     if (hasInput) _dir.normalize();
 
     // --- stamina gate ---
     const wantsRun = this.input.isDown(CONTROLS.run);
     this.running = this.stamina.update(dt, wantsRun, hasInput);
-    const targetSpeed = this.running ? PLAYER.runSpeed : PLAYER.walkSpeed;
+    const targetSpeed = (this.running ? PLAYER.runSpeed : PLAYER.walkSpeed) * analogScale;
 
     // --- accelerate / friction ---
     const targetVX = _dir.x * targetSpeed;

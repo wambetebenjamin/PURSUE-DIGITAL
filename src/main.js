@@ -7,6 +7,8 @@ import './ui/styles.css';
 import * as THREE from 'three';
 import { Engine } from './core/Engine.js';
 import { audio } from './audio/AudioEngine.js';
+import { TouchControls } from './ui/TouchControls.js';
+import { IS_TOUCH } from './core/quality.js';
 import { Input } from './core/Input.js';
 import { Game } from './core/Game.js';
 
@@ -23,6 +25,14 @@ const engine = new Engine(mount, {
 });
 
 input.attach(engine.canvas);
+
+// phone play: on-screen controls + touch styling
+if (IS_TOUCH) {
+  document.body.classList.add('touch-mode');
+  // eslint-disable-next-line no-new
+  new TouchControls(input);
+}
+
 const game = new Game({
   scene: engine.scene,
   camera: engine.camera,
@@ -39,7 +49,7 @@ const resumeHint = document.getElementById('resume-hint');
 // pointer-lock hint follows lock state (only once the game has begun)
 input.onPointerLockChange = (locked) => {
   const showModal = game.modal.isOpen;
-  const showHint = game.started && !game.finished && !locked && !showModal;
+  const showHint = !IS_TOUCH && game.started && !game.finished && !locked && !showModal;
   resumeHint.classList.toggle('hidden', !showHint);
 };
 
@@ -65,6 +75,12 @@ audioToggle.addEventListener('click', () => {
 engine.canvas.addEventListener('click', () => {
   resumeHint.classList.add('hidden');
 });
+
+// unlock audio on the very first touch (mobile autoplay policies)
+window.addEventListener('touchstart', () => {
+  audio.init();
+  audio.resume();
+}, { once: true, passive: true });
 
 // --------------------------------------------------------------- startup
 engine.start();

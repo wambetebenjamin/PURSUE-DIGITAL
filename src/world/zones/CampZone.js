@@ -9,6 +9,7 @@
  * sequence — the rout of the raiders and the 400 fleeing on camels.
  */
 import * as THREE from 'three';
+import { QUALITY } from '../../core/quality.js';
 import { Mat } from '../../utils/materials.js';
 import {
   createTent, createBonfire, createCage, createHumanoid,
@@ -126,7 +127,7 @@ export function createCampZone() {
   const sun = new THREE.DirectionalLight(0x7e8fe0, 0.6); // neon moonlight
   sun.position.set(-30, 52, -18);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 170;
   sun.shadow.camera.left = -44;

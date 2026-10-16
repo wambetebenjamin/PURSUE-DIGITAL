@@ -6,6 +6,7 @@
  * The brook position is exported so Game can fire the narrative trigger.
  */
 import * as THREE from 'three';
+import { QUALITY } from '../../core/quality.js';
 import { Mat } from '../../utils/materials.js';
 import {
   createRockField, createPalm, createDryBush, createBeacon, createRock, createHumanoid,
@@ -58,7 +59,7 @@ export function createDesertZone() {
   const sun = new THREE.DirectionalLight(0xfff2d0, 1.8); // blazing Miami noon
   sun.position.set(46, 70, 26);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 190;
   sun.shadow.camera.left = -44;

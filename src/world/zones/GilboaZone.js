@@ -13,6 +13,7 @@
  * dying king and closes the story.
  */
 import * as THREE from 'three';
+import { QUALITY } from '../../core/quality.js';
 import { Mat, Geo } from '../../utils/materials.js';
 import {
   createRockField, createRock, createChariotWreck, createShieldDebris,
@@ -59,7 +60,7 @@ export function createGilboaZone() {
   const sun = new THREE.DirectionalLight(0xc9d4e2, 0.8); // diffused, near-shadowless
   sun.position.set(10, 70, 20);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 190;
   sun.shadow.camera.left = -42;

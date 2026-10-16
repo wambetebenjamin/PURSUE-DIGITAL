@@ -6,6 +6,7 @@
  * rotating and registering colliders.
  */
 import * as THREE from 'three';
+import { qualityCount } from '../../core/quality.js';
 import { Mat, Geo } from '../../utils/materials.js';
 import { createDetailedHuman } from '../../entities/CharacterRig.js';
 import { randRange, seededRandom } from '../../utils/math.js';
@@ -111,6 +112,7 @@ export function createRock(seed = 1, dark = false) {
 
 /** Batched rocks — one InstancedMesh draw call for the whole field. */
 export function createRockField(count, area, seed = 1) {
+  count = qualityCount(count, 10);
   const geo = new THREE.DodecahedronGeometry(0.5, 0);
   const inst = new THREE.InstancedMesh(geo, Mat.rock(), count);
   inst.castShadow = true;
@@ -329,6 +331,7 @@ export function createBeacon(label, colorHex = 0x53e0ff) {
  * @returns {THREE.Group}
  */
 export function createHerd(count, area, seed = 1, groundHeight = () => 0) {
+  count = qualityCount(count, 4);
   const g = new THREE.Group();
   const dummy = new THREE.Object3D();
 
@@ -822,6 +825,7 @@ function windMaterial(baseMaterial) {
  * group.userData.update(time) advances the wind.
  */
 export function createGrassField(count, area, seed = 1, groundHeight = () => 0, opts = {}) {
+  count = qualityCount(count, 60);
   const { color = 0x7d8f48, height = 0.85, dryness = 0 } = opts;
   const blade = new THREE.ConeGeometry(0.055, 1, 3);
   blade.translate(0, 0.5, 0);
@@ -861,6 +865,7 @@ export function createGrassField(count, area, seed = 1, groundHeight = () => 0, 
 
 /** Golden wheat — taller blades with a grain head, wind-swept. */
 export function createWheatField(count, area, seed = 1, groundHeight = () => 0) {
+  count = qualityCount(count, 40);
   // blade + grain head merged into one instance geometry
   const blade = new THREE.ConeGeometry(0.045, 1, 3);
   blade.translate(0, 0.55, 0);
@@ -898,6 +903,7 @@ export function createWheatField(count, area, seed = 1, groundHeight = () => 0) 
 
 /** Wildflower sprinkle — colored bloom + stem, instanced. */
 export function createWildflowers(count, area, seed = 1, groundHeight = () => 0) {
+  count = qualityCount(count, 18);
   const stem = new THREE.CylinderGeometry(0.012, 0.018, 0.34, 3);
   stem.translate(0, 0.17, 0);
   const bloom = new THREE.IcosahedronGeometry(0.05, 0);
@@ -981,6 +987,7 @@ export function createCypress(seed = 1) {
 
 /** Reed bed for brook banks — tall thin clusters. */
 export function createReeds(count, area, seed = 1, groundHeight = () => 0) {
+  count = qualityCount(count, 24);
   return createGrassField(count, area, seed, groundHeight, { color: 0x7a8a3c, height: 1.5 });
 }
 
@@ -1032,6 +1039,7 @@ export function createMountainRidge(seed = 1, {
  * group.userData.update(time) animates the flight.
  */
 export function createBirdFlock(count, center = new THREE.Vector3(), radius = 40, height = 30, seed = 1) {
+  count = qualityCount(count, 6);
   const g = new THREE.Group();
   const birds = [];
   const bodyMat = new THREE.MeshBasicMaterial({ color: 0x241f26 });
@@ -1081,6 +1089,7 @@ export function createBirdFlock(count, center = new THREE.Vector3(), radius = 40
  * group.userData.update(time) wanders them along slow lissajous paths.
  */
 export function createButterflies(count, area, groundHeight = () => 0, seed = 1) {
+  count = qualityCount(count, 8);
   const g = new THREE.Group();
   const palette = [0xffd24a, 0xff8ac2, 0x8ad8ff, 0xfff4e0, 0xff6a4a];
   const items = [];

@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="PURSUE — a 3D action-adventure retelling of 1 Samuel 30. Play as David and recover everything." />
     <title>PURSUE — 1 Samuel 30</title>
   </head>
@@ -14,6 +14,9 @@
     <div id="ui-root">
       <!-- Sound toggle (procedural audio on/off) -->
       <button id="audio-toggle" title="Toggle sound" aria-label="Toggle sound">♪</button>
+
+      <!-- Portrait-play hint (phones) -->
+      <div id="rotate-hint" class="hidden">Turn your phone sideways for the full view</div>
 
       <!-- Persistent top bar: objective, stamina, compass -->
       <header id="hud">
@@ -51,6 +54,15 @@
 
       <!-- Pointer-lock resume hint -->
       <div id="resume-hint" class="hidden">Click to capture the mouse &nbsp;·&nbsp; ESC releases it</div>
+
+      <!-- Touch controls (phones only — see ui/TouchControls.js) -->
+      <div id="touch-ui" aria-hidden="true">
+        <div id="joy-base"><div id="joy-knob"></div></div>
+        <div id="touch-buttons">
+          <button id="btn-run" class="touch-btn">Run</button>
+          <button id="btn-use" class="touch-btn">Use</button>
+        </div>
+      </div>
     </div>
 
     <!-- Start / title screen -->
@@ -85,11 +97,17 @@
           Find the one who knows the road. Fall upon the camp. Bring every soul home.
           <em>Recover all.</em>
         </p>
-        <div class="controls-grid">
+        <div class="controls-grid controls-desktop">
           <div><b>WASD / Arrows</b><span>Move</span></div>
           <div><b>Mouse</b><span>Look around</span></div>
           <div><b>Shift</b><span>Run (uses stamina)</span></div>
           <div><b>E / Space</b><span>Interact &amp; advance</span></div>
+        </div>
+        <div class="controls-grid controls-touch">
+          <div><b>Left thumb</b><span>Move</span></div>
+          <div><b>Right thumb</b><span>Look around</span></div>
+          <div><b>Run</b><span>Sprint (uses stamina)</span></div>
+          <div><b>Use</b><span>Interact &amp; advance</span></div>
         </div>
         <button id="start-button" class="primary-button">Begin the Pursuit</button>
       </div>

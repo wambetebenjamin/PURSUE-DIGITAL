@@ -12,6 +12,7 @@
  * through the herd dust into a hazy golden veil between the factions.
  */
 import * as THREE from 'three';
+import { QUALITY } from '../../core/quality.js';
 import { Mat } from '../../utils/materials.js';
 import {
   createRockField, createRock, createHerd, createBaggageWagon,
@@ -59,7 +60,7 @@ export function createSpoilsZone() {
   const sun = new THREE.DirectionalLight(0xffe2a8, 1.6);
   sun.position.set(30, 52, -38); // low-north-west: backlights the herd dust
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 180;
   sun.shadow.camera.left = -46;

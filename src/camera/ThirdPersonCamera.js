@@ -44,9 +44,9 @@ export class ThirdPersonCamera {
   update(dt, targetPos) {
     if (!this._initialized) this.reset(targetPos, this.yaw);
 
-    // --- mouse look ---
+    // --- mouse / touch look ---
     const md = this.input.consumeMouseDelta();
-    if (this.input.pointerLocked && this.input.enabled) {
+    if (this.input.lookActive && this.input.enabled) {
       this.yaw -= md.x * CAMERA.sensitivity;
       this.pitch = clamp(this.pitch + md.y * CAMERA.sensitivity, CAMERA.pitchMin, CAMERA.pitchMax);
     }

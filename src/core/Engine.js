@@ -7,6 +7,7 @@
 import * as THREE from 'three';
 import { postFX } from './PostFX.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { QUALITY } from './quality.js';
 
 export class Engine {
   /**
@@ -18,12 +19,12 @@ export class Engine {
     this.game = game;
 
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: QUALITY.antialias,
       powerPreference: 'high-performance',
       stencil: false,
     });
     // Cap pixel ratio: keeps 60 FPS on high-DPI laptops without visible loss.
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, QUALITY.pixelRatio));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -76,7 +77,14 @@ export class Engine {
   _onResize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    this.camera.aspect = w / h;
+    const aspect = w / h;
+    this.camera.aspect = aspect;
+    // portrait phones see a narrow slice — widen the field of view to compensate
+    this.camera.fov = aspect < 1 ? 74 : this.camera.fov;
+    if (aspect < 1 || this._baseFov === undefined) {
+      this._baseFov = this._baseFov || this.camera.fov;
+      this.camera.fov = aspect < 1 ? 74 : this._baseFov;
+    }
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
     postFX.setSize(w, h);

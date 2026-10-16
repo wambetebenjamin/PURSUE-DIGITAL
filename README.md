@@ -67,6 +67,18 @@ No server, database, or environment variables are required. Everything is client
 | **E / Space** | Interact, pick up, advance dialogue |
 | **Esc** | Release the mouse pointer |
 
+### Playing on a phone
+
+The game detects touch devices and adapts automatically:
+
+- **Left thumb** — a dynamic virtual joystick appears where you touch to move (analog speed)
+- **Right thumb** — drag anywhere else to look around
+- **Run / Use** — on-screen buttons; *Use* talks to people and advances dialogue
+- Portrait play widens the camera field of view and shows a gentle "turn your phone" hint
+- The desktop prompt "Press E" reads "Tap Use"
+- A lighter performance profile kicks in (pixel ratio capped at 1.3, 1024² shadows, 45% grass/particle/creature density, no MSAA) so mid-range phones stay smooth
+- Safe-area insets keep the HUD clear of notches; the layout folds down to small screens and short landscape
+
 ---
 
 ## The seven phases (finite state machine)

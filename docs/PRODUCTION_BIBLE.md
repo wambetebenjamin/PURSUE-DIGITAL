@@ -195,6 +195,43 @@ type, speaker chips, and scripture citations (`cite` fields in
 `constants.js`). Copy is written in a grounded, scriptural register rather
 than generic filler.
 
+## 7d. Mobile play & quality profile
+
+The game is playable on phones (pass 5). The desktop WASD/mouse/pointer-lock
+path is untouched; touch is a parallel input layer.
+
+**Detection — `src/core/quality.js`**: guarded probes (`navigator.maxTouchPoints`,
+`ontouchstart`, screen size) produce `IS_TOUCH`, `IS_MOBILE`, and a frozen
+`QUALITY` profile:
+
+| Knob | Desktop | Phone |
+|---|---|---|
+| pixel ratio cap | 1.75 | 1.3 |
+| shadow map | 2048² | 1024² |
+| scene density (grass, wheat, reeds, herds, butterflies, birds, particles) | ×1 | ×0.45 |
+| canvas MSAA | on | off (post FX smooths edges) |
+
+`qualityCount(n, floor)` scales instance/particle counts in `PropFactory`
+field/creature builders and `world/effects/Particles.js`; each zone sun
+takes `QUALITY.shadowMap`. Headless Node (smoke) resolves to the desktop
+profile.
+
+**Touch input — `src/core/Input.js`**: touches starting in the left 46% of
+the screen spawn a dynamic virtual joystick (`moveAxis`, −1..1, up =
+forward) with knob visuals rendered by `ui/TouchControls.js`; touches
+elsewhere drag the camera look (deltas feed the same `consumeMouseDelta()`
+pipeline, gated by `input.lookActive` = pointer-locked OR touch-dragging).
+The on-screen **Use** and **Run** buttons synthesize `KeyE` / `ShiftLeft`
+into the key sets, so interact, dialogue advance, sprint and stamina logic
+are shared unchanged with keyboard. `Player.js` reads `moveAxis` for analog
+speed and falls back to WASD. Pointer-lock requests no-op in touch mode.
+
+**Responsive layout** (`index.html`, `styles.css`): `viewport-fit=cover` +
+`user-scalable=no`, `touch-action: none`, safe-area insets on HUD and cards,
+large touch targets, the start-screen controls legend swaps to touch
+wording, prompts read “Tap Use”, and portrait mode widens the camera FOV
+(74°) with a landscape-only rotate hint.
+
 ## 8. Phase-flow state machine
 
 ```

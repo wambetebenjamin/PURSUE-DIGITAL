@@ -6,6 +6,7 @@
  * canyon mouth at the north edge, which leads into the Amalekite camp.
  */
 import * as THREE from 'three';
+import { QUALITY } from '../../core/quality.js';
 import { Mat, Geo } from '../../utils/materials.js';
 import {
   createRockField, createDryBush, createPalm, createBeacon, createRock,
@@ -47,7 +48,7 @@ export function createEgyptianZone() {
   const sun = new THREE.DirectionalLight(0xffd89a, 1.4);
   sun.position.set(-34, 62, 30);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 170;
   sun.shadow.camera.left = -40;

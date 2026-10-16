@@ -3,6 +3,7 @@
  * interaction prompt, and transient alert banners.
  */
 import { clamp, compassLabel } from '../utils/math.js';
+import { IS_TOUCH } from '../core/quality.js';
 
 export class HUD {
   constructor() {
@@ -43,8 +44,9 @@ export class HUD {
   }
 
   showPrompt(text) {
-    if (!this._promptVisible || this.promptText.textContent !== text) {
-      this.promptText.textContent = text;
+    const display = IS_TOUCH ? text.replace('Press E', 'Tap Use') : text;
+    if (!this._promptVisible || this.promptText.textContent !== display) {
+      this.promptText.textContent = display;
       this.prompt.classList.remove('hidden');
       this._promptVisible = true;
     }
