@@ -110,6 +110,11 @@ speaker chips and scripture citations.
   UI, alerts, victory chords). Mute with the ♪ button; nothing is downloaded.
 - **Themed cards** — each act's dialogue card carries its own palette (ember, sandstone,
   night-fire, gold, marble, slate), an act badge, speaker chips, and scripture citations.
+- **Vice City grade** (`src/core/PostFX.js`) — a retro-Miami post chain: Unreal bloom,
+  split-toned shadows/highlights, saturation punch, edge chromatic aberration, vignette
+  and film grain, crossfading between per-phase moods (sunset · blaze · gold · neon-night ·
+  storm). Skies carry a hard sun disc with streaky sunset bands; the title screen is pure
+  80s — sun stripes, palm silhouettes, and a chrome-gradient logo under a pink/cyan HUD.
 
 ---
 
@@ -127,6 +132,7 @@ PURSUE-DIGITAL/
     ├── constants.js            # FSM names, tunables (speed/stamina/vision), narrative copy
     ├── core/
     │   ├── Engine.js           # WebGL renderer, clock, resize, the single RAF loop
+    │   ├── PostFX.js           # Vice City post chain: bloom + grade presets
     │   ├── Game.js             # orchestrator: FSM, phase logic, per-frame update order
     │   ├── StateMachine.js     # generic FSM (enter/update/exit)
     │   ├── Input.js            # keyboard + Pointer-Lock mouse, edge-triggered actions

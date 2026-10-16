@@ -925,3 +925,205 @@ body {
   /* keeps the key phrase luminous */
   color: var(--card-accent);
 }
+
+/* ============================================================
+   VICE CITY GRADE — neon Miami skin (pink/cyan, sun-stripe art)
+   ============================================================ */
+
+:root {
+  --accent: #2fe0ff;
+  --accent-warm: #ff4fa8;
+  --vc-pink: #ff2e88;
+  --vc-cyan: #2fe0ff;
+  --vc-gold: #ffb45e;
+  --vc-purple: #6a2fa8;
+}
+
+/* HUD: neon accents */
+.hud-label {
+  color: #b9e9ff;
+}
+
+#objective-text.pulse {
+  animation: objective-pulse-vc 1.6s ease-out;
+}
+
+@keyframes objective-pulse-vc {
+  0% {
+    color: var(--vc-pink);
+    text-shadow: 0 0 22px rgba(255, 46, 136, 0.85);
+  }
+  100% {
+    color: var(--text);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.65);
+  }
+}
+
+#stamina-fill {
+  background: linear-gradient(90deg, var(--vc-pink), var(--vc-gold));
+  box-shadow: 0 0 12px rgba(255, 46, 136, 0.55);
+}
+
+#stamina-fill.exhausted {
+  background: linear-gradient(90deg, #ff3c2e, var(--vc-pink));
+}
+
+#compass-text {
+  color: var(--vc-cyan);
+  text-shadow: 0 0 14px rgba(47, 224, 255, 0.5);
+}
+
+#hud {
+  background: linear-gradient(180deg, rgba(26, 8, 38, 0.8) 0%, rgba(26, 8, 38, 0) 100%);
+}
+
+/* ------------------------------------------------ the VC sunset */
+#start-screen {
+  background:
+    radial-gradient(140% 110% at 50% 118%, #ff2e88 0%, #ff6a3c 26%, #6a2fa8 58%, #1c1140 82%, #0c0820 100%);
+}
+
+/* the big low sun behind the logo */
+#start-screen .sun-disc {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  transform: translateX(-50%);
+  width: min(560px, 72vw);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffe9a8 0%, #ffb45e 38%, #ff2e88 66%, transparent 72%);
+  filter: blur(2px);
+  opacity: 0.85;
+  animation: sun-pulse 7s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes sun-pulse {
+  from { opacity: 0.75; transform: translateX(-50%) scale(1); }
+  to { opacity: 1; transform: translateX(-50%) scale(1.05); }
+}
+
+/* horizontal 80s scanline stripes over the sun */
+#start-screen .sun-stripes {
+  position: absolute;
+  left: 50%;
+  top: 6%;
+  transform: translateX(-50%);
+  width: min(620px, 80vw);
+  aspect-ratio: 1.35;
+  background: repeating-linear-gradient(180deg,
+    rgba(20, 8, 32, 0.85) 0 12px, transparent 12px 34px);
+  -webkit-mask-image: radial-gradient(110% 90% at 50% 34%, #000 34%, transparent 72%);
+  mask-image: radial-gradient(110% 90% at 50% 34%, #000 34%, transparent 72%);
+  pointer-events: none;
+}
+
+/* palm silhouettes flanking the title */
+.palm-silhouette {
+  position: absolute;
+  bottom: -6px;
+  width: clamp(170px, 24vw, 330px);
+  color: rgba(14, 5, 22, 0.9);
+  filter: drop-shadow(0 0 18px rgba(255, 46, 136, 0.35));
+  pointer-events: none;
+  z-index: 2;
+}
+
+.palm-left {
+  left: clamp(-70px, -3vw, -20px);
+  transform: rotate(-4deg);
+}
+
+.palm-right {
+  right: clamp(-70px, -3vw, -20px);
+  transform: scaleX(-1) rotate(-4deg);
+}
+
+.start-card-wrap {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  padding: 24px;
+}
+
+/* chrome logo: sunset gradient fill */
+#start-card h1 {
+  background: linear-gradient(180deg, #fff3d6 0%, #ffc36a 34%, #ff4fa8 72%, #2fe0ff 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  filter: drop-shadow(0 6px 26px rgba(255, 46, 136, 0.5));
+}
+
+#start-card {
+  background: rgba(20, 8, 32, 0.62);
+  border-color: rgba(255, 46, 136, 0.35);
+}
+
+#start-card .subtitle {
+  color: var(--vc-cyan);
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+}
+
+.controls-grid b {
+  border-color: rgba(47, 224, 255, 0.4);
+  color: #d8f6ff;
+}
+
+#start-card .story em {
+  color: var(--vc-pink);
+  font-style: italic;
+}
+
+/* loading spinner in pink */
+#loading .spinner {
+  border-top-color: var(--vc-pink);
+  border-right-color: var(--vc-cyan);
+}
+
+#loading span {
+  color: #ffd2e8;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+/* prompts + alerts get neon edges */
+#prompt {
+  border-color: rgba(47, 224, 255, 0.5);
+  box-shadow: 0 10px 34px rgba(47, 224, 255, 0.22);
+}
+
+#alert-banner {
+  border: 1px solid rgba(255, 46, 136, 0.55);
+  box-shadow: 0 12px 38px rgba(255, 46, 136, 0.3);
+}
+
+/* victory: neon-chrome scroll */
+#victory-screen {
+  background:
+    radial-gradient(120% 90% at 50% -10%, rgba(255, 46, 136, 0.22) 0%, transparent 55%),
+    rgba(10, 4, 18, 0.86);
+}
+
+#victory-card {
+  border-color: rgba(255, 46, 136, 0.4);
+  background: linear-gradient(180deg, rgba(38, 16, 48, 0.97), rgba(18, 8, 26, 0.97));
+}
+
+#victory-card h1 {
+  background: linear-gradient(180deg, #ffe9c8, var(--vc-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+#victory-card .citation {
+  color: var(--vc-cyan);
+}

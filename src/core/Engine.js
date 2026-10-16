@@ -5,6 +5,7 @@
  * Game logic lives in Game.js; the engine just drives `update(dt)`.
  */
 import * as THREE from 'three';
+import { postFX } from './PostFX.js';
 
 export class Engine {
   /**
@@ -39,6 +40,9 @@ export class Engine {
       600,
     );
 
+    // Vice City-style post chain: bloom + retro-Miami grade
+    postFX.init(this.renderer, this.scene, this.camera);
+
     this.clock = new THREE.Clock();
     this.elapsed = 0;
     this._raf = 0;
@@ -66,6 +70,7 @@ export class Engine {
     this.camera.aspect = w / h;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
+    postFX.setSize(w, h);
   }
 
   _loop() {
@@ -76,6 +81,6 @@ export class Engine {
     this.elapsed += dt;
 
     this.game.update(dt, this.elapsed);
-    this.renderer.render(this.scene, this.camera);
+    postFX.render(dt);
   }
 }

@@ -155,6 +155,17 @@ ash, stone, basalt, woven cloth, wood grain, and flesh pore maps painted on
 
 ---
 
+## 7aa. The Vice City grade (core/PostFX.js)
+
+The master prompt's LUT / color-grading note is realized as a live post chain:
+`RenderPass → UnrealBloomPass → GradePass → OutputPass`. The custom grade does
+edge chromatic aberration, split-toning (tinted shadows / hot highlights),
+saturation punch, an S-curve, vignette and animated film grain. Per-phase
+presets (`sunset`, `blaze`, `gold`, `neonNight`, `clear`, `storm`) crossfade
+over ~0.5 s when the FSM changes zones. `SkyDome` adds a hard sun disc with a
+wide halo and streaky sunset bands to sell the Miami horizon; the brook water
+is glossy tropical teal with animated vertex swell.
+
 ## 7b. Sound design (audio/AudioEngine.js)
 
 Every sound is synthesized live — no audio files:

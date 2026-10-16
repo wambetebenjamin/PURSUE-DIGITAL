@@ -37,6 +37,17 @@ export const PHASE_THEMES = Object.freeze({
   [STATES.GILBOA]: 'gilboa',
 });
 
+/** Post-processing grade per phase (see core/PostFX.js). */
+export const PHASE_GRADES = Object.freeze({
+  [STATES.ZIKLAG]: 'sunset',
+  [STATES.DESERT]: 'blaze',
+  [STATES.EGYPTIAN]: 'gold',
+  [STATES.CAMP]: 'neonNight',
+  [STATES.SPOILS]: 'gold',
+  [STATES.GATE]: 'clear',
+  [STATES.GILBOA]: 'storm',
+});
+
 /** Ambient soundscape per phase (see audio/AudioEngine.js). */
 export const PHASE_AMBIENCE = Object.freeze({
   [STATES.ZIKLAG]: 'ziklag',

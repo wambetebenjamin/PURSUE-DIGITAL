@@ -30,7 +30,7 @@ export function createZiklagZone() {
 
   // ------------------------------------------------------------- sky
   // PHASE 1 spec: late-afternoon golden hour, 5600K, low-angle sun
-  const sky = new SkyDome(0x4a5578, 0xd9963e, 0.55);
+  const sky = new SkyDome(0x2a1a52, 0xff6a3c, 0.55);
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -38,7 +38,7 @@ export function createZiklagZone() {
   group.add(hemi);
 
   // 5600K golden-hour key light held LOW on the horizon — long raking shadows
-  const sun = new THREE.DirectionalLight(0xffd2a0, 1.05);
+  const sun = new THREE.DirectionalLight(0xffb060, 1.1);
   sun.position.set(-38, 20, 26);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -51,6 +51,7 @@ export function createZiklagZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(-36, 18, 24);
   group.add(sun, sun.target);
+  sky.setSun(sun.userData.offset, 0xff9a50, 0.6);
 
   // flickering fires at two ruined houses
   const fireA = new THREE.PointLight(0xff6a2a, 30, 24, 2);
@@ -292,6 +293,7 @@ export function createZiklagZone() {
     colliders,
     fog: { color: 0x3a2a22, density: 0.014 },
     sun,
+    sky,
     groundHeight: ziklagHeight,
     update(dt, time) {
       smokeA.update(dt);

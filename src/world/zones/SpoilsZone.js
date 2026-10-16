@@ -16,7 +16,7 @@ import { Mat } from '../../utils/materials.js';
 import {
   createRockField, createRock, createHerd, createBaggageWagon,
   createOutcrop, createBeacon, createHumanoid, createDryBush,
-  createGrassField, createOliveTree, createWildflowers,
+  createGrassField, createOliveTree, createWildflowers, createPalm,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
@@ -46,14 +46,14 @@ export function createSpoilsZone() {
 
   // ------------------------------------------------------------- sky
   // 5200K clear late afternoon — bright, direct, revealing
-  const sky = new SkyDome(0x4d86c8, 0xf2e0b0, 0.82);
+  const sky = new SkyDome(0x2f7fd8, 0xffb45e, 0.82);
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
   const hemi = new THREE.HemisphereLight(0xbfd4e8, 0xd9be86, 1.1);
   group.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xfff0d8, 1.55);
+  const sun = new THREE.DirectionalLight(0xffe2a8, 1.6);
   sun.position.set(30, 52, -38); // low-north-west: backlights the herd dust
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -66,6 +66,7 @@ export function createSpoilsZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(28, 50, -36);
   group.add(sun, sun.target);
+  sky.setSun(sun.userData.offset, 0xffc878, 0.55);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(130, 120, 48, 44);
@@ -218,6 +219,13 @@ export function createSpoilsZone() {
     group.add(tree);
     colliders.push({ x, z, r: 1.1 });
   });
+  // palms — the Miami skyline of the Negev
+  [[-34, 30], [34, 28], [-46, 6], [46, 4], [0, -40]].forEach(([x, z], i) => {
+    const palm = createPalm(60 + i);
+    palm.position.set(x, spoilsHeight(x, z), z);
+    group.add(palm);
+    colliders.push({ x, z, r: 0.5 });
+  });
 
   // ------------------------------------------- golden dust veil (FX)
   // "strong backlighting catches the dust clouds kicked up by the livestock,
@@ -265,6 +273,7 @@ export function createSpoilsZone() {
     colliders,
     fog: { color: 0xdbc492, density: 0.0058 },
     sun,
+    sky,
     groundHeight: spoilsHeight,
     outcrop: SPOILS.outcrop,
     interactRadius: SPOILS.interactRadius,

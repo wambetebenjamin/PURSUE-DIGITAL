@@ -16,7 +16,7 @@ import { Mat, Geo } from '../../utils/materials.js';
 import {
   createCityGate, createChest, createMule, createHumanoid,
   createBeacon, createTreasurePile, createWheatField, createGrassField,
-  createOliveTree, createCypress,
+  createOliveTree, createCypress, createPalm,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
@@ -43,14 +43,14 @@ export function createGateZone() {
 
   // ------------------------------------------------------------- sky
   // 4800K warm morning, clear
-  const sky = new SkyDome(0x4e86c2, 0xf0d9a8, 0.8);
+  const sky = new SkyDome(0x2f86d8, 0xffc890, 0.8);
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
   const hemi = new THREE.HemisphereLight(0xa8c4e0, 0xd9b98c, 1.0);
   group.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xffe0b8, 1.45);
+  const sun = new THREE.DirectionalLight(0xffd8a0, 1.5);
   sun.position.set(-46, 34, 30); // low-east: long angled shadows on the flagstones
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -63,6 +63,7 @@ export function createGateZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(-44, 32, 28);
   group.add(sun, sun.target);
+  sky.setSun(sun.userData.offset, 0xffe0b0, 0.45);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(110, 90, 30, 26);
@@ -130,6 +131,14 @@ export function createGateZone() {
     gateHeight, { color: 0x8a9a4c, height: 0.55, dryness: 0.4 });
   group.add(courtyardGrass);
   updaters.push((tm) => courtyardGrass.userData.update(tm));
+
+  // courtyard palms
+  [[-12, -2], [12, -2], [-16, 12], [16, 12]].forEach(([x, z], i) => {
+    const palm = createPalm(80 + i);
+    palm.position.set(x, gateHeight(x, z), z);
+    group.add(palm);
+    colliders.push({ x, z, r: 0.5 });
+  });
 
   // ------------------------------------------------- elders of Judah
   const elderPalettes = [
@@ -236,6 +245,7 @@ export function createGateZone() {
     colliders,
     fog: { color: 0xd9c19a, density: 0.005 },
     sun,
+    sky,
     groundHeight: gateHeight,
     elders: GATE.elders,
     interactRadius: GATE.interactRadius,

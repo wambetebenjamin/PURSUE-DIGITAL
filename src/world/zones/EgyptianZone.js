@@ -35,14 +35,14 @@ export function createEgyptianZone() {
   const updaters = [];
 
   // ------------------------------------------------------------- sky
-  const sky = new SkyDome(0x4a86c8, 0xe8d5a8, 0.8);
+  const sky = new SkyDome(0x3a7fd0, 0xffc27a, 0.8);
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
   const hemi = new THREE.HemisphereLight(0x8fc0f0, 0xc9a86c, 0.9);
   group.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xffe6c0, 1.35);
+  const sun = new THREE.DirectionalLight(0xffd89a, 1.4);
   sun.position.set(-34, 62, 30);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -55,6 +55,7 @@ export function createEgyptianZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(-32, 60, 28);
   group.add(sun, sun.target);
+  sky.setSun(sun.userData.offset, 0xffd089, 0.5);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(120, 110, 46, 42);
@@ -171,6 +172,7 @@ export function createEgyptianZone() {
     colliders,
     fog: { color: 0xd9c49a, density: 0.006 },
     sun,
+    sky,
     groundHeight: egyptHeight,
     servant,
     update(dt, time) {

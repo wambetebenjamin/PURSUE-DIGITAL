@@ -28,8 +28,10 @@ import {
   VISION,
   PHASE_THEMES,
   PHASE_AMBIENCE,
+  PHASE_GRADES,
 } from '../constants.js';
 import { audio } from '../audio/AudioEngine.js';
+import { postFX } from './PostFX.js';
 import { distanceXZ } from '../utils/math.js';
 import { ZIKLAG } from '../world/zones/ZiklagZone.js';
 import { DESERT } from '../world/zones/DesertZone.js';
@@ -278,6 +280,7 @@ export class Game {
   _enterZone(stateName) {
     const zone = this.world.activate(stateName);
     audio.setAmbience(PHASE_AMBIENCE[stateName] ?? 'none');
+    postFX.setGrade(PHASE_GRADES[stateName] ?? 'clear');
     if (stateName === STATES.GILBOA) audio.grief();
     this.player.spawn(
       new THREE.Vector3(

@@ -46,14 +46,14 @@ export function createDesertZone() {
 
   // ------------------------------------------------------------- sky
   // PHASE 2 spec: brutal, overexposed midday desert sun at 6500K
-  const sky = new SkyDome(0x6aa2e0, 0xf6ecc9, 0.85);
+  const sky = new SkyDome(0x2f8fe8, 0xffd9a0, 0.85);
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
   const hemi = new THREE.HemisphereLight(0xbcd4f0, 0xe0c896, 1.05);
   group.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xf2f7ff, 1.75); // 6500K blinding-white key
+  const sun = new THREE.DirectionalLight(0xfff2d0, 1.8); // blazing Miami noon
   sun.position.set(46, 70, 26);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -66,6 +66,7 @@ export function createDesertZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(42, 68, 24);
   group.add(sun, sun.target);
+  sky.setSun(sun.userData.offset, 0xfff0c0, 0.55);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(150, 300, 64, 110);
@@ -84,10 +85,20 @@ export function createDesertZone() {
   // ---------------------------------------------------- Besor Brook
   // "thick brown sediment water" with blinding white speculars at 6500K
   const waterMat = Mat.water().clone();
-  waterMat.color.set(0x5a4a34);
+  waterMat.color.set(0x1fa8b8); // glossy tropical teal
   waterMat.specular.set(0xffffff);
-  waterMat.shininess = 160;
-  waterMat.opacity = 0.92;
+  waterMat.shininess = 180;
+  waterMat.opacity = 0.9;
+  waterMat.onBeforeCompile = (shader) => {
+    shader.uniforms.uTime = { value: 0 };
+    shader.vertexShader = `uniform float uTime;\n${shader.vertexShader}`.replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+       transformed.y += sin(position.x * 0.55 + uTime * 1.4) * 0.06
+                      + cos(position.y * 0.4 + uTime * 1.1) * 0.05;`,
+    );
+    waterMat.userData.shader = shader;
+  };
   const water = new THREE.Mesh(new THREE.PlaneGeometry(150, 15), waterMat);
   water.rotation.x = -Math.PI / 2;
   water.position.set(0, -0.32, 0);
@@ -257,9 +268,11 @@ export function createDesertZone() {
     colliders,
     fog: { color: 0xe8dcb4, density: 0.0068 },
     sun,
+    sky,
     groundHeight: desertHeight,
     waterLevel: -0.32,
     update(dt, time) {
+      if (waterMat.userData.shader) waterMat.userData.shader.uniforms.uTime.value = time;
       dust.update(dt);
       foam.update(dt);
       haze.update(dt);

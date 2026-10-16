@@ -98,7 +98,7 @@ export function createCampZone() {
 
   // ------------------------------------------------------------- sky
   // PHASE 3 spec: cool dark-blue starlight, low crescent moon, 3200K night
-  const sky = new SkyDome(0x0b1026, 0x2c2440, 0.75);
+  const sky = new SkyDome(0x1a1250, 0x8a2f6a, 0.75);
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -122,7 +122,7 @@ export function createCampZone() {
   moonShadow.quaternion.copy(moon.quaternion);
   group.add(moonShadow);
 
-  const sun = new THREE.DirectionalLight(0x9db8e8, 0.55); // cool moonlight
+  const sun = new THREE.DirectionalLight(0x7e8fe0, 0.6); // neon moonlight
   sun.position.set(-30, 52, -18);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -135,6 +135,7 @@ export function createCampZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(-28, 50, -16);
   group.add(sun, sun.target);
+  sky.setSun(new THREE.Vector3(70, 95, -140), 0xb8c8ff, 0.32); // the crescent
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(150, 160, 52, 56);
@@ -356,6 +357,7 @@ export function createCampZone() {
     colliders,
     fog: { color: 0x1c2238, density: 0.012 },
     sun,
+    sky,
     groundHeight: campHeight,
     guards,
     captives: CAMP.captives,

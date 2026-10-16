@@ -48,7 +48,7 @@ export function createGilboaZone() {
 
   // ------------------------------------------------------------- sky
   // heavy, oppressive overcast at 7000K — flat and cold
-  const sky = new SkyDome(0x39424e, 0x8a94a0, 0.9);
+  const sky = new SkyDome(0x2a3444, 0x6a7488, 0.9);
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -68,6 +68,7 @@ export function createGilboaZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(8, 68, 18);
   group.add(sun, sun.target);
+  sky.setSun(sun.userData.offset, 0x9aa8b8, 0.12);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(120, 130, 48, 52);
@@ -260,6 +261,7 @@ export function createGilboaZone() {
     colliders,
     fog: { color: 0x6b7480, density: 0.016 },
     sun,
+    sky,
     groundHeight: gilboaHeight,
     saul: GILBOA.saul,
     interactRadius: GILBOA.interactRadius,

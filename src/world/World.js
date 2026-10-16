@@ -64,6 +64,7 @@ export class World {
     if (!zone) return;
 
     zone.update(dt, time);
+    zone.sky?.update?.(time);
 
     if (zone.sun) {
       zone.sun.position.copy(playerPos).add(zone.sun.userData.offset);
