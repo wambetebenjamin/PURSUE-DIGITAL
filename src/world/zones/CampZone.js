@@ -67,7 +67,7 @@ function createGuard(seed) {
     cloth2: Mat.tunicAmalekiteAlt(),
     hair: Mat.hair(),
   };
-  const human = createHumanoid(palette, 'celebrating');
+  const human = createHumanoid(palette, 'celebrating', { armor: 'leather', beard: 'full', detail: 'full' });
   group.add(human);
 
   const cone = createVisionCone();
@@ -233,7 +233,7 @@ export function createCampZone() {
     hair: Mat.hair(),
   };
   [[-6, 22], [14, 12], [-18, -8], [6, -24]].forEach(([x, z], i) => {
-    const drunk = createHumanoid(drunkPalette, 'reclining');
+    const drunk = createHumanoid(drunkPalette, 'reclining', { beard: 'full', detail: 'low' });
     drunk.position.set(x, campHeight(x, z), z);
     drunk.rotation.y = seededRandom(i * 9.2) * Math.PI * 2;
     group.add(drunk);
@@ -304,7 +304,7 @@ export function createCampZone() {
   };
   const captivePositions = [[-1.1, 0.2], [1.0, -0.5], [0.1, 1.1], [-0.4, -1.2]];
   captivePositions.forEach(([dx, dz], i) => {
-    const c = createHumanoid(captivePalette, 'seatedCaptive');
+    const c = createHumanoid(captivePalette, 'seatedCaptive', { detail: 'low', beard: 'none' });
     c.position.set(
       CAMP.captives.x + dx,
       campHeight(CAMP.captives.x + dx, CAMP.captives.z + dz) - 0.05,

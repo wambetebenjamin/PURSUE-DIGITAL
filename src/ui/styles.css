@@ -535,3 +535,393 @@ body {
     text-align: center;
   }
 }
+
+/* ============================================================
+   DESIGN SYSTEM v2 — themed cards, typography, art direction
+   ============================================================ */
+
+:root {
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  --sans: 'Segoe UI', 'Helvetica Neue', system-ui, Arial, sans-serif;
+  --card-accent: #ffb45e;
+  --card-glow: rgba(255, 180, 94, 0.35);
+}
+
+/* ------------------------------------------------------- audio toggle */
+#audio-toggle {
+  position: absolute;
+  top: clamp(10px, 1.8vh, 18px);
+  right: clamp(10px, 2.2vw, 28px);
+  z-index: 30;
+  pointer-events: auto;
+  width: clamp(42px, 5vw, 48px);
+  height: clamp(42px, 5vw, 48px);
+  border-radius: 14px;
+  border: 1px solid var(--panel-border);
+  background: rgba(12, 14, 22, 0.72);
+  color: var(--text);
+  font-size: 19px;
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.2s ease, border-color 0.2s ease;
+  backdrop-filter: blur(6px);
+}
+
+#audio-toggle:hover {
+  transform: translateY(-2px);
+  background: rgba(28, 32, 46, 0.85);
+  border-color: var(--card-accent);
+}
+
+#audio-toggle.muted {
+  opacity: 0.55;
+  text-decoration: line-through;
+}
+
+/* keep the compass clear of the toggle */
+#hud {
+  padding-right: clamp(64px, 8vw, 88px);
+}
+
+/* -------------------------------------------------------- typography */
+#modal-title,
+#start-card h1,
+#victory-card h1 {
+  font-family: var(--serif);
+}
+
+/* ----------------------------------------------------------- modal v2 */
+#modal-root.card-in #modal-card {
+  animation: card-rise 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes card-rise {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+#modal-card {
+  position: relative;
+  max-width: min(620px, 92vw);
+  border-radius: 22px;
+  padding: clamp(28px, 5vh, 46px) clamp(26px, 4.5vw, 48px) clamp(24px, 4vh, 38px);
+  background:
+    radial-gradient(120% 120% at 12% 0%, var(--card-a, rgba(58, 42, 34, 0.94)) 0%, rgba(10, 11, 16, 0.96) 62%),
+    rgba(10, 11, 16, 0.96);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 42%, transparent);
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset,
+    0 0 60px var(--card-glow);
+  overflow: hidden;
+}
+
+/* top gradient rule + soft light sweep */
+#modal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--card-accent), transparent);
+  opacity: 0.9;
+}
+
+#modal-card::after {
+  content: '';
+  position: absolute;
+  top: -40%;
+  left: -20%;
+  width: 70%;
+  height: 160%;
+  background: radial-gradient(closest-side, var(--card-glow), transparent 70%);
+  pointer-events: none;
+}
+
+/* phase badge */
+#modal-phase {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: var(--card-accent);
+  opacity: 0.85;
+  margin-bottom: 12px;
+}
+
+#modal-title {
+  font-size: clamp(26px, 4.6vw, 40px);
+  line-height: 1.12;
+  letter-spacing: 0.02em;
+  color: var(--text);
+  margin-bottom: clamp(12px, 2vh, 20px);
+  text-wrap: balance;
+}
+
+#modal-speaker {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--card-accent);
+  background: color-mix(in srgb, var(--card-accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-accent) 38%, transparent);
+  border-radius: 999px;
+  padding: 6px 14px;
+  margin: 0 0 14px;
+}
+
+#modal-body {
+  font-family: var(--serif);
+  font-size: clamp(16px, 2.2vw, 20px);
+  line-height: 1.75;
+  color: var(--text);
+  opacity: 0.94;
+}
+
+#modal-cite {
+  display: block;
+  margin-top: 18px;
+  font-family: var(--sans);
+  font-size: 12px;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--card-accent);
+  opacity: 0.8;
+}
+
+#modal-cite.hidden {
+  display: none;
+}
+
+#modal-buttons {
+  margin-top: clamp(22px, 3.5vh, 32px);
+}
+
+/* ------------------------------------------------------------- themes */
+.theme-ziklag {
+  --card-accent: #ff9a5c;
+  --card-glow: rgba(255, 122, 62, 0.30);
+  --card-a: rgba(66, 32, 18, 0.94);
+}
+
+.theme-desert {
+  --card-accent: #ffd25e;
+  --card-glow: rgba(255, 210, 94, 0.28);
+  --card-a: rgba(72, 52, 18, 0.94);
+}
+
+.theme-egyptian {
+  --card-accent: #e8b86a;
+  --card-glow: rgba(232, 184, 106, 0.28);
+  --card-a: rgba(62, 46, 24, 0.94);
+}
+
+.theme-camp {
+  --card-accent: #ff7b4a;
+  --card-glow: rgba(255, 94, 54, 0.32);
+  --card-a: rgba(26, 20, 48, 0.95);
+}
+
+.theme-spoils {
+  --card-accent: #ffc857;
+  --card-glow: rgba(255, 200, 87, 0.30);
+  --card-a: rgba(58, 44, 18, 0.94);
+}
+
+.theme-gate {
+  --card-accent: #d8a63a;
+  --card-glow: rgba(216, 166, 58, 0.32);
+  --card-a: rgba(52, 30, 38, 0.94);
+}
+
+.theme-gilboa {
+  --card-accent: #8fa3b8;
+  --card-glow: rgba(122, 143, 168, 0.30);
+  --card-a: rgba(26, 31, 39, 0.95);
+}
+
+/* ---------------------------------------------------------- buttons v2 */
+.primary-button {
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #14100a;
+  background: linear-gradient(180deg, var(--card-accent), color-mix(in srgb, var(--card-accent) 72%, #7a4c14));
+  border: none;
+  border-radius: 999px;
+  padding: 15px 34px;
+  cursor: pointer;
+  box-shadow:
+    0 10px 26px color-mix(in srgb, var(--card-accent) 36%, transparent),
+    0 1px 0 rgba(255, 255, 255, 0.35) inset;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+}
+
+.primary-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow:
+    0 16px 34px color-mix(in srgb, var(--card-accent) 46%, transparent),
+    0 1px 0 rgba(255, 255, 255, 0.4) inset;
+}
+
+.primary-button:active {
+  transform: translateY(0);
+  filter: brightness(0.97);
+}
+
+/* -------------------------------------------------------- start screen */
+#start-screen {
+  background:
+    radial-gradient(110% 90% at 50% -10%, rgba(255, 154, 92, 0.20) 0%, transparent 55%),
+    linear-gradient(180deg, #171225 0%, #241826 34%, #3a2420 68%, #1c1310 100%);
+}
+
+#start-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(2px 2px at 12% 24%, rgba(255, 180, 94, 0.5), transparent 60%),
+    radial-gradient(1.6px 1.6px at 28% 58%, rgba(255, 122, 62, 0.45), transparent 60%),
+    radial-gradient(2px 2px at 47% 18%, rgba(255, 200, 120, 0.4), transparent 60%),
+    radial-gradient(1.4px 1.4px at 66% 48%, rgba(255, 150, 80, 0.5), transparent 60%),
+    radial-gradient(2px 2px at 82% 30%, rgba(255, 180, 94, 0.42), transparent 60%),
+    radial-gradient(1.5px 1.5px at 91% 66%, rgba(255, 122, 62, 0.4), transparent 60%);
+  animation: ember-drift 9s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes ember-drift {
+  from { transform: translateY(0); opacity: 0.75; }
+  to { transform: translateY(-18px); opacity: 1; }
+}
+
+#start-card {
+  background: rgba(12, 10, 16, 0.55);
+  border: 1px solid rgba(255, 180, 94, 0.22);
+  border-radius: 26px;
+  box-shadow: 0 40px 110px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+#start-card h1 {
+  font-size: clamp(56px, 11vw, 110px);
+  letter-spacing: 0.22em;
+  margin-right: -0.22em;
+  color: #ffe9c8;
+  text-shadow:
+    0 0 34px rgba(255, 170, 90, 0.45),
+    0 2px 0 rgba(120, 60, 20, 0.55);
+}
+
+/* ornamental divider under the title */
+#start-card .subtitle::after {
+  content: '✦';
+  display: block;
+  margin: 14px auto 0;
+  width: fit-content;
+  font-size: 12px;
+  letter-spacing: 1.2em;
+  margin-right: calc(-1.2em + 50% - 0.5em);
+  color: rgba(255, 180, 94, 0.7);
+}
+
+#start-card .story {
+  font-family: var(--serif);
+  font-size: clamp(15.5px, 2.1vw, 19px);
+  line-height: 1.85;
+  color: #ece2d2;
+  max-width: 56ch;
+}
+
+#start-card .story em {
+  color: #ffcf96;
+  font-style: italic;
+}
+
+/* keycaps in the controls grid */
+.controls-grid b {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #ffe9c8;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 200, 140, 0.32);
+  border-bottom-width: 3px;
+  border-radius: 9px;
+  padding: 7px 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+
+#start-card .controls-grid span {
+  display: block;
+  margin-top: 8px;
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c9b8a2;
+}
+
+/* ------------------------------------------------------------- victory */
+#victory-screen {
+  background:
+    radial-gradient(100% 80% at 50% 0%, rgba(255, 190, 110, 0.16) 0%, transparent 55%),
+    rgba(8, 7, 10, 0.82);
+}
+
+#victory-card {
+  background:
+    linear-gradient(180deg, rgba(38, 30, 22, 0.97), rgba(22, 17, 13, 0.97));
+  border: 1px solid rgba(255, 200, 130, 0.3);
+  border-radius: 24px;
+  box-shadow: 0 40px 110px rgba(0, 0, 0, 0.65);
+}
+
+#victory-card h1 {
+  color: #ffe2a8;
+}
+
+#victory-card .verse {
+  font-size: clamp(16px, 2.4vw, 22px);
+}
+
+#victory-card .verse.epilogue {
+  color: #d9c8b2;
+  font-style: italic;
+}
+
+/* --------------------------------------------------------- prompts v2 */
+#prompt {
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--card-accent) 45%, transparent);
+  background: rgba(12, 14, 22, 0.82);
+  padding: 12px 22px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+#prompt-text {
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #ffe9c8;
+}
+
+#prompt-text::first-line {
+  /* keeps the key phrase luminous */
+  color: var(--card-accent);
+}

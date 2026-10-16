@@ -127,6 +127,20 @@ instanced.
 
 ---
 
+## 7a. Character construction (CharacterRig.js)
+
+The master prompt's anatomy directives are realized in the merged-geometry rig:
+sculpted skull + jaw + brow + cheek masses, nose, ears, eyes with irises,
+clumped hair and full/gray beards, tapered limbs with elbow/knee masses,
+layered tunics with skirts and belts, diagonal sashes, lamellar armor plates
+with brass rivets, and strapped sandals. `detail: 'full'` (heroes) adds eyes,
+brows, lips, thumbs, and rivets; `detail: 'low'` keeps crowds cheap. Pivots
+(`armL/R`, `legL/R`, `head`, `torso`) preserve every animation hook the zones use.
+
+Surface realism is carried by `utils/textures.js` — mottled sand, grass, dirt,
+ash, stone, basalt, woven cloth, wood grain, and flesh pore maps painted on
+≤512² canvases at boot.
+
 ## 7. Character directives → rig palette & poses
 
 | Prompt directive | Implementation |
@@ -140,6 +154,35 @@ instanced.
 | Non-reflective ambush gear, charcoal-smudged faces | dark Lambert palettes for Israelite infiltration figures |
 
 ---
+
+## 7b. Sound design (audio/AudioEngine.js)
+
+Every sound is synthesized live — no audio files:
+
+| Prompt atmosphere | Synthesis |
+| --- | --- |
+| Wind-blown sand, dusty haze | brown-noise bed, lowpass 420 Hz, slow LFO |
+| Smoldering ruins, campfires | brown-noise bed + sparse high-passed crackle pops |
+| Churning brook | bandpassed white noise (950 Hz) |
+| Night camp | cricket trills (4.2 kHz pulses) + fire |
+| Severe midday glare | dry wind + hollow pad |
+| Fields & gate | birdsong motifs + crowd murmur (bandpass noise) |
+| Gilboa rain & mist | high-passed rain noise + mournful minor pad |
+| 24-hour battle | sine war drums (92→46 Hz) on a 0.8 s pulse |
+| Victory / grief | triangle-wave chord swells |
+
+Per-phase tonal pads (detuned triangles through a lowpass) crossfade with the
+zone ambience; footsteps sync to the gait; UI clicks, alerts, and interact
+blips cover feedback. The ♪ HUD button mutes the master bus.
+
+## 7c. UI themes & cards
+
+Each act's card is themed (`theme-ziklag` … `theme-gilboa`) with its own
+accent/glow palette — ember orange, sandstone gold, night-fire, dividing-line
+gold, tribute bronze, slate blue. Cards carry an act badge, serif display
+type, speaker chips, and scripture citations (`cite` fields in
+`constants.js`). Copy is written in a grounded, scriptural register rather
+than generic filler.
 
 ## 8. Phase-flow state machine
 

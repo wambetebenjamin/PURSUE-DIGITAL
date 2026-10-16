@@ -120,7 +120,8 @@ export function createGilboaZone() {
     cloth2: Mat.elderPurple(), // the royal purple beneath the dented scales
     hair: Mat.hair(),
   };
-  const saul = createHumanoid(saulPalette, 'slumpedWounded');
+  const saul = createHumanoid(saulPalette, 'slumpedWounded',
+    { armor: 'bronze', beard: 'full', hairStyle: 'long', detail: 'full' });
   saul.position.set(GILBOA.saul.x, gilboaHeight(GILBOA.saul.x, GILBOA.saul.z), GILBOA.saul.z);
   saul.rotation.y = 0.6; // facing down the slope at the advancing enemy
   const crown = createCrown();
@@ -168,7 +169,8 @@ export function createGilboaZone() {
   for (let i = 0; i < 3; i++) {
     const x = -10 + i * 11;
     const z = -12 - i * 5;
-    const man = createHumanoid(israelitePalette, 'grieving');
+    const man = createHumanoid(israelitePalette, 'grieving',
+      { armor: 'leather', beard: 'full', detail: 'low' });
     man.position.set(x, gilboaHeight(x, z), z);
     man.rotation.y = Math.PI + (seededRandom(i * 7.1) - 0.5); // fleeing down the slope
     group.add(man);
@@ -189,7 +191,8 @@ export function createGilboaZone() {
     const col = i % 3;
     const x = -9 + col * 9 + (seededRandom(i * 3.7) - 0.5) * 2;
     const z = -26 - row * 7 + (seededRandom(i * 8.2) - 0.5) * 2;
-    const soldier = createHumanoid(philistinePalette, 'standing');
+    const soldier = createHumanoid(philistinePalette, 'standing',
+      { armor: 'iron', hairStyle: 'covered', detail: 'low' });
     soldier.position.set(x, gilboaHeight(x, z), z);
     soldier.rotation.y = (seededRandom(i * 2.4) - 0.5) * 0.3; // facing up-slope
     // dark iron spear

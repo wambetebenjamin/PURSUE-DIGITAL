@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import { Mat } from '../../utils/materials.js';
 import {
   createRockField, createDryBush, createPalm, createBeacon, createRock,
+  createOliveTree, createGrassField, createWildflowers,
 } from '../props/PropFactory.js';
 import { createServant } from '../../entities/EgyptianServant.js';
 import { ParticleEmitter } from '../effects/Particles.js';
@@ -114,6 +115,24 @@ export function createEgyptianZone() {
   group.add(servant.group);
   colliders.push({ x: EGYPT.servant.x, z: EGYPT.servant.z, r: 0.9 });
   updaters.push((t) => servant.update(t));
+
+  // --------------------------------------------- the fields (grove)
+  // "find the Egyptian servant in the field" — olive trees and wild growth
+  const groveSpots = [[-18, 22], [22, 16], [-28, -6], [18, -12], [-12, -24], [32, -22], [-34, 12]];
+  groveSpots.forEach(([x, z], i) => {
+    const tree = createOliveTree(i + 1);
+    tree.position.set(x, egyptHeight(x, z), z);
+    group.add(tree);
+    colliders.push({ x, z, r: 1.1 });
+  });
+
+  const grass = createGrassField(2600, { minX: -44, maxX: 44, minZ: -40, maxZ: 38 }, 13, egyptHeight,
+    { color: 0x95a05a, height: 0.7, dryness: 0.45 });
+  group.add(grass);
+  updaters.push((t) => grass.userData.update(t));
+
+  const flowers = createWildflowers(240, { minX: -38, maxX: 38, minZ: -34, maxZ: 32 }, 17, egyptHeight);
+  group.add(flowers);
 
   // ------------------------------------------------- camp road beacon
   const beacon = createBeacon('Amalekite Camp', 0xff8c4a);

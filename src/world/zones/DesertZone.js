@@ -9,6 +9,7 @@ import * as THREE from 'three';
 import { Mat } from '../../utils/materials.js';
 import {
   createRockField, createPalm, createDryBush, createBeacon, createRock, createHumanoid,
+  createReeds,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
@@ -126,6 +127,12 @@ export function createDesertZone() {
     colliders.push({ x, z, r: 1.1 * s });
   }
 
+  // reed beds along both banks
+  const reedsL = createReeds(420, { minX: -40, maxX: -8, minZ: -9, maxZ: 9 }, 61, desertHeight);
+  const reedsR = createReeds(420, { minX: 8, maxX: 40, minZ: -9, maxZ: 9 }, 62, desertHeight);
+  group.add(reedsL, reedsR);
+  updaters.push((t) => { reedsL.userData.update(t); reedsR.userData.update(t); });
+
   // ------------------------------------ the 200 who could not cross
   // exhausted Israelites collapsing onto the left sandstone ledge (v. 9-10)
   const spentPalette = {
@@ -137,7 +144,8 @@ export function createDesertZone() {
   for (let i = 0; i < 7; i++) {
     const x = -17 - (i % 3) * 3.4 + (seededRandom(i * 3.1) - 0.5);
     const z = -7 + i * 2.6;
-    const man = createHumanoid(spentPalette, i % 2 === 0 ? 'seatedCaptive' : 'grieving');
+    const man = createHumanoid(spentPalette, i % 2 === 0 ? 'seatedCaptive' : 'grieving',
+      { beard: 'full', detail: 'low' });
     man.position.set(x, desertHeight(x, z), z);
     man.rotation.y = Math.PI / 2 + (seededRandom(i * 5.9) - 0.5) * 0.7;
     group.add(man);
@@ -146,7 +154,8 @@ export function createDesertZone() {
   for (let i = 0; i < 4; i++) {
     const x = -6 + i * 4.5;
     const z = -1.5 + (i % 2) * 3;
-    const wader = createHumanoid(spentPalette, 'standing');
+    const wader = createHumanoid(spentPalette, 'standing',
+      { armor: 'leather', beard: 'full', detail: 'low' });
     wader.position.set(x, desertHeight(x, z) - 0.55, z);
     wader.rotation.y = Math.PI; // pushing north across the brook
     group.add(wader);

@@ -26,7 +26,10 @@ import {
   OBJECTIVES,
   CONTROLS,
   VISION,
+  PHASE_THEMES,
+  PHASE_AMBIENCE,
 } from '../constants.js';
+import { audio } from '../audio/AudioEngine.js';
 import { distanceXZ } from '../utils/math.js';
 import { ZIKLAG } from '../world/zones/ZiklagZone.js';
 import { DESERT } from '../world/zones/DesertZone.js';
@@ -91,7 +94,7 @@ export class Game {
           this._setPrompt(null);
           this.modal.showNarrative(NARRATIVE.ziklagModal, () => {
             this.fsm.set(STATES.DESERT);
-          });
+          }, PHASE_THEMES[STATES.ZIKLAG]);
         }
       },
     });
@@ -107,7 +110,7 @@ export class Game {
         // --- the Brook Besor ---
         if (!this.brookTriggered && Math.abs(p.z - DESERT.brookZ) < DESERT.brookTrigger) {
           this.brookTriggered = true;
-          this.modal.showNarrative(NARRATIVE.brookModal);
+          this.modal.showNarrative(NARRATIVE.brookModal, null, PHASE_THEMES[STATES.DESERT]);
         }
 
         // --- far edge of the march → the arid field ---
@@ -132,6 +135,7 @@ export class Game {
             this._setPrompt(NARRATIVE.promptServant);
             if (this.player.interactRequested) {
               this._setPrompt(null);
+              audio.ui('interact');
               this._startServantDialogue();
             }
           } else {
@@ -168,6 +172,7 @@ export class Game {
         const { detected } = zone.checkDetection(p);
         if (detected && this._detectionCooldown <= 0 && !this.modal.isOpen) {
           this._detectionCooldown = VISION.alertDuration;
+          audio.ui('alert');
           this.hud.showAlert(NARRATIVE.detectionAlert, VISION.alertDuration);
           // driven back to the valley mouth
           p.x = CAMP.spawn.x;
@@ -197,10 +202,11 @@ export class Game {
           if (this.player.interactRequested) {
             this._setPrompt(null);
             this.spoilsDone = true;
+            audio.ui('interact');
             this.modal.showSequence(NARRATIVE.spoilsDialogue, () => {
               this.hud.showAlert('The statute of equal share is established.', 2.6);
               this.fsm.set(STATES.GATE);
-            });
+            }, PHASE_THEMES[STATES.SPOILS]);
           }
         } else {
           this._setPrompt(null);
@@ -222,10 +228,11 @@ export class Game {
           if (this.player.interactRequested) {
             this._setPrompt(null);
             this.gateDone = true;
+            audio.ui('interact');
             this.modal.showSequence(NARRATIVE.gateDialogue, () => {
               this.hud.showAlert('Portions sent to the elders of Judah.', 2.6);
               this.fsm.set(STATES.GILBOA);
-            });
+            }, PHASE_THEMES[STATES.GATE]);
           }
         } else {
           this._setPrompt(null);
@@ -246,7 +253,8 @@ export class Game {
           this._setPrompt(NARRATIVE.promptSaul);
           if (this.player.interactRequested) {
             this._setPrompt(null);
-            this.modal.showSequence(NARRATIVE.gilboaDialogue, () => this.win());
+            audio.ui('interact');
+            this.modal.showSequence(NARRATIVE.gilboaDialogue, () => this.win(), PHASE_THEMES[STATES.GILBOA]);
           }
         } else {
           this._setPrompt(null);
@@ -260,14 +268,17 @@ export class Game {
     if (this.battleShown) return;
     this.battleShown = true;
     this._setPrompt(null);
+    audio.battle();
     this.modal.showSequence(NARRATIVE.battleSequence, () => {
       this.fsm.set(STATES.SPOILS);
-    });
+    }, PHASE_THEMES[STATES.CAMP]);
   }
 
   // ============================================================ helpers
   _enterZone(stateName) {
     const zone = this.world.activate(stateName);
+    audio.setAmbience(PHASE_AMBIENCE[stateName] ?? 'none');
+    if (stateName === STATES.GILBOA) audio.grief();
     this.player.spawn(
       new THREE.Vector3(
         zone.spawn.x,
@@ -296,13 +307,15 @@ export class Game {
       this.hud.showAlert('The servant will lead you down to the raiders.', 2.6);
       this.arrow.setTarget(EGYPT.exit.x, EGYPT.exit.z);
       this.arrow.show();
-    });
+    }, PHASE_THEMES[STATES.EGYPTIAN]);
   }
 
   // ============================================================ control
   start() {
     this.started = true;
     this.finished = false;
+    audio.init();
+    audio.resume();
     this.fsm.set(STATES.ZIKLAG);
     this.input.requestLock();
   }
@@ -315,6 +328,7 @@ export class Game {
     this.input.enabled = false;
     this.input.exitLock();
     this.arrow.hide();
+    audio.victory();
     this.victory.show();
   }
 

@@ -7,7 +7,9 @@
  */
 import * as THREE from 'three';
 import { Mat, Geo } from '../../utils/materials.js';
+import { createDetailedHuman } from '../../entities/CharacterRig.js';
 import { randRange, seededRandom } from '../../utils/math.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 // ------------------------------------------------------------ helpers
 function mesh(geo, mat, sx = 1, sy = 1, sz = 1, x = 0, y = 0, z = 0) {
@@ -271,146 +273,18 @@ export function createCage() {
 
 // ------------------------------------------------------------- humans
 /**
- * Generic low-poly humanoid with named pivot parts.
- * @param {{skin:THREE.Material, cloth:THREE.Material, cloth2?:THREE.Material, hair?:THREE.Material}} palette
- * @param {'standing'|'sitting'|'celebrating'|'seatedCaptive'} pose
+ * Generic detailed humanoid with named pivot parts (see CharacterRig.js).
+ * Kept as the zone-facing API: palette + pose, with optional gear overrides.
+ * @param {{skin:THREE.Material, cloth:THREE.Material, cloth2?:THREE.Material,
+ *          hair?:THREE.Material, leather?:THREE.Material, metal?:THREE.Material,
+ *          accent?:THREE.Material}} palette
+ * @param {'standing'|'sitting'|'celebrating'|'seatedCaptive'|'armsCrossed'|
+ *         'grieving'|'slumpedWounded'|'reclining'} pose
+ * @param {{beard?:string, hairStyle?:string, armor?:string, robe?:boolean,
+ *          detail?:string}} [opts]
  */
-export function createHumanoid(palette, pose = 'standing') {
-  const g = new THREE.Group();
-  const skin = palette.skin;
-  const cloth = palette.cloth;
-  const cloth2 = palette.cloth2 ?? cloth;
-  const hair = palette.hair ?? Mat.hair();
-
-  const torso = mesh(Geo.box(), cloth, 0.62, 0.8, 0.36, 0, 1.14, 0);
-  const sash = mesh(Geo.box(), cloth2, 0.66, 0.15, 0.4, 0, 0.84, 0);
-  const head = mesh(Geo.sphere(), skin, 0.4, 0.42, 0.4, 0, 1.8, 0);
-  const hairMesh = mesh(Geo.sphere(), hair, 0.44, 0.3, 0.44, 0, 1.96, 0.02);
-  const neck = mesh(Geo.cyl(), skin, 0.14, 0.18, 0.14, 0, 1.58, 0);
-
-  // pivots
-  const armL = new THREE.Group();
-  const armR = new THREE.Group();
-  armL.position.set(-0.42, 1.44, 0);
-  armR.position.set(0.42, 1.44, 0);
-  armL.add(
-    mesh(Geo.box(), cloth, 0.17, 0.36, 0.19, 0, -0.18, 0),
-    mesh(Geo.box(), skin, 0.14, 0.38, 0.16, 0, -0.5, 0),
-  );
-  armR.add(
-    mesh(Geo.box(), cloth, 0.17, 0.36, 0.19, 0, -0.18, 0),
-    mesh(Geo.box(), skin, 0.14, 0.38, 0.16, 0, -0.5, 0),
-  );
-
-  const legL = new THREE.Group();
-  const legR = new THREE.Group();
-  legL.position.set(-0.17, 0.82, 0);
-  legR.position.set(0.17, 0.82, 0);
-  legL.add(mesh(Geo.box(), cloth2, 0.25, 0.78, 0.28, 0, -0.39, 0));
-  legR.add(mesh(Geo.box(), cloth2, 0.25, 0.78, 0.28, 0, -0.39, 0));
-
-  g.add(torso, sash, head, hairMesh, neck, armL, armR, legL, legR);
-
-  const parts = { armL, armR, legL, legR, head, torso };
-
-  switch (pose) {
-    case 'sitting':
-      // folded on the ground
-      g.position.y = -0.42;
-      torso.rotation.x = 0.18;
-      head.position.set(0, 1.62, 0.18);
-      hairMesh.position.set(0, 1.78, 0.18);
-      neck.position.set(0, 1.42, 0.08);
-      legL.rotation.x = -1.45;
-      legR.rotation.x = -1.45;
-      legL.rotation.z = 0.35;
-      legR.rotation.z = -0.35;
-      armL.rotation.x = -0.75;
-      armR.rotation.x = -0.75;
-      armL.rotation.z = 0.22;
-      armR.rotation.z = -0.22;
-      break;
-
-    case 'celebrating':
-      armL.rotation.z = 2.45;
-      armR.rotation.z = -2.45;
-      armL.rotation.x = -0.25;
-      armR.rotation.x = -0.25;
-      head.rotation.x = -0.16;
-      break;
-
-    case 'seatedCaptive':
-      g.position.y = -0.5;
-      torso.rotation.x = 0.25;
-      head.position.set(0, 1.56, 0.22);
-      hairMesh.position.set(0, 1.72, 0.22);
-      neck.position.set(0, 1.38, 0.1);
-      legL.rotation.x = -1.5;
-      legR.rotation.x = -1.5;
-      armL.rotation.x = -1.15;
-      armR.rotation.x = -1.15;
-      armL.rotation.z = 0.35;
-      armR.rotation.z = -0.35;
-      head.rotation.x = 0.3;
-      break;
-
-    case 'armsCrossed':
-      // closed, aggrieved body language (the greedy 400)
-      armL.rotation.x = -1.35;
-      armR.rotation.x = -1.35;
-      armL.rotation.z = -0.55;
-      armR.rotation.z = 0.55;
-      head.rotation.x = -0.08;
-      break;
-
-    case 'grieving':
-      // slumped shoulders, head hung, hands open at the sides
-      torso.rotation.x = 0.16;
-      head.rotation.x = 0.42;
-      armL.rotation.x = -0.25;
-      armR.rotation.x = -0.25;
-      armL.rotation.z = 0.14;
-      armR.rotation.z = -0.14;
-      break;
-
-    case 'slumpedWounded':
-      // Saul against the chariot wheel: one knee down, head heavy
-      g.position.y = -0.32;
-      torso.rotation.x = 0.32;
-      head.rotation.x = 0.5;
-      legL.rotation.x = -1.25;
-      legR.rotation.x = -0.35;
-      armL.rotation.x = -0.95;
-      armL.rotation.z = 0.25;
-      armR.rotation.x = -1.5;
-      armR.rotation.z = -0.3;
-      break;
-
-    case 'reclining':
-      // intoxicated Amalekite slumped over rugs
-      g.position.y = -0.55;
-      g.rotation.x = -0.35;
-      torso.rotation.x = 0.45;
-      head.rotation.x = 0.55;
-      legL.rotation.x = -1.35;
-      legR.rotation.x = -1.15;
-      armL.rotation.x = -1.7;
-      armR.rotation.x = -1.2;
-      break;
-
-    default:
-      break;
-  }
-
-  g.traverse((o) => {
-    if (o.isMesh) {
-      o.castShadow = true;
-      o.receiveShadow = false;
-    }
-  });
-
-  g.userData.parts = parts;
-  return g;
+export function createHumanoid(palette, pose = 'standing', opts = {}) {
+  return createDetailedHuman({ palette, pose, ...opts });
 }
 
 // ------------------------------------------------------------ beacons
@@ -920,4 +794,192 @@ export function createCrown() {
     g.add(pt);
   }
   return g;
+}
+
+// ======================================================= fields & flora
+/** Wind-swayed instanced grass. One draw call for the whole field. */
+function windMaterial(baseMaterial) {
+  const mat = baseMaterial;
+  mat.onBeforeCompile = (shader) => {
+    shader.uniforms.uTime = { value: 0 };
+    shader.vertexShader = `uniform float uTime;\n${shader.vertexShader}`.replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+       #ifdef USE_INSTANCING
+         float sway = sin(uTime * 1.6 + instanceMatrix[3][0] * 0.9 + instanceMatrix[3][2] * 0.7);
+         float bend = pow(max(position.y, 0.0), 1.5);
+         transformed.x += sway * bend * 0.16;
+         transformed.z += cos(uTime * 1.2 + instanceMatrix[3][0]) * bend * 0.09;
+       #endif`,
+    );
+    mat.userData.shader = shader;
+  };
+  return mat;
+}
+
+/**
+ * Grass field: thousands of tapered blades, instanced, wind-swayed.
+ * group.userData.update(time) advances the wind.
+ */
+export function createGrassField(count, area, seed = 1, groundHeight = () => 0, opts = {}) {
+  const { color = 0x7d8f48, height = 0.85, dryness = 0 } = opts;
+  const blade = new THREE.ConeGeometry(0.055, 1, 3);
+  blade.translate(0, 0.5, 0);
+
+  const mat = windMaterial(new THREE.MeshLambertMaterial({ color, flatShading: true }));
+  const inst = new THREE.InstancedMesh(blade, mat, count);
+  inst.castShadow = false;
+  inst.receiveShadow = true;
+
+  const dummy = new THREE.Object3D();
+  const c = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const r = (n) => seededRandom(seed * 31 + i * 2.3 + n);
+    const x = randRange(area.minX, area.maxX);
+    const z = randRange(area.minZ, area.maxZ);
+    const y = groundHeight(x, z);
+    const s = 0.55 + r(1) * 0.9;
+    dummy.position.set(x, y, z);
+    dummy.scale.set(0.8 + r(2) * 0.5, s * height, 0.8 + r(3) * 0.5);
+    dummy.rotation.set((r(4) - 0.5) * 0.3, r(5) * Math.PI * 2, (r(6) - 0.5) * 0.3);
+    dummy.updateMatrix();
+    inst.setMatrixAt(i, dummy.matrix);
+    const dry = r(7) < dryness;
+    c.setHSL(0.22 - r(8) * 0.06 - (dry ? 0.09 : 0), 0.38 + r(9) * 0.14, 0.32 + r(10) * 0.16);
+    inst.setColorAt(i, c);
+  }
+  inst.instanceMatrix.needsUpdate = true;
+  if (inst.instanceColor) inst.instanceColor.needsUpdate = true;
+
+  const g = new THREE.Group();
+  g.add(inst);
+  g.userData.update = (t) => {
+    if (mat.userData.shader) mat.userData.shader.uniforms.uTime.value = t;
+  };
+  return g;
+}
+
+/** Golden wheat — taller blades with a grain head, wind-swept. */
+export function createWheatField(count, area, seed = 1, groundHeight = () => 0) {
+  // blade + grain head merged into one instance geometry
+  const blade = new THREE.ConeGeometry(0.045, 1, 3);
+  blade.translate(0, 0.55, 0);
+  const head = new THREE.CylinderGeometry(0.035, 0.055, 0.22, 4);
+  head.translate(0, 1.12, 0);
+  const geo = mergeGeometries([blade, head], false);
+
+  const mat = windMaterial(new THREE.MeshLambertMaterial({ color: 0xd9b45c, flatShading: true }));
+  const inst = new THREE.InstancedMesh(geo, mat, count);
+
+  const dummy = new THREE.Object3D();
+  const c = new THREE.Color();
+  for (let i = 0; i < count; i++) {
+    const r = (n) => seededRandom(seed * 47 + i * 3.7 + n);
+    const x = randRange(area.minX, area.maxX);
+    const z = randRange(area.minZ, area.maxZ);
+    dummy.position.set(x, groundHeight(x, z), z);
+    dummy.scale.setScalar(0.8 + r(1) * 0.5);
+    dummy.rotation.set((r(2) - 0.5) * 0.22, r(3) * Math.PI * 2, (r(4) - 0.5) * 0.22);
+    dummy.updateMatrix();
+    inst.setMatrixAt(i, dummy.matrix);
+    c.setHSL(0.12 + r(5) * 0.035, 0.5 + r(6) * 0.16, 0.42 + r(7) * 0.12);
+    inst.setColorAt(i, c);
+  }
+  inst.instanceMatrix.needsUpdate = true;
+  if (inst.instanceColor) inst.instanceColor.needsUpdate = true;
+
+  const g = new THREE.Group();
+  g.add(inst);
+  g.userData.update = (t) => {
+    if (mat.userData.shader) mat.userData.shader.uniforms.uTime.value = t;
+  };
+  return g;
+}
+
+/** Wildflower sprinkle — colored bloom + stem, instanced. */
+export function createWildflowers(count, area, seed = 1, groundHeight = () => 0) {
+  const stem = new THREE.CylinderGeometry(0.012, 0.018, 0.34, 3);
+  stem.translate(0, 0.17, 0);
+  const bloom = new THREE.IcosahedronGeometry(0.05, 0);
+  bloom.translate(0, 0.38, 0);
+  const geo = mergeGeometries([stem, bloom], false);
+
+  const mat = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
+  const inst = new THREE.InstancedMesh(geo, mat, count);
+  const dummy = new THREE.Object3D();
+  const c = new THREE.Color();
+  const palette = [0xc85a4a, 0xd9a24a, 0x8a6ab0, 0xd8d0e8, 0xb04a6a];
+  for (let i = 0; i < count; i++) {
+    const r = (n) => seededRandom(seed * 59 + i * 4.1 + n);
+    const x = randRange(area.minX, area.maxX);
+    const z = randRange(area.minZ, area.maxZ);
+    dummy.position.set(x, groundHeight(x, z), z);
+    dummy.scale.setScalar(0.8 + r(1) * 0.6);
+    dummy.rotation.set((r(2) - 0.5) * 0.35, r(3) * Math.PI * 2, (r(3.5) - 0.5) * 0.35);
+    dummy.updateMatrix();
+    inst.setMatrixAt(i, dummy.matrix);
+    c.setHex(palette[Math.floor(r(4) * palette.length)]);
+    inst.setColorAt(i, c);
+  }
+  inst.instanceMatrix.needsUpdate = true;
+  if (inst.instanceColor) inst.instanceColor.needsUpdate = true;
+
+  const g = new THREE.Group();
+  g.add(inst);
+  return g;
+}
+
+/** Gnarled olive tree — twisted trunk segments + silver-green canopy clumps. */
+export function createOliveTree(seed = 1) {
+  const g = new THREE.Group();
+  const r = (n) => seededRandom(seed * 6.13 + n);
+  const h = 2.2 + r(1) * 1.4;
+
+  // twisted trunk from angled segments
+  let x = 0; let z = 0; let y = 0;
+  for (let i = 0; i < 3; i++) {
+    const seg = mesh(Geo.cyl(), Mat.palmTrunk(), 0.3 - i * 0.07, h / 2.4, 0.3 - i * 0.07,
+      x, y + h / 4.8, z);
+    seg.rotation.z = (r(10 + i) - 0.5) * 0.55;
+    seg.rotation.x = (r(20 + i) - 0.5) * 0.45;
+    g.add(seg);
+    x += (r(30 + i) - 0.5) * 0.65;
+    z += (r(40 + i) - 0.5) * 0.65;
+    y += h / 2.7;
+  }
+
+  // silver-green canopy: overlapping clumps (olive tones)
+  const leaf = new THREE.MeshLambertMaterial({ color: 0x8a9a6a, flatShading: true });
+  const leaf2 = new THREE.MeshLambertMaterial({ color: 0x6d7c52, flatShading: true });
+  for (let i = 0; i < 7; i++) {
+    const clump = mesh(Geo.ico(), i % 2 ? leaf : leaf2,
+      1.5 + r(50 + i) * 1.3, 0.95 + r(60 + i) * 0.8, 1.5 + r(70 + i) * 1.3,
+      x + (r(80 + i) - 0.5) * 3.2, y + 0.6 + r(90 + i) * 1.5, z + (r(100 + i) - 0.5) * 3.2);
+    clump.castShadow = true;
+    g.add(clump);
+  }
+  return g;
+}
+
+/** Tall dark cypress — the silhouette of Judean hillsides. */
+export function createCypress(seed = 1) {
+  const g = new THREE.Group();
+  const r = (n) => seededRandom(seed * 7.3 + n);
+  const h = 3.2 + r(1) * 1.8;
+  const trunk = mesh(Geo.cyl(), Mat.palmTrunk(), 0.14, h * 0.9, 0.14, 0, h * 0.45, 0);
+  g.add(trunk);
+  const dark = new THREE.MeshLambertMaterial({ color: 0x2e4228, flatShading: true });
+  for (let i = 0; i < 4; i++) {
+    const clump = mesh(Geo.cone(), dark,
+      0.85 - i * 0.13, 1.6 - i * 0.2, 0.85 - i * 0.13,
+      0, h * (0.42 + i * 0.17), 0);
+    clump.rotation.y = r(10 + i) * Math.PI;
+    g.add(clump);
+  }
+  return g;
+}
+
+/** Reed bed for brook banks — tall thin clusters. */
+export function createReeds(count, area, seed = 1, groundHeight = () => 0) {
+  return createGrassField(count, area, seed, groundHeight, { color: 0x7a8a3c, height: 1.5 });
 }

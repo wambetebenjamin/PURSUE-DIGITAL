@@ -6,6 +6,7 @@
 import './ui/styles.css';
 import * as THREE from 'three';
 import { Engine } from './core/Engine.js';
+import { audio } from './audio/AudioEngine.js';
 import { Input } from './core/Input.js';
 import { Game } from './core/Game.js';
 
@@ -44,7 +45,19 @@ input.onPointerLockChange = (locked) => {
 
 startButton.addEventListener('click', () => {
   startScreen.classList.add('hidden');
+  audio.init();
+  audio.resume();
   game.start();
+});
+
+// ------------------------------------------------------------- audio
+const audioToggle = document.getElementById('audio-toggle');
+audioToggle.addEventListener('click', () => {
+  audio.init();
+  audio.resume();
+  const muted = audio.toggleMuted();
+  audioToggle.classList.toggle('muted', muted);
+  audioToggle.textContent = muted ? '✕' : '♪';
 });
 
 // click anywhere on the canvas re-acquires the pointer (Input handles it),

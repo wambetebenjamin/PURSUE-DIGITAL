@@ -16,6 +16,7 @@ import { Mat } from '../../utils/materials.js';
 import {
   createRockField, createRock, createHerd, createBaggageWagon,
   createOutcrop, createBeacon, createHumanoid, createDryBush,
+  createGrassField, createOliveTree, createWildflowers,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
@@ -116,7 +117,7 @@ export function createSpoilsZone() {
   for (let i = 0; i < 5; i++) {
     const x = -18 + i * 9;
     const z = 12 + (i % 2) * 4;
-    const kid = createHumanoid(captivePalette, 'standing');
+    const kid = createHumanoid(captivePalette, 'standing', { detail: 'low', beard: 'none' });
     kid.position.set(x, spoilsHeight(x, z), z);
     kid.scale.setScalar(0.72);
     kid.rotation.y = Math.PI + (seededRandom(i * 4.2) - 0.5);
@@ -138,7 +139,8 @@ export function createSpoilsZone() {
     const row = i % 2;
     const x = -22 - col * 3.2;
     const z = -2 + row * 4.5 + (seededRandom(i * 2.9) - 0.5);
-    const man = createHumanoid(vanguardPalette, i % 3 === 0 ? 'armsCrossed' : 'standing');
+    const man = createHumanoid(vanguardPalette, i % 3 === 0 ? 'armsCrossed' : 'standing',
+      { armor: 'leather', beard: i % 2 === 0 ? 'full' : 'gray', detail: 'low' });
     man.position.set(x, spoilsHeight(x, z), z);
     man.rotation.y = Math.PI / 2; // facing the herd / the 200
     group.add(man);
@@ -160,7 +162,8 @@ export function createSpoilsZone() {
     const row = i % 2;
     const x = 22 + col * 3.2;
     const z = -2 + row * 4.5 + (seededRandom(i * 6.7) - 0.5);
-    const man = createHumanoid(guardPalette, 'grieving');
+    const man = createHumanoid(guardPalette, 'grieving',
+      { beard: 'full', hairStyle: 'long', detail: 'low' });
     man.position.set(x, spoilsHeight(x, z), z);
     man.rotation.y = -Math.PI / 2;
     group.add(man);
@@ -201,6 +204,20 @@ export function createSpoilsZone() {
     bush.position.set(x, spoilsHeight(x, z), z);
     group.add(bush);
   }
+
+  // ------------------------------------- green river-meadow at the ford
+  const meadow = createGrassField(1800, { minX: -42, maxX: 42, minZ: -26, maxZ: 22 }, 41,
+    spoilsHeight, { color: 0x7d8f48, height: 0.6, dryness: 0.35 });
+  group.add(meadow);
+  updaters.push((t) => meadow.userData.update(t));
+  const blooms = createWildflowers(180, { minX: -36, maxX: 36, minZ: -20, maxZ: 18 }, 43, spoilsHeight);
+  group.add(blooms);
+  [[-40, 20], [38, 18], [-44, -8], [42, -12]].forEach(([x, z], i) => {
+    const tree = createOliveTree(30 + i);
+    tree.position.set(x, spoilsHeight(x, z), z);
+    group.add(tree);
+    colliders.push({ x, z, r: 1.1 });
+  });
 
   // ------------------------------------------- golden dust veil (FX)
   // "strong backlighting catches the dust clouds kicked up by the livestock,

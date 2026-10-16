@@ -15,7 +15,8 @@ import * as THREE from 'three';
 import { Mat, Geo } from '../../utils/materials.js';
 import {
   createCityGate, createChest, createMule, createHumanoid,
-  createBeacon, createTreasurePile,
+  createBeacon, createTreasurePile, createWheatField, createGrassField,
+  createOliveTree, createCypress,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
@@ -102,20 +103,33 @@ export function createGateZone() {
     terrace.castShadow = true;
     group.add(terrace);
   }
-  // dark cypress silhouettes on the terraces
+  // cypress silhouettes + olive trees on the terraces
   for (let i = 0; i < 7; i++) {
     const x = (seededRandom(i * 4.4) - 0.5) * 70;
     const z = -32 - seededRandom(i * 8.8) * 22;
     const t = Math.floor((-z - 30) / 8);
     const y = 2.4 + Math.max(0, Math.min(3, t)) * 2.2;
-    const trunk = new THREE.Mesh(Geo.box(), Mat.cedarWood());
-    trunk.scale.set(0.3, 1.6, 0.3);
-    trunk.position.set(x, y + 0.8, z);
-    const foliage = new THREE.Mesh(Geo.cone(), Mat.palmLeaf());
-    foliage.scale.set(1.3, 3.6, 1.3);
-    foliage.position.set(x, y + 3.2, z);
-    group.add(trunk, foliage);
+    const tree = i % 2 === 0 ? createCypress(i + 1) : createOliveTree(i + 1);
+    tree.position.set(x, y, z);
+    group.add(tree);
+    colliders.push({ x, z, r: 1.0 });
   }
+
+  // --------------------------------------------- fields of wheat
+  // "terraced limestone hills of Hebron" under cultivation
+  for (let t = 0; t < 3; t++) {
+    const y = 2.4 + t * 2.2;
+    const wheat = createWheatField(700 - t * 120, {
+      minX: -34 + t * 5, maxX: 34 - t * 5,
+      minZ: -31 - t * 8, maxZ: -23 - t * 8,
+    }, 23 + t, () => y);
+    group.add(wheat);
+    updaters.push((tm) => wheat.userData.update(tm));
+  }
+  const courtyardGrass = createGrassField(900, { minX: -38, maxX: 38, minZ: -20, maxZ: 18 }, 29,
+    gateHeight, { color: 0x8a9a4c, height: 0.55, dryness: 0.4 });
+  group.add(courtyardGrass);
+  updaters.push((tm) => courtyardGrass.userData.update(tm));
 
   // ------------------------------------------------- elders of Judah
   const elderPalettes = [
@@ -129,7 +143,8 @@ export function createGateZone() {
     const a = -0.7 + i * 0.35;
     const x = Math.sin(a) * 5.2;
     const z = GATE.elders.z - 1.2 + Math.cos(a) * 1.4;
-    const elder = createHumanoid(palette, 'standing');
+    const elder = createHumanoid(palette, 'standing',
+      { robe: true, beard: i % 2 === 0 ? 'gray' : 'full', hairStyle: i % 3 === 0 ? 'balding' : 'short', detail: 'full' });
     elder.position.set(x, gateHeight(x, z), z);
     elder.rotation.y = Math.PI - a * 0.7; // turned toward the arriving envoys
     group.add(elder);
@@ -176,7 +191,8 @@ export function createGateZone() {
   for (let i = 0; i < 3; i++) {
     const x = -6 + i * 6;
     const z = 2.5 + (i % 2) * 2;
-    const envoy = createHumanoid(envoyPalette, 'standing');
+    const envoy = createHumanoid(envoyPalette, 'standing',
+      { armor: 'leather', beard: 'full', detail: 'low' });
     envoy.position.set(x, gateHeight(x, z), z);
     envoy.rotation.y = Math.PI; // facing the elders, hands openly at their belts
     group.add(envoy);

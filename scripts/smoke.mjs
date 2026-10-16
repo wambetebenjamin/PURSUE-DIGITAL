@@ -199,6 +199,7 @@ ok(game.modal.isOpen, 'reaching the captives opens the 24-hour battle sequence')
 ok(game.battleShown, 'battle sequence is latched');
 ok(!game.finished, 'the game is not over yet — the story continues');
 ok(game.modal._steps.length === NARRATIVE.battleSequence.length, 'battle sequence has 2 scripted cards');
+ok(game.modal.citeEl.textContent.includes('30:17'), 'cards carry scripture citations');
 
 for (let i = 0; i < NARRATIVE.battleSequence.length; i++) {
   press('KeyE');
@@ -216,6 +217,7 @@ press('KeyE');
 frames(1);
 release('KeyE');
 ok(game.modal.isOpen, 'interaction opens the spoil-dispute dialogue');
+ok(game.modal.card.classList.contains('theme-spoils'), 'spoils card carries the spoils theme');
 ok(game.modal._steps.length === NARRATIVE.spoilsDialogue.length, 'dispute dialogue has 3 scripted steps');
 for (let i = 0; i < NARRATIVE.spoilsDialogue.length; i++) {
   press('KeyE');
@@ -250,6 +252,7 @@ press('KeyE');
 frames(1);
 release('KeyE');
 ok(game.modal.isOpen, 'interaction opens the Gilboa epilogue');
+ok(game.modal.card.classList.contains('theme-gilboa'), 'epilogue card carries the gilboa theme');
 ok(game.modal._steps.length === NARRATIVE.gilboaDialogue.length, 'epilogue has 3 scripted steps');
 for (let i = 0; i < NARRATIVE.gilboaDialogue.length; i++) {
   press('KeyE');

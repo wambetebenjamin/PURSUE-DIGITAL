@@ -1,8 +1,10 @@
 # PURSUE — 1 Samuel 30
 
-A complete, low-poly **3D action-adventure web game** for desktop browsers, retelling the
-pursuit of the Amalekites from **1 Samuel 30**. Built with **Three.js + Vite** (pure WebGL,
-no game engine runtime), fully modular, and deployable to **Vercel** as a static site.
+A cinematic **3D action-adventure web game** for desktop browsers, retelling the
+pursuit of the Amalekites from **1 Samuel 30–31**. Built with **Three.js + Vite** (pure WebGL,
+no game engine runtime): detailed procedural characters with sculpted anatomy, painted
+canvas surface textures, wind-swept fields, fully synthesized audio, and themed narrative
+cards — all generated at runtime, zero asset downloads. Deployable to **Vercel** as a static site.
 
 > Ziklag is burning. The families are taken. Two hundred men are too exhausted to cross the
 > brook — you press on with four hundred. Find the Egyptian servant. Descend upon the camp.
@@ -24,7 +26,8 @@ npm run build      # emits static site into dist/
 npm run preview    # serves dist/ at http://localhost:4173
 ```
 
-Headless logic test (walks the entire seven-phase state machine in Node):
+Headless logic test (walks the entire seven-phase state machine in Node — rigs,
+textures, and cards included):
 
 ```bash
 npm run smoke
@@ -83,7 +86,30 @@ lighting / PBR / composition translation.
 | `STATE_6_GILBOA_EPILOGUE` | **The Fall of Saul** (7000K overcast) | Steep basalt ridge, low mist & wind-whipped drizzle, the broken chariot wheel, dented bronze Saul with heavy crown, shattered shield-wall, Philistine ranks pressing up the slope → the epilogue and victory (1 Sam 31) |
 
 Persistent HUD (HTML/CSS above the canvas): **objective text · stamina meter · compass heading**,
-plus interaction prompts, alert banners, and responsive modals.
+plus interaction prompts, alert banners, a sound toggle, and themed narrative cards with
+speaker chips and scripture citations.
+
+---
+
+## Characters, sound & themes
+
+- **Character rigs** (`src/entities/CharacterRig.js`) — anatomically-proportioned figures
+  with sculpted skull/jaw/brow/cheek masses, eyes, noses, layered hair and beards, tunics,
+  belts, sashes, lamellar armor plates with rivets, and strapped sandals. Geometry is merged
+  per material inside each animated pivot (~8 draw calls per figure). David wears leather
+  lamellar and carries a sheathed sword; Saul wears dented royal bronze under a crown.
+- **Surface textures** (`src/utils/textures.js`) — every ground, wall, cloth, wood and skin
+  material is painted at runtime on ≤512² canvases (mottled sand, grass blades, weave
+  crosshatch, wood grain, stone pocks, flesh pores).
+- **Fields** — wind-swept instanced grass, wheat with grain heads, wildflowers, reed beds,
+  and gnarled olive trees across the arid fields, the river-meadow at Besor, and the
+  terraced hills of Hebron (one draw call per field, shader wind).
+- **Procedural audio** (`src/audio/AudioEngine.js`) — the Web Audio API synthesizes every
+  sound: layered ambience (wind, fire crackle, brook water, crickets, birdsong, rain),
+  tonal pads per phase, war drums under the battle cards, and SFX (stride-synced footsteps,
+  UI, alerts, victory chords). Mute with the ♪ button; nothing is downloaded.
+- **Themed cards** — each act's dialogue card carries its own palette (ember, sandstone,
+  night-fire, gold, marble, slate), an act badge, speaker chips, and scripture citations.
 
 ---
 
@@ -105,12 +131,15 @@ PURSUE-DIGITAL/
     │   ├── StateMachine.js     # generic FSM (enter/update/exit)
     │   ├── Input.js            # keyboard + Pointer-Lock mouse, edge-triggered actions
     │   └── EventBus.js         # decoupled pub/sub
+    ├── audio/
+    │   └── AudioEngine.js      # procedural Web Audio: ambience, pads, footsteps, SFX
     ├── camera/
     │   └── ThirdPersonCamera.js# orbit camera: mouse look, smoothing, compass bearing
     ├── player/
     │   ├── Player.js           # David rig (primitives), movement, collisions, gait animation
     │   └── Stamina.js          # 0–100 run stamina, forced-walk on exhaustion
     ├── entities/
+    │   ├── CharacterRig.js     # detailed merged-geometry humanoid builder
     │   ├── EgyptianServant.js  # seated NPC + idle animation
     │   └── DirectionalArrow.js # 3D chevron pointing at the active target zone
     ├── world/
@@ -137,6 +166,7 @@ PURSUE-DIGITAL/
     └── utils/
         ├── math.js             # angle/damping helpers, seeded RNG, compass labels
         ├── materials.js        # shared material & geometry cache (draw-call friendly)
+        ├── textures.js         # procedural canvas surfaces (skin, sand, grass, cloth…)
         └── canvasText.js       # tiny canvas-texture label sprites (< 1024²)
 ```
 
@@ -144,9 +174,11 @@ PURSUE-DIGITAL/
 
 ## Rendering & performance notes
 
-- **Low-poly primitives only** — no external models or texture downloads. The world uses
-  flat-shaded Lambert/Phong materials from a **shared material cache** (minimal state changes).
-- **Texture budget**: the only textures are runtime canvas labels (~512²), far under the 1024² cap.
+- **Procedural assets only** — no external models, textures, or audio downloads. The world
+  uses Lambert/Phong/Standard materials from a **shared material cache** (minimal state changes).
+- **Texture budget**: all textures are runtime-painted canvases (≤512²), far under the 1024² cap.
+- **Character budget**: figures merge to ~8 draw calls each (per-pivot, per-material);
+  fields, herds, and rocks are instanced (one draw call per system).
 - **Draw-call discipline**: rocks use `InstancedMesh` (one draw call per field); particle systems
   are one `THREE.Points` call per emitter with a custom soft-disc shader (per-particle alpha,
   zero textures).
