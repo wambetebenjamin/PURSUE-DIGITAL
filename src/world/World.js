@@ -11,6 +11,9 @@ import { createZiklagZone } from './zones/ZiklagZone.js';
 import { createDesertZone } from './zones/DesertZone.js';
 import { createEgyptianZone } from './zones/EgyptianZone.js';
 import { createCampZone } from './zones/CampZone.js';
+import { createSpoilsZone } from './zones/SpoilsZone.js';
+import { createGateZone } from './zones/GateZone.js';
+import { createGilboaZone } from './zones/GilboaZone.js';
 import { STATES } from '../constants.js';
 
 export class World {
@@ -21,11 +24,14 @@ export class World {
 
     this.scene.fog = new THREE.FogExp2(0x241c18, 0.016);
 
-    // Build all four phases up-front (cheap: low-poly primitives only).
+    // Build all seven phases up-front (cheap: low-poly primitives only).
     this.zones.set(STATES.ZIKLAG, createZiklagZone());
     this.zones.set(STATES.DESERT, createDesertZone());
     this.zones.set(STATES.EGYPTIAN, createEgyptianZone());
     this.zones.set(STATES.CAMP, createCampZone());
+    this.zones.set(STATES.SPOILS, createSpoilsZone());
+    this.zones.set(STATES.GATE, createGateZone());
+    this.zones.set(STATES.GILBOA, createGilboaZone());
 
     for (const zone of this.zones.values()) {
       zone.group.visible = false;

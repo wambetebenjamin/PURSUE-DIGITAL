@@ -7,7 +7,9 @@
  */
 import * as THREE from 'three';
 import { Mat } from '../../utils/materials.js';
-import { createRockField, createPalm, createDryBush, createBeacon, createRock } from '../props/PropFactory.js';
+import {
+  createRockField, createPalm, createDryBush, createBeacon, createRock, createHumanoid,
+} from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
@@ -42,14 +44,15 @@ export function createDesertZone() {
   const updaters = [];
 
   // ------------------------------------------------------------- sky
-  const sky = new SkyDome(0x3f7fd0, 0xf2e2b8, 0.85);
+  // PHASE 2 spec: brutal, overexposed midday desert sun at 6500K
+  const sky = new SkyDome(0x6aa2e0, 0xf6ecc9, 0.85);
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0x9cc8ff, 0xc9a86c, 0.95);
+  const hemi = new THREE.HemisphereLight(0xbcd4f0, 0xe0c896, 1.05);
   group.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xfff2d8, 1.5);
+  const sun = new THREE.DirectionalLight(0xf2f7ff, 1.75); // 6500K blinding-white key
   sun.position.set(46, 70, 26);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -78,7 +81,13 @@ export function createDesertZone() {
   group.add(ground);
 
   // ---------------------------------------------------- Besor Brook
-  const water = new THREE.Mesh(new THREE.PlaneGeometry(150, 15), Mat.water());
+  // "thick brown sediment water" with blinding white speculars at 6500K
+  const waterMat = Mat.water().clone();
+  waterMat.color.set(0x5a4a34);
+  waterMat.specular.set(0xffffff);
+  waterMat.shininess = 160;
+  waterMat.opacity = 0.92;
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(150, 15), waterMat);
   water.rotation.x = -Math.PI / 2;
   water.position.set(0, -0.32, 0);
   water.receiveShadow = false;
@@ -96,9 +105,12 @@ export function createDesertZone() {
   }
 
   // ---------------------------------------------------- valley walls
-  // big instanced rock fields hug the playable corridor
+  // big instanced rock fields hug the playable corridor — dry, porous,
+  // crumbly limestone shale ("sharp jagged geometry and zero specularity")
   const rocksL = createRockField(46, { minX: -88, maxX: -50, minZ: -135, maxZ: 135 }, 11);
   const rocksR = createRockField(46, { minX: 50, maxX: 88, minZ: -135, maxZ: 135 }, 22);
+  rocksL.material = Mat.limestone();
+  rocksR.material = Mat.limestone();
   group.add(rocksL, rocksR);
 
   // walkable-area boulders (with colliders)
@@ -112,6 +124,35 @@ export function createDesertZone() {
     rock.position.set(x, desertHeight(x, z), z);
     group.add(rock);
     colliders.push({ x, z, r: 1.1 * s });
+  }
+
+  // ------------------------------------ the 200 who could not cross
+  // exhausted Israelites collapsing onto the left sandstone ledge (v. 9-10)
+  const spentPalette = {
+    skin: Mat.skin(),
+    cloth: Mat.tunicCaptive(),
+    cloth2: Mat.tunicEarth(),
+    hair: Mat.hair(),
+  };
+  for (let i = 0; i < 7; i++) {
+    const x = -17 - (i % 3) * 3.4 + (seededRandom(i * 3.1) - 0.5);
+    const z = -7 + i * 2.6;
+    const man = createHumanoid(spentPalette, i % 2 === 0 ? 'seatedCaptive' : 'grieving');
+    man.position.set(x, desertHeight(x, z), z);
+    man.rotation.y = Math.PI / 2 + (seededRandom(i * 5.9) - 0.5) * 0.7;
+    group.add(man);
+  }
+  // a few of the 400 already wading the torrent
+  for (let i = 0; i < 4; i++) {
+    const x = -6 + i * 4.5;
+    const z = -1.5 + (i % 2) * 3;
+    const wader = createHumanoid(spentPalette, 'standing');
+    wader.position.set(x, desertHeight(x, z) - 0.55, z);
+    wader.rotation.y = Math.PI; // pushing north across the brook
+    group.add(wader);
+    updaters.push((t) => {
+      wader.rotation.z = Math.sin(t * 1.8 + i * 1.3) * 0.08; // fighting the current
+    });
   }
 
   // ------------------------------------------------- palms & shrubs
@@ -161,7 +202,43 @@ export function createDesertZone() {
     colorEnd: 0xd9be86,
     additive: true,
   });
-  group.add(dust.points);
+  // foam simulation along the churning rapids
+  const foam = new ParticleEmitter({
+    count: 90,
+    origin: new THREE.Vector3(0, -0.15, 0),
+    spread: 40,
+    rise: 0.45,
+    riseJitter: 1.2,
+    drift: 1.6,
+    life: 2.2,
+    lifeJitter: 0.5,
+    size: 9,
+    sizeGrow: 5,
+    alpha: 0.35,
+    rate: 0,
+    color: 0xf6f2e8,
+    colorEnd: 0xd9d2c2,
+    additive: true,
+  });
+  // severe dust wind-haze (opacity filter) under the overexposed sun
+  const haze = new ParticleEmitter({
+    count: 80,
+    origin: new THREE.Vector3(0, 4.5, 0),
+    spread: 48,
+    rise: 0.25,
+    riseJitter: 0.7,
+    drift: 1.8,
+    life: 10,
+    lifeJitter: 0.35,
+    size: 22,
+    sizeGrow: 12,
+    alpha: 0.1,
+    rate: 0,
+    color: 0xf6ecc9,
+    colorEnd: 0xe0d0a8,
+    additive: true,
+  });
+  group.add(dust.points, foam.points, haze.points);
 
   return {
     name: 'STATE_1_DESERT_MARCH',
@@ -169,12 +246,14 @@ export function createDesertZone() {
     spawn: DESERT.spawn,
     bounds: DESERT.bounds,
     colliders,
-    fog: { color: 0xe3cfa0, density: 0.0052 },
+    fog: { color: 0xe8dcb4, density: 0.0068 },
     sun,
     groundHeight: desertHeight,
     waterLevel: -0.32,
     update(dt, time) {
       dust.update(dt);
+      foam.update(dt);
+      haze.update(dt);
       for (const u of updaters) u(time);
     },
   };

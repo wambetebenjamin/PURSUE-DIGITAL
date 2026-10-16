@@ -6,7 +6,7 @@ no game engine runtime), fully modular, and deployable to **Vercel** as a static
 
 > Ziklag is burning. The families are taken. Two hundred men are too exhausted to cross the
 > brook — you press on with four hundred. Find the Egyptian servant. Descend upon the camp.
-> **Recover all.**
+> Divide the spoil. Send portions to Judah. **Recover all.**
 
 ---
 
@@ -24,7 +24,7 @@ npm run build      # emits static site into dist/
 npm run preview    # serves dist/ at http://localhost:4173
 ```
 
-Headless logic test (walks the entire state machine in Node):
+Headless logic test (walks the entire seven-phase state machine in Node):
 
 ```bash
 npm run smoke
@@ -66,14 +66,21 @@ No server, database, or environment variables are required. Everything is client
 
 ---
 
-## The four phases (finite state machine)
+## The seven phases (finite state machine)
+
+Mapped 1:1 to the production master-prompt pipeline — see
+[`docs/PRODUCTION_BIBLE.md`](docs/PRODUCTION_BIBLE.md) for the full
+lighting / PBR / composition translation.
 
 | State | Phase | Core content |
 | --- | --- | --- |
-| `STATE_0_ZIKLAG` | **The Ashes of Ziklag** | Ash-gray village, burnt low-poly houses, rising smoke & ember particles, debris trail to the glowing **Desert Edge** waypoint → narrative modal |
-| `STATE_1_DESERT_MARCH` | **The Pursuit & The Brook** | Sun-bleached dunes, rocky valley (instanced), **Besor Brook** water plane, stamina-gated running, "200 men are too exhausted to cross…" modal |
+| `STATE_0_ZIKLAG` | **Ziklag in Ruins** (5600K golden hour) | Burnt mud-brick houses, black granary smoke column, ember particles, sand drifts at the gates, volumetric dust → debris trail to the **Desert Edge** waypoint |
+| `STATE_1_DESERT_MARCH` | **The Pursuit Through Besor** (6500K midday) | Sun-bleached dunes, chalky limestone walls (instanced), churning brown **Besor Brook** with foam & blinding speculars, the exhausted **200** collapsed on the left ledge, stamina-gated running |
 | `STATE_2_EGYPTIAN_SERVANT` | **The Egyptian Servant** | Seated NPC, proximity prompt *"Press E to give bread and water"*, 3-node dialogue tree, then a **3D directional arrow** unlocks toward the camp |
-| `STATE_3_AMALEKITE_RESCUE` | **The Camp and Rescue** | Tents, bonfires, celebrating Amalekites with **vision cones** (distance + facing checks), central cage of captives → victory overlay with 1 Sam 30:18–19 and **Play Again** |
+| `STATE_3_AMALEKITE_RESCUE` | **Night Ambush at the Camp** (3200K starlight) | Tents, bonfires, intoxicated Amalekites on rugs, spilled wine (zero-roughness), piles of pillaged gold & silver, **vision cones** (distance + facing checks), central cage of captives → the 24-hour battle cards (1 Sam 30:17–19) |
+| `STATE_4_SPOILS_DIVISION` | **Spoils & Separation at Besor** (5200K) | Symmetric staging: the blood-stained 400 vs. the 200 with the baggage train, an instanced herd of recovered sheep/goats/cattle as the central barrier, David's outcrop → the statute of equal share (1 Sam 30:21–25) |
+| `STATE_5_DISTRIBUTION` | **Diplomatic Distribution** (4800K) | Hebron's limestone gate arch, elders in purple & madder receiving cedar tribute chests, unloading mule trains, gold & silver glare → gifts to Judah (1 Sam 30:26–31) |
+| `STATE_6_GILBOA_EPILOGUE` | **The Fall of Saul** (7000K overcast) | Steep basalt ridge, low mist & wind-whipped drizzle, the broken chariot wheel, dented bronze Saul with heavy crown, shattered shield-wall, Philistine ranks pressing up the slope → the epilogue and victory (1 Sam 31) |
 
 Persistent HUD (HTML/CSS above the canvas): **objective text · stamina meter · compass heading**,
 plus interaction prompts, alert banners, and responsive modals.
@@ -88,7 +95,7 @@ PURSUE-DIGITAL/
 ├── package.json
 ├── vite.config.js              # static build config (chunked vendor bundle)
 ├── scripts/
-│   └── smoke.mjs               # headless Node test: boots the FSM and plays through all 4 phases
+│   └── smoke.mjs               # headless Node test: boots the FSM and plays through all 7 phases
 └── src/
     ├── main.js                 # bootstrap: engine + game + title/victory wiring
     ├── constants.js            # FSM names, tunables (speed/stamina/vision), narrative copy
@@ -112,9 +119,13 @@ PURSUE-DIGITAL/
     │   │   ├── ZiklagZone.js   # PHASE 1 environment + waypoint
     │   │   ├── DesertZone.js   # PHASE 2 terrain (dunes/wadi/brook) + march beacon
     │   │   ├── EgyptianZone.js # PHASE 3 plain + servant + canyon mouth
-    │   │   └── CampZone.js     # PHASE 4 tents/fires/guards + vision-cone detection
+    │   │   ├── CampZone.js     # PHASE 4 tents/fires/guards + vision-cone detection
+    │   │   ├── SpoilsZone.js   # PHASE 5 factions + instanced herd + baggage train
+    │   │   ├── GateZone.js     # PHASE 6 city gate, elders, tribute, mule train
+    │   │   └── GilboaZone.js   # PHASE 7 ridge, Saul, chariot wreck, philistines
     │   ├── props/
-    │   │   └── PropFactory.js  # burnt houses, tents, bonfires, cage, rocks, beacons, humanoids
+    │   │   └── PropFactory.js  # houses, tents, fires, cage, rocks, beacons, humanoids,
+    │   │                       # herds (instanced), wagons, chests, mules, camels, gate
     │   └── effects/
     │       ├── Particles.js    # pooled soft-disc particle emitters (smoke, embers, dust, sparks)
     │       └── SkyDome.js      # two-color gradient sky shader
@@ -152,13 +163,16 @@ Target: Chrome, Firefox, Edge, Safari — desktop only (keyboard + mouse require
 
 ## Expansion seams
 
-- `StateMachine.add(name, …)` — drop in new phases without touching the loop.
+- `StateMachine.add(name, …)` — drop in new phases without touching the loop (used for Phases 5–7).
 - `PropFactory` / zone builders return plain groups — swap primitives for glTF meshes later.
 - `EventBus` is wired for decoupled gameplay events (audio, analytics) if you grow the build.
 
 ## Scripture references
 
 - Ziklag destroyed & the pursuit — 1 Samuel 30:1–6
-- The 200 at the Brook Besor — 1 Samuel 30:9–10, 21–24
+- The 200 at the Brook Besor — 1 Samuel 30:9–10, 21–25
 - The Egyptian servant — 1 Samuel 30:11–15
-- David recovered all — 1 Samuel 30:18–20
+- The 24-hour battle & full recovery — 1 Samuel 30:17–20
+- The spoil divided & the statute — 1 Samuel 30:21–25
+- Gifts to the elders of Judah — 1 Samuel 30:26–31
+- The fall of Saul on Gilboa — 1 Samuel 31:1–6

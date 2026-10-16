@@ -1,15 +1,19 @@
 /**
- * CampZone.js — PHASE 4: "The Camp and Rescue"
+ * CampZone.js — PHASES 3–4: "The Night Ambush" & "The 24-Hour War"
+ * (1 Samuel 30:16–19)
  *
- * A dusk-lit valley of tents and bonfires with celebrating Amalekites.
- * Each guard carries a ground-projected vision cone (distance + facing check).
- * Reaching the central cage triggers the victory sequence.
+ * A moonlit valley of tents and bonfires at 3200K starlight: celebrating,
+ * intoxicated Amalekites among spilled wine, rugs, and piles of pillaged
+ * gold and silver. Each guard carries a ground-projected vision cone
+ * (distance + facing check). Reaching the central cage triggers the battle
+ * sequence — the rout of the raiders and the 400 fleeing on camels.
  */
 import * as THREE from 'three';
 import { Mat } from '../../utils/materials.js';
 import {
   createTent, createBonfire, createCage, createHumanoid,
-  createRockField, createBeacon,
+  createRockField, createBeacon, createTreasurePile, createSpilledAmphora,
+  createRug, createCamel,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
@@ -93,14 +97,32 @@ export function createCampZone() {
   const guards = [];
 
   // ------------------------------------------------------------- sky
-  const sky = new SkyDome(0x241a3a, 0xc86a3a, 0.7);
+  // PHASE 3 spec: cool dark-blue starlight, low crescent moon, 3200K night
+  const sky = new SkyDome(0x0b1026, 0x2c2440, 0.75);
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0x53406b, 0x7a4a30, 0.95);
+  // ambient starlight: cool blue over warm firelight bounce
+  const hemi = new THREE.HemisphereLight(0x2c3a5c, 0x241818, 0.75);
   group.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xffb070, 1.05);
+  // low-hanging crescent moon (the "3200K starlight" key)
+  const moon = new THREE.Mesh(
+    new THREE.CircleGeometry(9, 24),
+    new THREE.MeshBasicMaterial({ color: 0xd8e2f2 }),
+  );
+  moon.position.set(70, 95, -140);
+  moon.lookAt(0, 10, 0);
+  group.add(moon);
+  const moonShadow = new THREE.Mesh(
+    new THREE.CircleGeometry(8.2, 24),
+    new THREE.MeshBasicMaterial({ color: 0x10162c }),
+  );
+  moonShadow.position.copy(moon.position).add(new THREE.Vector3(-3.2, 1.6, 0));
+  moonShadow.quaternion.copy(moon.quaternion);
+  group.add(moonShadow);
+
+  const sun = new THREE.DirectionalLight(0x9db8e8, 0.55); // cool moonlight
   sun.position.set(-30, 52, -18);
   sun.castShadow = true;
   sun.shadow.mapSize.set(1024, 1024);
@@ -125,7 +147,7 @@ export function createCampZone() {
   }
   groundGeo.computeVertexNormals();
   const groundMat = Mat.rockDark().clone();
-  groundMat.color.set(0x6e5238);
+  groundMat.color.set(0x4a3526); // trodden dark earth
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.receiveShadow = true;
   group.add(ground);
@@ -179,6 +201,71 @@ export function createCampZone() {
     group.add(sparks.points);
     dtUpdaters.push((dt) => sparks.update(dt));
   });
+
+  // ------------------------------ scattered plunder & disarray (PBR spec)
+  // rugs, overturned wine amphorae (zero-roughness spills), pillaged metal
+  const disarray = [
+    { kind: 'rug', x: -6, z: 22 }, { kind: 'rug', x: 14, z: 12 },
+    { kind: 'rug', x: -18, z: -8 }, { kind: 'rug', x: 6, z: -24 },
+    { kind: 'amphora', x: -3, z: 26 }, { kind: 'amphora', x: 11, z: 16 },
+    { kind: 'amphora', x: -13, z: -2 }, { kind: 'amphora', x: 20, z: -12 },
+    { kind: 'amphora', x: -24, z: -18 }, { kind: 'amphora', x: 4, z: -32 },
+    { kind: 'treasure', x: -9, z: 14 }, { kind: 'treasure', x: 17, z: 22 },
+    { kind: 'treasure', x: -21, z: -14 }, { kind: 'treasure', x: 8, z: -10 },
+    { kind: 'treasure', x: -4, z: -36 },
+  ];
+  for (const d of disarray) {
+    const y = campHeight(d.x, d.z);
+    let prop = null;
+    if (d.kind === 'rug') prop = createRug(d.x + d.z);
+    else if (d.kind === 'amphora') prop = createSpilledAmphora(d.x * d.z + 3);
+    else prop = createTreasurePile(d.x - d.z + 8);
+    prop.position.set(d.x, y, d.z);
+    prop.rotation.y = seededRandom(d.x * 3.1 + d.z) * Math.PI * 2;
+    group.add(prop);
+  }
+
+  // intoxicated Amalekites slumped over the rugs
+  const drunkPalette = {
+    skin: Mat.skinDark(),
+    cloth: Mat.tunicAmalekite(),
+    cloth2: Mat.tunicAmalekiteAlt(),
+    hair: Mat.hair(),
+  };
+  [[-6, 22], [14, 12], [-18, -8], [6, -24]].forEach(([x, z], i) => {
+    const drunk = createHumanoid(drunkPalette, 'reclining');
+    drunk.position.set(x, campHeight(x, z), z);
+    drunk.rotation.y = seededRandom(i * 9.2) * Math.PI * 2;
+    group.add(drunk);
+  });
+
+  // ------------------------------------ the 400 escape on camels (v. 17)
+  for (let i = 0; i < 3; i++) {
+    const x = -22 + i * 20;
+    const z = -50 - (i % 2) * 5;
+    const camel = createCamel(i + 1);
+    camel.position.set(x, campHeight(x, z), z);
+    camel.rotation.y = Math.PI + (seededRandom(i * 4.7) - 0.5) * 0.6;
+    group.add(camel);
+  }
+  const camelDust = new ParticleEmitter({
+    count: 70,
+    origin: new THREE.Vector3(0, 1.4, -52),
+    spread: 22,
+    rise: 1.1,
+    riseJitter: 0.7,
+    drift: 1.4,
+    life: 4.5,
+    lifeJitter: 0.45,
+    size: 12,
+    sizeGrow: 10,
+    alpha: 0.24,
+    rate: 0,
+    color: 0x8a7358,
+    colorEnd: 0x4a3c30,
+  });
+  group.add(camelDust.points);
+  dtUpdaters.push((dt) => camelDust.update(dt));
 
   // --------------------------------------------------------- guards
   const guardSpots = [
@@ -267,7 +354,7 @@ export function createCampZone() {
     spawn: CAMP.spawn,
     bounds: CAMP.bounds,
     colliders,
-    fog: { color: 0x6b4a3a, density: 0.0095 },
+    fog: { color: 0x1c2238, density: 0.012 },
     sun,
     groundHeight: campHeight,
     guards,

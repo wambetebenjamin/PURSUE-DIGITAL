@@ -2,11 +2,14 @@
  * Game.js — the orchestrator: finite state machine, phase logic, and the
  * per-frame update that ties player, camera, world, and UI together.
  *
- * FSM phases (1 Samuel 30):
- *   STATE_0_ZIKLAG           — ashes, debris trail, Desert Edge waypoint
- *   STATE_1_DESERT_MARCH     — dunes, stamina, the Brook Besor
- *   STATE_2_EGYPTIAN_SERVANT — dialogue tree, then the directional arrow
- *   STATE_3_AMALEKITE_RESCUE — vision cones, the cage, victory
+ * FSM phases (1 Samuel 30–31 master-prompt pipeline):
+ *   STATE_0_ZIKLAG             — ashes, debris trail, Desert Edge waypoint
+ *   STATE_1_DESERT_MARCH       — dunes, stamina, the Brook Besor
+ *   STATE_2_EGYPTIAN_SERVANT   — dialogue tree, then the directional arrow
+ *   STATE_3_AMALEKITE_RESCUE   — night ambush: vision cones, the cage, the rout
+ *   STATE_4_SPOILS_DIVISION    — the 200 and the 400 at Besor, the statute
+ *   STATE_5_DISTRIBUTION       — tribute to the elders of Judah at the gate
+ *   STATE_6_GILBOA_EPILOGUE    — the fall of Saul; the story closes
  */
 import * as THREE from 'three';
 import { StateMachine } from './StateMachine.js';
@@ -29,6 +32,9 @@ import { ZIKLAG } from '../world/zones/ZiklagZone.js';
 import { DESERT } from '../world/zones/DesertZone.js';
 import { EGYPT } from '../world/zones/EgyptianZone.js';
 import { CAMP } from '../world/zones/CampZone.js';
+import { SPOILS } from '../world/zones/SpoilsZone.js';
+import { GATE } from '../world/zones/GateZone.js';
+import { GILBOA } from '../world/zones/GilboaZone.js';
 
 export class Game {
   constructor({ scene, camera, input }) {
@@ -52,6 +58,9 @@ export class Game {
     this.brookTriggered = false;
     this.ziklagTriggered = false;
     this.servantServed = false;
+    this.battleShown = false;
+    this.spoilsDone = false;
+    this.gateDone = false;
     this._detectionCooldown = 0;
     this._nudgeCooldown = 0;
     this._prompt = null;
@@ -167,11 +176,92 @@ export class Game {
           this.cameraRig.reset(p, CAMP.spawn.yaw + Math.PI);
         }
 
-        // --- rescue ---
+        // --- rescue → the 24-hour war of attrition, then onward ---
         if (distanceXZ(p, CAMP.captives) < CAMP.rescueRadius) {
-          this.win();
+          this._startBattleSequence();
         }
       },
+    });
+
+    this.fsm.add(STATES.SPOILS, {
+      enter: () => {
+        this._enterZone(STATES.SPOILS);
+        this.hud.setObjective(OBJECTIVES[STATES.SPOILS]);
+        this.arrow.setTarget(SPOILS.outcrop.x, SPOILS.outcrop.z);
+        this.arrow.show();
+      },
+      update: () => {
+        const dist = distanceXZ(this.player.position, SPOILS.outcrop);
+        if (dist < SPOILS.interactRadius && !this.spoilsDone) {
+          this._setPrompt(NARRATIVE.promptOutcrop);
+          if (this.player.interactRequested) {
+            this._setPrompt(null);
+            this.spoilsDone = true;
+            this.modal.showSequence(NARRATIVE.spoilsDialogue, () => {
+              this.hud.showAlert('The statute of equal share is established.', 2.6);
+              this.fsm.set(STATES.GATE);
+            });
+          }
+        } else {
+          this._setPrompt(null);
+        }
+      },
+    });
+
+    this.fsm.add(STATES.GATE, {
+      enter: () => {
+        this._enterZone(STATES.GATE);
+        this.hud.setObjective(OBJECTIVES[STATES.GATE]);
+        this.arrow.setTarget(GATE.elders.x, GATE.elders.z);
+        this.arrow.show();
+      },
+      update: () => {
+        const dist = distanceXZ(this.player.position, GATE.elders);
+        if (dist < GATE.interactRadius && !this.gateDone) {
+          this._setPrompt(NARRATIVE.promptElders);
+          if (this.player.interactRequested) {
+            this._setPrompt(null);
+            this.gateDone = true;
+            this.modal.showSequence(NARRATIVE.gateDialogue, () => {
+              this.hud.showAlert('Portions sent to the elders of Judah.', 2.6);
+              this.fsm.set(STATES.GILBOA);
+            });
+          }
+        } else {
+          this._setPrompt(null);
+        }
+      },
+    });
+
+    this.fsm.add(STATES.GILBOA, {
+      enter: () => {
+        this._enterZone(STATES.GILBOA);
+        this.hud.setObjective(OBJECTIVES[STATES.GILBOA]);
+        this.arrow.setTarget(GILBOA.saul.x, GILBOA.saul.z);
+        this.arrow.show();
+      },
+      update: () => {
+        const dist = distanceXZ(this.player.position, GILBOA.saul);
+        if (dist < GILBOA.interactRadius) {
+          this._setPrompt(NARRATIVE.promptSaul);
+          if (this.player.interactRequested) {
+            this._setPrompt(null);
+            this.modal.showSequence(NARRATIVE.gilboaDialogue, () => this.win());
+          }
+        } else {
+          this._setPrompt(null);
+        }
+      },
+    });
+  }
+
+  /** PHASE 4: the battle rages twilight-to-twilight, then the return to Besor. */
+  _startBattleSequence() {
+    if (this.battleShown) return;
+    this.battleShown = true;
+    this._setPrompt(null);
+    this.modal.showSequence(NARRATIVE.battleSequence, () => {
+      this.fsm.set(STATES.SPOILS);
     });
   }
 
@@ -234,6 +324,9 @@ export class Game {
     this.brookTriggered = false;
     this.ziklagTriggered = false;
     this.servantServed = false;
+    this.battleShown = false;
+    this.spoilsDone = false;
+    this.gateDone = false;
     this._detectionCooldown = 0;
 
     this.victory.hide();

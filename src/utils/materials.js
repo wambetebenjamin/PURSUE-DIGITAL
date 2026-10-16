@@ -77,6 +77,57 @@ export const Mat = {
   tunicAmalekiteAlt: () => cached('tunicAmalekiteAlt', () => new THREE.MeshLambertMaterial({ color: 0x5e4632, flatShading: true })),
   tunicCaptive: () => cached('tunicCaptive', () => new THREE.MeshLambertMaterial({ color: 0x5b6b7a, flatShading: true })),
 
+  // --- PHASE 4-7 PBR accents (prompt-specified Metallic/Roughness values) ---
+  // "Blood-spattered steel (Metallic 1.0, Roughness 0.15)"
+  steelBloody: () => cached('steelBloody', () => new THREE.MeshStandardMaterial({
+    color: 0x6d7076, metalness: 1.0, roughness: 0.15, flatShading: true,
+  })),
+  // "tarnished, dented bronze scales (Metallic 0.8, Roughness 0.4)"
+  royalBronze: () => cached('royalBronze', () => new THREE.MeshStandardMaterial({
+    color: 0x8a5c28, metalness: 0.8, roughness: 0.4, flatShading: true,
+  })),
+  // "spilled liquids with zero roughness"
+  spill: () => cached('spill', () => new THREE.MeshStandardMaterial({
+    color: 0x2a1408, metalness: 0.15, roughness: 0.0,
+    transparent: true, opacity: 0.85,
+  })),
+  // "micro-reflections on piles of pillaged, polished silver and brass"
+  silverLoot: () => cached('silverLoot', () => new THREE.MeshStandardMaterial({
+    color: 0xc9ccd4, metalness: 1.0, roughness: 0.12, flatShading: true,
+  })),
+  goldLoot: () => cached('goldLoot', () => new THREE.MeshStandardMaterial({
+    color: 0xd8a63a, metalness: 1.0, roughness: 0.22, flatShading: true,
+  })),
+  bronzeBand: () => cached('bronzeBand', () => new THREE.MeshStandardMaterial({
+    color: 0x7a5c2e, metalness: 0.9, roughness: 0.45, flatShading: true,
+  })),
+  ironDark: () => cached('ironDark', () => new THREE.MeshStandardMaterial({
+    color: 0x2c2c30, metalness: 0.85, roughness: 0.55, flatShading: true,
+  })),
+
+  // --- PHASE 5-7 architecture & landscape (limestone / basalt / flagstone) ---
+  limestone: () => cached('limestone', () => new THREE.MeshLambertMaterial({ color: 0xcdbb99, flatShading: true })),
+  limestonePale: () => cached('limestonePale', () => new THREE.MeshLambertMaterial({ color: 0xd9c9a6, flatShading: true })),
+  flagstone: () => cached('flagstone', () => new THREE.MeshLambertMaterial({ color: 0x9e937f, flatShading: true })),
+  basalt: () => cached('basalt', () => new THREE.MeshLambertMaterial({ color: 0x3a3d42, flatShading: true })),
+  riverMud: () => cached('riverMud', () => new THREE.MeshLambertMaterial({ color: 0x6b543c, flatShading: true })),
+
+  // --- livestock / wagons / tribute (PHASE 5-6) ---
+  fleece: () => cached('fleece', () => new THREE.MeshLambertMaterial({ color: 0xe6dccb, flatShading: true })),
+  goatHide: () => cached('goatHide', () => new THREE.MeshLambertMaterial({ color: 0x8d7358, flatShading: true })),
+  cattleHide: () => cached('cattleHide', () => new THREE.MeshLambertMaterial({ color: 0x6e4b32, flatShading: true })),
+  muleHide: () => cached('muleHide', () => new THREE.MeshLambertMaterial({ color: 0x7a6248, flatShading: true })),
+  camelHide: () => cached('camelHide', () => new THREE.MeshLambertMaterial({ color: 0xa8875e, flatShading: true })),
+  canvasTarp: () => cached('canvasTarp', () => new THREE.MeshLambertMaterial({ color: 0xb09a72, flatShading: true })),
+  cedarWood: () => cached('cedarWood', () => new THREE.MeshLambertMaterial({ color: 0x6b3f24, flatShading: true })),
+
+  // --- PHASE 5-6 fine attire (saturated distribution palette) ---
+  elderPurple: () => cached('elderPurple', () => new THREE.MeshLambertMaterial({ color: 0x5a2a5e, flatShading: true })),
+  elderMadder: () => cached('elderMadder', () => new THREE.MeshLambertMaterial({ color: 0x8c2f24, flatShading: true })),
+  tunicIndigo: () => cached('tunicIndigo', () => new THREE.MeshLambertMaterial({ color: 0x4b5568, flatShading: true })),
+  tunicEarth: () => cached('tunicEarth', () => new THREE.MeshLambertMaterial({ color: 0x6b543c, flatShading: true })),
+  tunicBattleWorn: () => cached('tunicBattleWorn', () => new THREE.MeshLambertMaterial({ color: 0x5c4a3e, flatShading: true })),
+
   // --- Misc shared ---
   alertCone: () => cached('alertCone', () => new THREE.MeshBasicMaterial({
     color: 0xffd25e,

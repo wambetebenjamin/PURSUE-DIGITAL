@@ -3,7 +3,9 @@
  *
  * Boots the game modules in Node with a minimal DOM stub, then walks the
  * full state machine: Ziklag → desert → brook → servant dialogue → camp
- * detection → rescue → victory → restart. Any thrown error fails the run.
+ * detection → rescue → the battle sequence → the spoil divided at Besor →
+ * gifts to Judah → the fall of Saul → victory → restart. Any thrown error
+ * fails the run.
  *
  * Usage: `npm run smoke`
  */
@@ -77,6 +79,9 @@ const { ZIKLAG } = await import('../src/world/zones/ZiklagZone.js');
 const { DESERT } = await import('../src/world/zones/DesertZone.js');
 const { EGYPT } = await import('../src/world/zones/EgyptianZone.js');
 const { CAMP } = await import('../src/world/zones/CampZone.js');
+const { SPOILS } = await import('../src/world/zones/SpoilsZone.js');
+const { GATE } = await import('../src/world/zones/GateZone.js');
+const { GILBOA } = await import('../src/world/zones/GilboaZone.js');
 
 const input = new Input();
 const scene = new THREE.Scene();
@@ -190,7 +195,69 @@ ok(
 game._detectionCooldown = 3;
 game.player.group.position.set(CAMP.captives.x + 1, 0, CAMP.captives.z + 1);
 frames(2);
-ok(game.finished, 'colliding with the captives triggers victory');
+ok(game.modal.isOpen, 'reaching the captives opens the 24-hour battle sequence');
+ok(game.battleShown, 'battle sequence is latched');
+ok(!game.finished, 'the game is not over yet — the story continues');
+ok(game.modal._steps.length === NARRATIVE.battleSequence.length, 'battle sequence has 2 scripted cards');
+
+for (let i = 0; i < NARRATIVE.battleSequence.length; i++) {
+  press('KeyE');
+  frames(1);
+  release('KeyE');
+  frames(1);
+}
+ok(game.fsm.currentName === STATES.SPOILS, 'battle cards advance to STATE_4_SPOILS_DIVISION');
+
+// ------------------------------------------- STATE 4: the spoil divided
+game.player.group.position.set(SPOILS.outcrop.x + 1.5, 0, SPOILS.outcrop.z);
+frames(2);
+ok(game._prompt === NARRATIVE.promptOutcrop, 'the outcrop offers the dividing-line prompt');
+press('KeyE');
+frames(1);
+release('KeyE');
+ok(game.modal.isOpen, 'interaction opens the spoil-dispute dialogue');
+ok(game.modal._steps.length === NARRATIVE.spoilsDialogue.length, 'dispute dialogue has 3 scripted steps');
+for (let i = 0; i < NARRATIVE.spoilsDialogue.length; i++) {
+  press('KeyE');
+  frames(1);
+  release('KeyE');
+  frames(1);
+}
+ok(game.fsm.currentName === STATES.GATE, 'the statute advances to STATE_5_DISTRIBUTION');
+
+// ------------------------------------------- STATE 5: gifts to Judah
+game.player.group.position.set(GATE.elders.x + 1.5, 0, GATE.elders.z);
+frames(2);
+ok(game._prompt === NARRATIVE.promptElders, 'the elders offer the tribute prompt');
+press('KeyE');
+frames(1);
+release('KeyE');
+ok(game.modal.isOpen, 'interaction opens the distribution dialogue');
+ok(game.modal._steps.length === NARRATIVE.gateDialogue.length, 'distribution dialogue has 3 scripted steps');
+for (let i = 0; i < NARRATIVE.gateDialogue.length; i++) {
+  press('KeyE');
+  frames(1);
+  release('KeyE');
+  frames(1);
+}
+ok(game.fsm.currentName === STATES.GILBOA, 'the gifts advance to STATE_6_GILBOA_EPILOGUE');
+
+// ------------------------------------------- STATE 6: the fall of Saul
+game.player.group.position.set(GILBOA.saul.x + 1.5, 0, GILBOA.saul.z);
+frames(2);
+ok(game._prompt === NARRATIVE.promptSaul, 'Saul offers the final approach prompt');
+press('KeyE');
+frames(1);
+release('KeyE');
+ok(game.modal.isOpen, 'interaction opens the Gilboa epilogue');
+ok(game.modal._steps.length === NARRATIVE.gilboaDialogue.length, 'epilogue has 3 scripted steps');
+for (let i = 0; i < NARRATIVE.gilboaDialogue.length; i++) {
+  press('KeyE');
+  frames(1);
+  release('KeyE');
+  frames(1);
+}
+ok(game.finished, 'the epilogue completes the run');
 ok(game.victory.visible, 'victory overlay is visible');
 ok(document.getElementById('hud').classList.contains('hidden'), 'HUD is cleared on victory');
 
@@ -198,7 +265,11 @@ ok(document.getElementById('hud').classList.contains('hidden'), 'HUD is cleared 
 game.resetAll();
 frames(5);
 ok(game.fsm.currentName === STATES.ZIKLAG, 'Play Again resets to STATE_0_ZIKLAG');
-ok(!game.finished && !game.servantServed && !game.brookTriggered, 'all run flags are cleared');
+ok(
+  !game.finished && !game.servantServed && !game.brookTriggered
+  && !game.battleShown && !game.spoilsDone && !game.gateDone,
+  'all run flags are cleared',
+);
 ok(!game.victory.visible, 'victory overlay is hidden');
 ok(!game.arrow.group.visible, 'directional arrow is hidden again');
 
