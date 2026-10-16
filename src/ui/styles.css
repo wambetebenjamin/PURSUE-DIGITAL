@@ -1306,7 +1306,7 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-#game-canvas {
+#app canvas {
   touch-action: none;
 }
 
