@@ -100,7 +100,7 @@ export function createCampZone() {
 
   // ------------------------------------------------------------- sky
   // PHASE 3 spec: cool dark-blue starlight, low crescent moon, 3200K night
-  const sky = new SkyDome(0x1a1250, 0x8a2f6a, 0.75);
+  const sky = new SkyDome(0x140b46, 0xc22e88, 0.75, 0x5c2a9e); // Starfish Island night
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -137,7 +137,7 @@ export function createCampZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(-28, 50, -16);
   group.add(sun, sun.target);
-  sky.setSun(new THREE.Vector3(70, 95, -140), 0xb8c8ff, 0.32); // the crescent
+  sky.setSun(new THREE.Vector3(70, 95, -140), 0xc8d8ff, 0.5); // the crescent
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(150, 160, 52, 56);
@@ -150,8 +150,8 @@ export function createCampZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0x9a7c5c), colorB: new THREE.Color(0x5a4230),
-    colorC: new THREE.Color(0x2c1e18), scale: 0.05, strength: 0.55, seed: 43,
+    colorA: new THREE.Color(0x6a5c8a), colorB: new THREE.Color(0x4a3c6a),
+    colorC: new THREE.Color(0x2c2048), scale: 0.05, strength: 0.55, seed: 43,
   });
   const groundMat = Mat.rockDark().clone();
   groundMat.color.set(0x8a7058); // trodden dark earth × vertex colors
@@ -373,7 +373,7 @@ export function createCampZone() {
     spawn: CAMP.spawn,
     bounds: CAMP.bounds,
     colliders,
-    fog: { color: 0x1c2238, density: 0.012 },
+    fog: { color: 0x2a1454, density: 0.013 },
     sun,
     sky,
     groundHeight: campHeight,

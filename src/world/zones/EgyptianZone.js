@@ -38,7 +38,7 @@ export function createEgyptianZone() {
   const updaters = [];
 
   // ------------------------------------------------------------- sky
-  const sky = new SkyDome(0x3a7fd0, 0xffc27a, 0.8);
+  const sky = new SkyDome(0x2f7ae8, 0xffb86a, 0.8, 0x64a0f0); // Little Havana gold hour
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -58,7 +58,7 @@ export function createEgyptianZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(-32, 60, 28);
   group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xffd089, 0.5);
+  sky.setSun(sun.userData.offset, 0xffe0a0, 0.75);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(120, 110, 46, 42);
@@ -71,8 +71,8 @@ export function createEgyptianZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xf2e2b8), colorB: new THREE.Color(0xc9c078),
-    colorC: new THREE.Color(0x8a8a50), scale: 0.05, strength: 0.55, seed: 19,
+    colorA: new THREE.Color(0xffe9b0), colorB: new THREE.Color(0xd8c070),
+    colorC: new THREE.Color(0x88b060), scale: 0.05, strength: 0.55, seed: 19,
   });
   const groundMat = Mat.sandLight().clone();
   groundMat.vertexColors = true;
@@ -108,6 +108,21 @@ export function createEgyptianZone() {
     group.add(palm);
     colliders.push({ x, z, r: 0.5 });
   });
+
+  // palm avenue down the field toward the canyon mouth
+  const avenueCount = Math.max(6, Math.round(12 * QUALITY.density));
+  for (let i = 0; i < avenueCount; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const x = side * (30 + (i % 3) * 3);
+    const z = 34 - Math.floor(i / 2) * 16;
+    if (z < -34) break;
+    const palm = createPalm(220 + i);
+    palm.position.set(x, egyptHeight(x, z), z);
+    palm.scale.setScalar(1.2 + (i % 3) * 0.22);
+    palm.rotation.y = i * 1.1;
+    group.add(palm);
+    colliders.push({ x, z, r: 0.5 });
+  }
 
   // canyon mouth walls near the exit
   [[-10, -42], [11, -42], [-16, -36], [17, -36]].forEach(([x, z], i) => {
@@ -240,7 +255,7 @@ export function createEgyptianZone() {
     spawn: EGYPT.spawn,
     bounds: EGYPT.bounds,
     colliders,
-    fog: { color: 0xd9c49a, density: 0.0048 },
+    fog: { color: 0xffc98e, density: 0.0065 },
     sun,
     sky,
     groundHeight: egyptHeight,

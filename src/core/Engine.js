@@ -27,7 +27,9 @@ export class Engine {
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, QUALITY.pixelRatio));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // Khronos PBR Neutral: keeps saturated Miami pinks/cyans alive
+    // (ACES greys out exactly the colors the Vice City grade lives on)
+    this.renderer.toneMapping = THREE.NeutralToneMapping;
     this.renderer.toneMappingExposure = 1.12;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;

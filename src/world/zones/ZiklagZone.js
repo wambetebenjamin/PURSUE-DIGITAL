@@ -35,7 +35,7 @@ export function createZiklagZone() {
 
   // ------------------------------------------------------------- sky
   // PHASE 1 spec: late-afternoon golden hour, 5600K, low-angle sun
-  const sky = new SkyDome(0x2a1a52, 0xff6a3c, 0.55);
+  const sky = new SkyDome(0x3b1a8e, 0xff5e4d, 0.55, 0xd94a8c); // Ocean Drive sunset
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -56,7 +56,7 @@ export function createZiklagZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(-36, 18, 24);
   group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xff9a50, 0.6);
+  sky.setSun(sun.userData.offset, 0xffb060, 0.85);
 
   // flickering fires at two ruined houses
   const fireA = new THREE.PointLight(0xff6a2a, 30, 24, 2);
@@ -76,8 +76,8 @@ export function createZiklagZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xb8a898), colorB: new THREE.Color(0x6a5648),
-    colorC: new THREE.Color(0x3a2c22), scale: 0.045, strength: 0.5, seed: 3,
+    colorA: new THREE.Color(0xc9987a), colorB: new THREE.Color(0x8a5c52),
+    colorC: new THREE.Color(0x4a2c3c), scale: 0.045, strength: 0.5, seed: 3,
   });
   const groundMat = Mat.ashGround().clone();
   groundMat.vertexColors = true;
@@ -307,7 +307,7 @@ export function createZiklagZone() {
     spawn: ZIKLAG.spawn,
     bounds: ZIKLAG.bounds,
     colliders,
-    fog: { color: 0x3a2a22, density: 0.011 },
+    fog: { color: 0xff6a52, density: 0.012 },
     sun,
     sky,
     groundHeight: ziklagHeight,

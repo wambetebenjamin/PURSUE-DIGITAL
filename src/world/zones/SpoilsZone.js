@@ -50,7 +50,7 @@ export function createSpoilsZone() {
 
   // ------------------------------------------------------------- sky
   // 5200K clear late afternoon — bright, direct, revealing
-  const sky = new SkyDome(0x2f7fd8, 0xffb45e, 0.82);
+  const sky = new SkyDome(0x4a2aa0, 0xff8a5c, 0.82, 0xb85aa8); // ocean sunset
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -70,7 +70,7 @@ export function createSpoilsZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(28, 50, -36);
   group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xffc878, 0.55);
+  sky.setSun(sun.userData.offset, 0xffd08a, 0.8);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(130, 120, 48, 44);
@@ -81,8 +81,8 @@ export function createSpoilsZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xf2e2b0), colorB: new THREE.Color(0xb8b878),
-    colorC: new THREE.Color(0x7a8a4c), scale: 0.055, strength: 0.6, seed: 23,
+    colorA: new THREE.Color(0xffc9a0), colorB: new THREE.Color(0xe09a70),
+    colorC: new THREE.Color(0xa86858), scale: 0.055, strength: 0.6, seed: 23,
   });
   const groundMat = Mat.sandLight().clone();
   groundMat.vertexColors = true;
@@ -278,6 +278,21 @@ export function createSpoilsZone() {
     colliders.push({ x, z, r: 0.5 });
   });
 
+  // twin palm rows down the valley of the dividing line
+  const avenueCount = Math.max(6, Math.round(12 * QUALITY.density));
+  for (let i = 0; i < avenueCount; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const x = side * (38 + (i % 3) * 3.2);
+    const z = 42 - Math.floor(i / 2) * 17;
+    if (z < -36) break;
+    const palm = createPalm(260 + i);
+    palm.position.set(x, spoilsHeight(x, z), z);
+    palm.scale.setScalar(1.22 + (i % 3) * 0.2);
+    palm.rotation.y = i * 1.3;
+    group.add(palm);
+    colliders.push({ x, z, r: 0.5 });
+  }
+
   // ------------------------------------------- golden dust veil (FX)
   // "strong backlighting catches the dust clouds kicked up by the livestock,
   //  creating a hazy golden veil between the two disputing groups"
@@ -322,7 +337,7 @@ export function createSpoilsZone() {
     spawn: SPOILS.spawn,
     bounds: SPOILS.bounds,
     colliders,
-    fog: { color: 0xdbc492, density: 0.0045 },
+    fog: { color: 0xe8906a, density: 0.006 },
     sun,
     sky,
     groundHeight: spoilsHeight,

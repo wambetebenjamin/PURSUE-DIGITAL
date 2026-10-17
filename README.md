@@ -68,7 +68,17 @@ No server, database, or environment variables are required. Everything is client
 | **Esc** | Pause / release the mouse pointer |
 | **M** | Map of Judah (full chart of the march) |
 
-### The Vice City interface
+### The Vice City look
+
+The graphics are graded to 1986 Miami rather than desert realism:
+
+- **Neutral tone mapping** (Khronos PBR Neutral) so saturated pinks and cyans survive to the grade
+- **Three-stop skies** — saturated zenith, electric mid band, hot pastel horizon haze, fat sun disc with wide halo
+- Each phase carries its Miami moment: Ocean Drive sunset, Malibu noon, Little Havana gold hour, Starfish Island night, South Beach afternoon, the Vice storm
+- **Miami grade** — violet shadows, cream-pink highlights, vibrance + saturation punch, S-curve, chromatic edges, bloom
+- **Palm avenues** flank the travel corridors; the brook runs Vice City turquoise
+
+## The Vice City interface
 
 The game plays with the interface of a classic open-world epic, rebuilt in our
 own procedural style after studying the reversed GTA III / Vice City engine

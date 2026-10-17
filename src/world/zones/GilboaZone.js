@@ -50,7 +50,7 @@ export function createGilboaZone() {
 
   // ------------------------------------------------------------- sky
   // heavy, oppressive overcast at 7000K — flat and cold
-  const sky = new SkyDome(0x2a3444, 0x6a7488, 0.9);
+  const sky = new SkyDome(0x221a5c, 0x8a4ab8, 0.9, 0x4a2a9e); // the Vice storm
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -70,7 +70,7 @@ export function createGilboaZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(8, 68, 18);
   group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0x9aa8b8, 0.12);
+  sky.setSun(sun.userData.offset, 0xb0c0ff, 0.25);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(120, 130, 48, 52);
@@ -81,8 +81,8 @@ export function createGilboaZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xb8bcc4), colorB: new THREE.Color(0x6a7078),
-    colorC: new THREE.Color(0x3a2c28), scale: 0.05, strength: 0.5, seed: 37,
+    colorA: new THREE.Color(0x8a86a8), colorB: new THREE.Color(0x5a5478),
+    colorC: new THREE.Color(0x38304e), scale: 0.05, strength: 0.5, seed: 37,
   });
   const groundMat = Mat.basalt().clone();
   groundMat.vertexColors = true;
@@ -278,7 +278,7 @@ export function createGilboaZone() {
     spawn: GILBOA.spawn,
     bounds: GILBOA.bounds,
     colliders,
-    fog: { color: 0x6b7480, density: 0.016 },
+    fog: { color: 0x4a3a78, density: 0.016 },
     sun,
     sky,
     groundHeight: gilboaHeight,

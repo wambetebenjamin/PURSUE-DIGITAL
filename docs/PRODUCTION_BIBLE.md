@@ -157,14 +157,30 @@ ash, stone, basalt, woven cloth, wood grain, and flesh pore maps painted on
 
 ## 7aa. The Vice City grade (core/PostFX.js)
 
-The master prompt's LUT / color-grading note is realized as a live post chain:
-`RenderPass → UnrealBloomPass → GradePass → OutputPass`. The custom grade does
-edge chromatic aberration, split-toning (tinted shadows / hot highlights),
-saturation punch, an S-curve, vignette and animated film grain. Per-phase
-presets (`sunset`, `blaze`, `gold`, `neonNight`, `clear`, `storm`) crossfade
-over ~0.5 s when the FSM changes zones. `SkyDome` adds a hard sun disc with a
-wide halo and streaky sunset bands to sell the Miami horizon; the brook water
-is glossy tropical teal with animated vertex swell.
+The look is built in three layers tuned to 1986 Miami, not desert realism:
+
+1. **Tone mapping** — Khronos PBR Neutral (`THREE.NeutralToneMapping`),
+   chosen over ACES: ACES greys out saturated pinks/cyans, exactly the
+   colors the Vice City grade lives on. Neutral keeps them alive.
+2. **Sky** — `SkyDome` draws a three-stop gradient (zenith → electric mid
+   band → hot pastel horizon) with a fat sun disc, wide halo, sunset band
+   streaks, drifting cloud layers, and a bright horizon-haze bleed. Each
+   zone carries its Miami moment:
+   Ziklag = Ocean Drive sunset (violet/magenta/coral), Desert = Malibu noon
+   (cyan/turquoise), Egyptian = Little Havana gold hour, Camp = Starfish
+   Island night (indigo/violet/magenta), Spoils = ocean sunset, Gate =
+   South Beach afternoon, Gilboa = the Vice storm (bruised purple).
+3. **Grade pass** — Miami split-toning (violet shadows `×1.65`, cream-pink
+   highlights), vibrance that pushes muted colors harder, saturation up to
+   1.78, a 0.30 S-curve, edge chromatic aberration, vignette and fine grain.
+   `PHASE_GRADES` maps each FSM state to a preset (`sunset | blaze | gold |
+   neonNight | clear | storm`) and grades crossfade at boundaries.
+
+Terrain vertex colors follow the skies: pink-gold sands, sunset mauves,
+moonlit violet ground at camp, storm grey-purple at Gilboa. Palm avenues
+(density-scaled) flank the travel corridors in the open zones — the Ocean
+Drive silhouette against the gradient. Fog hues match the horizon haze.
+
 
 ## 7b. Sound design (audio/AudioEngine.js)
 

@@ -49,7 +49,7 @@ export function createDesertZone() {
 
   // ------------------------------------------------------------- sky
   // PHASE 2 spec: brutal, overexposed midday desert sun at 6500K
-  const sky = new SkyDome(0x2f8fe8, 0xffd9a0, 0.85);
+  const sky = new SkyDome(0x1e9dff, 0xb8f2ff, 0.85, 0x5fd0ff); // Malibu noon
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -69,7 +69,7 @@ export function createDesertZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(42, 68, 24);
   group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xfff0c0, 0.55);
+  sky.setSun(sun.userData.offset, 0xfff6d8, 0.7);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(150, 300, 64, 110);
@@ -82,8 +82,8 @@ export function createDesertZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xfff0d0), colorB: new THREE.Color(0xd9be86),
-    colorC: new THREE.Color(0x9a8258), scale: 0.03, strength: 0.4, seed: 11,
+    colorA: new THREE.Color(0xffe6c2), colorB: new THREE.Color(0xf0b98e),
+    colorC: new THREE.Color(0xc98a6e), scale: 0.03, strength: 0.4, seed: 11,
   });
   const groundMat = Mat.sand().clone();
   groundMat.vertexColors = true;
@@ -94,7 +94,7 @@ export function createDesertZone() {
   // ---------------------------------------------------- Besor Brook
   // "thick brown sediment water" with blinding white speculars at 6500K
   const waterMat = Mat.water().clone();
-  waterMat.color.set(0x1fa8b8); // glossy tropical teal
+  waterMat.color.set(0x2ec8d8); // Vice City turquoise
   waterMat.specular.set(0xffffff);
   waterMat.shininess = 180;
   waterMat.opacity = 0.9;
@@ -223,6 +223,21 @@ export function createDesertZone() {
     colliders.push({ x, z, r: 0.5 });
   });
 
+  // palm avenue flanking the march — the Miami skyline of the Negev
+  const avenueCount = Math.max(8, Math.round(18 * QUALITY.density));
+  for (let i = 0; i < avenueCount; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const x = side * (22 + (i % 3) * 2.5);
+    const z = 62 - Math.floor(i / 2) * 19;
+    if (z < -100) break;
+    const palm = createPalm(200 + i);
+    palm.position.set(x, desertHeight(x, z), z);
+    palm.scale.setScalar(1.25 + (i % 3) * 0.2);
+    palm.rotation.y = i * 0.9;
+    group.add(palm);
+    colliders.push({ x, z, r: 0.5 });
+  }
+
   for (let i = 0; i < 16; i++) {
     const x = (seededRandom(i * 7.3) - 0.5) * 84;
     const z = (seededRandom(i * 9.9) - 0.5) * 220;
@@ -303,7 +318,7 @@ export function createDesertZone() {
     spawn: DESERT.spawn,
     bounds: DESERT.bounds,
     colliders,
-    fog: { color: 0xe8dcb4, density: 0.005 },
+    fog: { color: 0xa8ecff, density: 0.007 },
     sun,
     sky,
     groundHeight: desertHeight,

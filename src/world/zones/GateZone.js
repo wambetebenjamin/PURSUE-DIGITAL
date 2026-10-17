@@ -46,7 +46,7 @@ export function createGateZone() {
 
   // ------------------------------------------------------------- sky
   // 4800K warm morning, clear
-  const sky = new SkyDome(0x2f86d8, 0xffc890, 0.8);
+  const sky = new SkyDome(0x1f8fe8, 0xffd9b0, 0.8, 0x64b8f8); // South Beach afternoon
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
@@ -66,7 +66,7 @@ export function createGateZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(-44, 32, 28);
   group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xffe0b0, 0.45);
+  sky.setSun(sun.userData.offset, 0xfff0c8, 0.6);
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(110, 90, 30, 26);
@@ -77,8 +77,8 @@ export function createGateZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xe8dccc), colorB: new THREE.Color(0xb8ac94),
-    colorC: new THREE.Color(0x8a7e68), scale: 0.08, strength: 0.35, seed: 29,
+    colorA: new THREE.Color(0xf2e0c8), colorB: new THREE.Color(0xd4b898),
+    colorC: new THREE.Color(0xa88868), scale: 0.08, strength: 0.35, seed: 29,
   });
   const groundMat = Mat.flagstone().clone();
   groundMat.vertexColors = true;
@@ -148,6 +148,21 @@ export function createGateZone() {
     group.add(palm);
     colliders.push({ x, z, r: 0.5 });
   });
+
+  // palm-lined approach to the gate — Ocean Drive, tribute road
+  const avenueCount = Math.max(8, Math.round(14 * QUALITY.density));
+  for (let i = 0; i < avenueCount; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const x = side * (20 + (i % 3) * 2.2);
+    const z = 46 - Math.floor(i / 2) * 12;
+    if (z < -6) break;
+    const palm = createPalm(240 + i);
+    palm.position.set(x, gateHeight(x, z), z);
+    palm.scale.setScalar(1.3 + (i % 3) * 0.18);
+    palm.rotation.y = i * 0.8;
+    group.add(palm);
+    colliders.push({ x, z, r: 0.5 });
+  }
 
   // workers of the city: a woman at the mill, a girl with a jar, jars stacked
   const cityPalette = {
@@ -296,7 +311,7 @@ export function createGateZone() {
     spawn: GATE.spawn,
     bounds: GATE.bounds,
     colliders,
-    fog: { color: 0xd9c19a, density: 0.004 },
+    fog: { color: 0xffd2a8, density: 0.006 },
     sun,
     sky,
     groundHeight: gateHeight,

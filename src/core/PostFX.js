@@ -2,9 +2,11 @@
  * PostFX.js — the "Vice City" look: bloom + retro-Miami color grade.
  *
  * Chain: RenderPass → UnrealBloomPass → GradePass (custom) → OutputPass.
- * The grade does split-toning (teal/purple shadows, hot highlights),
- * saturation punch, edge chromatic aberration, vignette, and film grain —
- * the ingredients of that early-2000s neon-sunset render.
+ * The grade does Miami split-toning (violet shadows, cream/pink highlights),
+ * vibrance + saturation punch, an S-curve, edge chromatic aberration,
+ * vignette and fine grain — the ingredients of that neon-sunset render.
+ * Tone mapping is Khronos PBR Neutral (in Engine) so saturated pinks and
+ * cyans survive to the grade instead of being greyed out by ACES.
  *
  * Grades transition smoothly (`setGrade` lerps toward the target every
  * frame), so crossing a phase boundary fades the mood instead of snapping.
@@ -17,40 +19,46 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
-/** Per-mood grade presets. */
+/** Per-mood grade presets — named for their Vice City moment. */
 export const GRADES = Object.freeze({
+  /** Ocean Drive sunset: the icon. Magenta sky, violet shadows, hot sun. */
   sunset: {
-    saturation: 1.42, shadowTint: [0.52, 0.36, 0.78], highlightTint: [1.14, 0.94, 0.76],
-    vignette: 0.34, grain: 0.035, chroma: 0.6, bloom: 0.72, exposure: 1.14,
+    saturation: 1.62, shadowTint: [0.58, 0.30, 0.92], highlightTint: [1.20, 0.90, 0.72],
+    vignette: 0.32, grain: 0.032, chroma: 0.66, bloom: 0.92, exposure: 1.16,
   },
+  /** Malibu noon: cyan sky, turquoise haze, white glare. */
   blaze: {
-    saturation: 1.34, shadowTint: [0.42, 0.58, 0.8], highlightTint: [1.1, 1.04, 0.86],
-    vignette: 0.22, grain: 0.025, chroma: 0.42, bloom: 0.52, exposure: 1.22,
+    saturation: 1.52, shadowTint: [0.34, 0.64, 0.92], highlightTint: [1.12, 1.08, 0.88],
+    vignette: 0.20, grain: 0.022, chroma: 0.46, bloom: 0.68, exposure: 1.24,
   },
+  /** Little Havana golden hour. */
   gold: {
-    saturation: 1.4, shadowTint: [0.5, 0.42, 0.72], highlightTint: [1.14, 0.98, 0.76],
-    vignette: 0.28, grain: 0.03, chroma: 0.5, bloom: 0.58, exposure: 1.14,
+    saturation: 1.56, shadowTint: [0.54, 0.38, 0.88], highlightTint: [1.18, 0.98, 0.72],
+    vignette: 0.26, grain: 0.028, chroma: 0.54, bloom: 0.76, exposure: 1.16,
   },
+  /** Starfish Island night: electric indigo shadows, pink neon highlights. */
   neonNight: {
-    saturation: 1.55, shadowTint: [0.36, 0.32, 0.85], highlightTint: [1.18, 0.82, 0.92],
-    vignette: 0.44, grain: 0.05, chroma: 0.75, bloom: 1.0, exposure: 1.06,
+    saturation: 1.78, shadowTint: [0.36, 0.26, 1.00], highlightTint: [1.26, 0.68, 0.98],
+    vignette: 0.42, grain: 0.048, chroma: 0.82, bloom: 1.22, exposure: 1.10,
   },
+  /** South Beach afternoon: bright, clean, pastel. */
   clear: {
-    saturation: 1.32, shadowTint: [0.48, 0.52, 0.72], highlightTint: [1.08, 1.02, 0.88],
-    vignette: 0.24, grain: 0.025, chroma: 0.42, bloom: 0.48, exposure: 1.14,
+    saturation: 1.50, shadowTint: [0.40, 0.56, 0.92], highlightTint: [1.12, 1.06, 0.86],
+    vignette: 0.22, grain: 0.022, chroma: 0.46, bloom: 0.64, exposure: 1.18,
   },
+  /** Vice storm: bruised purple, steel blue, lightning-cold highlights. */
   storm: {
-    saturation: 1.16, shadowTint: [0.4, 0.52, 0.66], highlightTint: [0.92, 1.0, 1.12],
-    vignette: 0.42, grain: 0.045, chroma: 0.55, bloom: 0.34, exposure: 1.02,
+    saturation: 1.38, shadowTint: [0.46, 0.36, 0.92], highlightTint: [0.96, 0.98, 1.16],
+    vignette: 0.42, grain: 0.045, chroma: 0.58, bloom: 0.48, exposure: 1.04,
   },
 });
 
 const GradeShader = {
   uniforms: {
     tDiffuse: { value: null },
-    uSaturation: { value: 1.3 },
-    uShadowTint: { value: new THREE.Vector3(0.5, 0.4, 0.75) },
-    uHighlightTint: { value: new THREE.Vector3(1.1, 0.95, 0.8) },
+    uSaturation: { value: 1.5 },
+    uShadowTint: { value: new THREE.Vector3(0.55, 0.32, 0.9) },
+    uHighlightTint: { value: new THREE.Vector3(1.2, 0.9, 0.75) },
     uVignette: { value: 0.3 },
     uGrain: { value: 0.03 },
     uChroma: { value: 0.5 },
@@ -85,19 +93,29 @@ const GradeShader = {
       col.g = texture2D(tDiffuse, vUv).g;
       col.b = texture2D(tDiffuse, vUv - ca).b;
 
-      // split toning: tinted shadows, hot highlights
+      // Miami split toning: violet shadows, hot cream-pink highlights
       float luma = dot(col, vec3(0.299, 0.587, 0.114));
       float shadowW = 1.0 - smoothstep(0.0, 0.55, luma);
-      float highW = smoothstep(0.42, 1.0, luma);
-      col = mix(col, col * uShadowTint * 1.5, shadowW * 0.5);
-      col = mix(col, col * uHighlightTint * 1.15, highW * 0.45);
+      float highW = smoothstep(0.40, 1.0, luma);
+      col = mix(col, col * uShadowTint * 1.65, shadowW * 0.58);
+      col = mix(col, col * uHighlightTint * 1.18, highW * 0.52);
+
+      // vibrance: push muted colors harder than already-vivid ones
+      float mx = max(col.r, max(col.g, col.b));
+      float mn = min(col.r, min(col.g, col.b));
+      float satLevel = mx - mn;
+      float vib = 1.0 + (1.0 - satLevel) * 0.38;
+      col *= vib;
 
       // saturation punch (the Vice City signature)
       luma = dot(col, vec3(0.299, 0.587, 0.114));
       col = mix(vec3(luma), col, uSaturation);
 
-      // gentle S-curve
-      col = mix(col, smoothstep(0.0, 1.0, col), 0.22);
+      // Miami S-curve — deeper contrast, colors stay alive
+      col = mix(col, smoothstep(0.0, 1.0, col), 0.30);
+
+      // gentle highlight bloom-bleed: soften anything clipping
+      col = col / (1.0 + max(0.0, mx - 1.0) * 0.25);
 
       // vignette + grain
       col *= 1.0 - edge * uVignette;
@@ -132,7 +150,7 @@ class PostFX {
     composer.setSize(size.x, size.y);
     composer.addPass(new RenderPass(scene, camera));
 
-    const bloom = new UnrealBloomPass(size, 0.7, 0.55, 0.72);
+    const bloom = new UnrealBloomPass(size, 0.85, 0.65, 0.62);
     composer.addPass(bloom);
 
     const grade = new ShaderPass(GradeShader);
