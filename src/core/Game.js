@@ -20,12 +20,15 @@ import { DirectionalArrow } from '../entities/DirectionalArrow.js';
 import { HUD } from '../ui/HUD.js';
 import { DialogueModal } from '../ui/DialogueModal.js';
 import { VictoryScreen } from '../ui/VictoryScreen.js';
+import { Radar, ZONE_TAGS } from '../ui/Radar.js';
+import { PauseMenu } from '../ui/PauseMenu.js';
 import {
   STATES,
   NARRATIVE,
   OBJECTIVES,
   CONTROLS,
   VISION,
+  PLAYER,
   PHASE_THEMES,
   PHASE_AMBIENCE,
   PHASE_GRADES,
@@ -57,6 +60,20 @@ export class Game {
     this.modal = new DialogueModal(input);
     this.victory = new VictoryScreen(() => this.resetAll());
 
+    // -------- Vice City interface layer --------
+    this.radar = new Radar(document.getElementById('radar'));
+    this.pause = new PauseMenu({
+      onResume: () => {
+        this.paused = false;
+        if (!this.finished) this.input.requestLock();
+      },
+      onRestart: () => this.resetAll(),
+      radar: this.radar,
+    });
+    this.paused = false;
+    this._runTime = 0;
+    this.pursuit = 0; // 0–5, the wanted-stars analog
+
     // -------- run flags --------
     this.started = false;
     this.finished = false;
@@ -80,6 +97,8 @@ export class Game {
       enter: () => {
         this._enterZone(STATES.ZIKLAG);
         this.hud.setObjective(OBJECTIVES[STATES.ZIKLAG]);
+        this.radar.setObjective(ZIKLAG.waypoint.x, ZIKLAG.waypoint.z);
+        this.pursuit = 4; // the raid is burning behind you
       },
       update: () => {
         const wp = ZIKLAG.waypoint;
@@ -105,6 +124,7 @@ export class Game {
       enter: () => {
         this._enterZone(STATES.DESERT);
         this.hud.setObjective(OBJECTIVES[STATES.DESERT]);
+        this.radar.setObjective(DESERT.exit.x, DESERT.exit.z);
       },
       update: () => {
         const p = this.player.position;
@@ -126,6 +146,7 @@ export class Game {
       enter: () => {
         this._enterZone(STATES.EGYPTIAN);
         this.hud.setObjective(OBJECTIVES[STATES.EGYPTIAN]);
+        this.radar.setObjective(EGYPT.servant.x, EGYPT.servant.z);
       },
       update: () => {
         const p = this.player.position;
@@ -163,7 +184,7 @@ export class Game {
       enter: () => {
         this._enterZone(STATES.CAMP);
         this.hud.setObjective(OBJECTIVES[STATES.CAMP]);
-        this.arrow.setTarget(CAMP.captives.x, CAMP.captives.z);
+        this._setObjectiveTarget(CAMP.captives.x, CAMP.captives.z);
       },
       update: (dt) => {
         const p = this.player.position;
@@ -175,6 +196,7 @@ export class Game {
         if (detected && this._detectionCooldown <= 0 && !this.modal.isOpen) {
           this._detectionCooldown = VISION.alertDuration;
           audio.ui('alert');
+          this.pursuit = 5; // wanted-stars spike: the raiders have seen you
           this.hud.showAlert(NARRATIVE.detectionAlert, VISION.alertDuration);
           // driven back to the valley mouth
           p.x = CAMP.spawn.x;
@@ -194,7 +216,7 @@ export class Game {
       enter: () => {
         this._enterZone(STATES.SPOILS);
         this.hud.setObjective(OBJECTIVES[STATES.SPOILS]);
-        this.arrow.setTarget(SPOILS.outcrop.x, SPOILS.outcrop.z);
+        this._setObjectiveTarget(SPOILS.outcrop.x, SPOILS.outcrop.z);
         this.arrow.show();
       },
       update: () => {
@@ -220,7 +242,7 @@ export class Game {
       enter: () => {
         this._enterZone(STATES.GATE);
         this.hud.setObjective(OBJECTIVES[STATES.GATE]);
-        this.arrow.setTarget(GATE.elders.x, GATE.elders.z);
+        this._setObjectiveTarget(GATE.elders.x, GATE.elders.z);
         this.arrow.show();
       },
       update: () => {
@@ -246,7 +268,7 @@ export class Game {
       enter: () => {
         this._enterZone(STATES.GILBOA);
         this.hud.setObjective(OBJECTIVES[STATES.GILBOA]);
-        this.arrow.setTarget(GILBOA.saul.x, GILBOA.saul.z);
+        this._setObjectiveTarget(GILBOA.saul.x, GILBOA.saul.z);
         this.arrow.show();
       },
       update: () => {
@@ -279,6 +301,8 @@ export class Game {
   // ============================================================ helpers
   _enterZone(stateName) {
     const zone = this.world.activate(stateName);
+    const tag = ZONE_TAGS[stateName];
+    if (tag) this.hud.showZone(tag[0], tag[1]);
     audio.setAmbience(PHASE_AMBIENCE[stateName] ?? 'none');
     postFX.setGrade(PHASE_GRADES[stateName] ?? 'clear');
     if (stateName === STATES.GILBOA) audio.grief();
@@ -296,6 +320,12 @@ export class Game {
     this._detectionCooldown = 0;
   }
 
+  /** Keep the radar mission blip on the same point the arrow tracks. */
+  _setObjectiveTarget(x, z) {
+    this.arrow.setTarget(x, z);
+    this.radar.setObjective(x, z);
+  }
+
   _setPrompt(text) {
     if (text === this._prompt) return;
     this._prompt = text;
@@ -308,7 +338,7 @@ export class Game {
       this.servantServed = true;
       this.hud.setObjective(OBJECTIVES.SERVANT_LEAD);
       this.hud.showAlert('The servant will lead you down to the raiders.', 2.6);
-      this.arrow.setTarget(EGYPT.exit.x, EGYPT.exit.z);
+      this._setObjectiveTarget(EGYPT.exit.x, EGYPT.exit.z);
       this.arrow.show();
     }, PHASE_THEMES[STATES.EGYPTIAN]);
   }
@@ -326,6 +356,8 @@ export class Game {
   win() {
     if (this.finished) return;
     this.finished = true;
+    this.pause.close(false);
+    this.paused = false;
     this._setPrompt(null);
     this.hud.setVisible(false);
     this.input.enabled = false;
@@ -338,6 +370,12 @@ export class Game {
   /** Full reset back to STATE_0 (Play Again). */
   resetAll() {
     this.finished = false;
+    this.pause.close(false);
+    this.paused = false;
+    this._runTime = 0;
+    this.pursuit = 0;
+    this.hud.setTimer(0);
+    this.hud.setPursuit(0);
     this.brookTriggered = false;
     this.ziklagTriggered = false;
     this.servantServed = false;
@@ -362,6 +400,21 @@ export class Game {
   update(dt, elapsed) {
     if (!this.started) return;
 
+    // --- pause / map screen (Escape pauses, M charts the march) ---
+    if ((this.input.wasPressed('Escape') || this.input.wasPressed('KeyM'))
+        && !this.modal.isOpen && !this.finished) {
+      const wantMap = this.input.wasPressed('KeyM');
+      this.pause.toggle(wantMap ? 'map' : undefined);
+      this.paused = this.pause.isOpen;
+      if (this.paused) this.input.exitLock();
+    }
+    if (this.paused) {
+      this.pause.update(dt, this.player.position, this.cameraRig.yaw);
+      this.hud.update(dt);
+      this.input.endFrame();
+      return;
+    }
+
     // Modal takes priority: advance it on E / Space, freeze gameplay.
     if (this.modal.isOpen) {
       if (this.input.wasPressed(CONTROLS.interact)) this.modal.tryAdvanceFromKeyboard();
@@ -373,6 +426,12 @@ export class Game {
     }
 
     if (!this.finished) {
+      // --- run clock + pursuit decay (the raid fades from memory) ---
+      this._runTime += dt;
+      this.hud.setTimer(this._runTime);
+      if (this.pursuit > 0) this.pursuit = Math.max(0, this.pursuit - dt * 0.45);
+      this.hud.setPursuit(this.pursuit);
+
       // --- player ---
       const zone = this.world.activeZone;
       this.player.groundHeight = zone.groundHeight(this.player.position.x, this.player.position.z);
@@ -389,8 +448,12 @@ export class Game {
       if (zone.servant) zone.servant.update(elapsed, this.servantServed);
       this.arrow.update(dt, this.player.position);
 
-      // --- camera ---
-      this.cameraRig.update(dt, this.player.position);
+      // --- camera (sprint kick while running) ---
+      this.cameraRig.update(dt, this.player.position, this.player.running);
+
+      // --- radar (heading-up, speed zoom) ---
+      const speedRatio = Math.min(1, this.player.velocity.length() / PLAYER.runSpeed);
+      this.radar.update(dt, this.player.position, this.cameraRig.yaw, speedRatio);
 
       // --- FSM phase logic ---
       this.fsm.update(dt);
@@ -403,6 +466,7 @@ export class Game {
       // victory: keep the scene breathing behind the overlay
       this.world.update(dt, elapsed, this.player.position);
       this.cameraRig.update(dt, this.player.position);
+      this.radar.update(dt, this.player.position, this.cameraRig.yaw, 0);
     }
 
     this.hud.update(dt);

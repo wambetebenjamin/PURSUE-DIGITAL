@@ -16,6 +16,7 @@ export class TouchControls {
     this.joyKnob = document.getElementById('joy-knob');
     this.btnRun = document.getElementById('btn-run');
     this.btnUse = document.getElementById('btn-use');
+    this.btnMap = document.getElementById('btn-map');
     this._runOn = false;
 
     if (!this.root) return;
@@ -62,5 +63,15 @@ export class TouchControls {
       else this.input.releaseKey('ShiftLeft');
       this.btnRun.classList.toggle('on', this._runOn);
     });
+
+    // --- Map button: opens the pause/map screen (KeyM edge) ---
+    if (this.btnMap) {
+      this.btnMap.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.input.pressKey('KeyM');
+        setTimeout(() => this.input.releaseKey('KeyM'), 0);
+      });
+    }
   }
 }

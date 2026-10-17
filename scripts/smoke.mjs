@@ -119,6 +119,13 @@ frames(10);
 ok(game.fsm.currentName === STATES.ZIKLAG, 'boots into STATE_0_ZIKLAG');
 ok(game.world.activeZone.name === STATES.ZIKLAG, 'ziklag zone is active');
 
+// --- Vice City interface layer ---
+ok(game.radar && game.radar.enabled, 'radar canvas initialised');
+ok(game.radar._objective !== null, 'radar carries the mission blip');
+ok(document.getElementById('zone-name').textContent === 'Ziklag', 'zone banner names the district');
+ok(/^\d+:\d\d$/.test(document.getElementById('hud-timer').textContent), 'mission timer is formatted');
+ok(game._runTime > 0, 'run clock is ticking');
+
 // ------------------------------------------- STATE 0: reach waypoint
 game.player.group.position.set(ZIKLAG.waypoint.x, 0, ZIKLAG.waypoint.z + 2);
 frames(2);
@@ -275,6 +282,21 @@ ok(
 );
 ok(!game.victory.visible, 'victory overlay is hidden');
 ok(!game.arrow.group.visible, 'directional arrow is hidden again');
+
+// ------------------------------------------------------ pause & map screen
+press('Escape');
+frames(1);
+ok(game.paused && game.pause.isOpen, 'Escape pauses the march');
+ok(!document.getElementById('pause-screen').classList.contains('hidden'), 'pause overlay is shown');
+press('Escape');
+frames(1);
+ok(!game.paused, 'Escape resumes the march');
+press('KeyM');
+frames(1);
+ok(game.paused && game.pause.page === 'map', 'M opens the Map of Judah');
+press('Escape');
+frames(1);
+ok(!game.paused, 'the map closes back to play');
 
 // stamina sanity: sprinting drains, forced walk at zero
 const st = game.player.stamina;

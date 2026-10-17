@@ -232,6 +232,31 @@ large touch targets, the start-screen controls legend swaps to touch
 wording, prompts read “Tap Use”, and portrait mode widens the camera FOV
 (74°) with a landscape-only rotate hint.
 
+## 7e. The Vice City interface layer (radar & HUD)
+
+Interface *design patterns* were studied from the reversed GTA III / Vice City
+engine source (re3/reVC — `github.com/daynz/GTAviceCity`, cloned locally for
+reference). Nothing is copied: no game assets, text, fonts, or code — every
+stroke is procedural canvas art and every layout decision is re-implemented to
+fit PURSUE's march through 1 Samuel 30.
+
+| GTA convention (source) | PURSUE implementation |
+|---|---|
+| Circular radardisc, bottom-left (`HUD_RADARDISC`, `CRadar`) | `ui/Radar.js` — heading-up disc, land plates, neon rim |
+| Speed-scaled radar zoom (`m_radarRange` 120→350) | range 26→70 world units, lerped by run speed |
+| Coord blips + edge clamp (`BLIP_COORD`, trace colours) | pulsing magenta mission blip, chevron when off-range |
+| North marker (`RADAR_SPRITE_NORTH`) | "N" tick riding the rim |
+| Player triangle fixed at centre | white triangle, map rotates beneath it |
+| Zone-name card (`CHud::SetZoneName`) | `#zone-banner` district banners ("Ziklag — a town in the Negev") |
+| Mission timer | `#hud-timer` mm:ss run clock |
+| Wanted stars | `#pursuit-stars` — the Amalekite pursuit (spikes on detection, decays) |
+| Frontend MAPS page (`Frontend.cpp`) | pause screen + "Map of Judah" chart (`ui/PauseMenu.js`) |
+| Follow-ped speed FOV | sprint FOV kick + distance push in `ThirdPersonCamera` |
+| `MISSION PASSED` big message (`SetBigMessage`) | `#mission-passed` banner on the victory card |
+
+Controls: **Esc** pauses (GTA pause key), **M** opens the map directly; on
+touch a **Map** button synthesizes `KeyM` like the other touch buttons.
+
 ## 8. Phase-flow state machine
 
 ```

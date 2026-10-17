@@ -77,17 +77,12 @@ export class Engine {
   _onResize() {
     const w = window.innerWidth;
     const h = window.innerHeight;
-    const aspect = w / h;
-    this.camera.aspect = aspect;
-    // portrait phones see a narrow slice — widen the field of view to compensate
-    this.camera.fov = aspect < 1 ? 74 : this.camera.fov;
-    if (aspect < 1 || this._baseFov === undefined) {
-      this._baseFov = this._baseFov || this.camera.fov;
-      this.camera.fov = aspect < 1 ? 74 : this._baseFov;
-    }
+    this.camera.aspect = w / h;
+    // FOV (portrait widening + sprint kick) is owned by ThirdPersonCamera
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
     postFX.setSize(w, h);
+    if (this.onResize) this.onResize();
   }
 
   _loop() {

@@ -19,6 +19,7 @@ export class ThirdPersonCamera {
     this.yaw = 0;
     this.pitch = 0.34;
     this.distance = CAMERA.distance;
+    this._sprint01 = 0; // damped sprint blend for FOV / distance push
     this._initialized = false;
   }
 
@@ -26,6 +27,7 @@ export class ThirdPersonCamera {
     this.yaw = yaw;
     this.pitch = 0.34;
     this.distance = CAMERA.distance;
+    this._sprint01 = 0;
     this._applyImmediate(targetPos);
     this._initialized = true;
   }
@@ -41,7 +43,7 @@ export class ThirdPersonCamera {
     this.camera.lookAt(_lookAt);
   }
 
-  update(dt, targetPos) {
+  update(dt, targetPos, sprinting = false) {
     if (!this._initialized) this.reset(targetPos, this.yaw);
 
     // --- mouse / touch look ---
@@ -50,6 +52,17 @@ export class ThirdPersonCamera {
       this.yaw -= md.x * CAMERA.sensitivity;
       this.pitch = clamp(this.pitch + md.y * CAMERA.sensitivity, CAMERA.pitchMin, CAMERA.pitchMax);
     }
+
+    // --- sprint feel (CCamera speed zoom analog): FOV kick + distance push ---
+    this._sprint01 += ((sprinting ? 1 : 0) - this._sprint01) * Math.min(1, dt * 4);
+    const aspect = this.camera.aspect || 1.6;
+    const baseFov = aspect < 1 ? CAMERA.portraitFov : CAMERA.fov;
+    const targetFov = baseFov + this._sprint01 * CAMERA.sprintFovKick;
+    if (Math.abs(this.camera.fov - targetFov) > 0.02) {
+      this.camera.fov += (targetFov - this.camera.fov) * Math.min(1, dt * 5);
+      this.camera.updateProjectionMatrix();
+    }
+    this.distance = CAMERA.distance + this._sprint01 * CAMERA.sprintPush;
 
     // --- ideal camera position on a sphere around the player ---
     const cp = Math.cos(this.pitch);

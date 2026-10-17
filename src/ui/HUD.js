@@ -1,6 +1,8 @@
 /**
  * HUD.js — persistent HTML/CSS overlay: objective, stamina meter, compass,
- * interaction prompt, and transient alert banners.
+ * interaction prompt, transient alert banners, plus the Vice City interface
+ * layer: district banner (CHud::SetZoneName), mission timer and the
+ * pursuit stars (the wanted-stars analog of the Amalekite raid).
  */
 import { clamp, compassLabel } from '../utils/math.js';
 import { IS_TOUCH } from '../core/quality.js';
@@ -16,9 +18,49 @@ export class HUD {
     this.alertText = document.getElementById('alert-text');
     this.hud = document.getElementById('hud');
 
+    // --- Vice City interface layer ---
+    this.zoneBanner = document.getElementById('zone-banner');
+    this.zoneName = document.getElementById('zone-name');
+    this.zoneTag = document.getElementById('zone-tag');
+    this.timerText = document.getElementById('hud-timer');
+    this.pursuitStars = document.getElementById('pursuit-stars');
+
     this._alertTimer = 0;
     this._promptVisible = false;
     this._staminaWarning = false;
+    this._zoneTimer = 0;
+    this._zoneFade = 0;
+    this._pursuit = -1;
+  }
+
+  /** District banner — GTA's zone name card with its fade in / hold / fade out. */
+  showZone(name, tagline = '') {
+    if (this.zoneName) this.zoneName.textContent = name;
+    if (this.zoneTag) this.zoneTag.textContent = tagline;
+    if (this.zoneBanner) this.zoneBanner.classList.remove('hidden');
+    this._zoneTimer = 3.6;
+    this._zoneFade = 1;
+    if (this.zoneBanner) this.zoneBanner.style.opacity = '1';
+  }
+
+  /** Mission timer, mm:ss — the GTA mission-clock analog. */
+  setTimer(seconds) {
+    if (!this.timerText) return;
+    const s = Math.max(0, Math.floor(seconds));
+    const mm = Math.floor(s / 60);
+    const ss = String(s % 60).padStart(2, '0');
+    this.timerText.textContent = `${mm}:${ss}`;
+  }
+
+  /** Pursuit stars 0–5 — the wanted-level analog (the raiders are hunting). */
+  setPursuit(level) {
+    const n = clamp(Math.round(level), 0, 5);
+    if (n === this._pursuit || !this.pursuitStars) return;
+    this._pursuit = n;
+    const stars = this.pursuitStars.children;
+    for (let i = 0; i < stars.length; i++) {
+      stars[i].classList.toggle('lit', i < n);
+    }
   }
 
   setObjective(text) {
@@ -76,6 +118,14 @@ export class HUD {
     if (this._alertTimer > 0) {
       this._alertTimer -= dt;
       if (this._alertTimer <= 0) this.alertBanner.classList.add('hidden');
+    }
+    if (this._zoneTimer > 0) {
+      this._zoneTimer -= dt;
+      if (this._zoneTimer <= 1) {
+        this._zoneFade = Math.max(0, this._zoneTimer);
+        if (this.zoneBanner) this.zoneBanner.style.opacity = String(this._zoneFade);
+      }
+      if (this._zoneTimer <= 0 && this.zoneBanner) this.zoneBanner.classList.add('hidden');
     }
   }
 }

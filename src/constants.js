@@ -86,6 +86,10 @@ export const STAMINA = Object.freeze({
 });
 
 export const CAMERA = Object.freeze({
+  fov: 62,            // base field of view (GTA DefaultFOV analog)
+  portraitFov: 74,    // widened for portrait phones
+  sprintFovKick: 9,   // FOV push while sprinting (speed feel)
+  sprintPush: 1.2,    // camera distance push while sprinting
   distance: 9.5,
   minDistance: 3.5,
   maxDistance: 15,

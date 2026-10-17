@@ -32,7 +32,27 @@
           <span class="hud-label">Heading</span>
           <span id="compass-text">N 0°</span>
         </div>
+        <div id="hud-right">
+          <div id="hud-timer-wrap">
+            <span class="hud-label">Time</span>
+            <span id="hud-timer">0:00</span>
+          </div>
+          <div id="pursuit" title="Amalekite pursuit">
+            <div id="pursuit-stars">
+              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+            </div>
+          </div>
+        </div>
       </header>
+
+      <!-- District banner — the zone-name card of the march -->
+      <div id="zone-banner" class="hidden">
+        <span id="zone-name"></span>
+        <span id="zone-tag"></span>
+      </div>
+
+      <!-- Circular radar, bottom-left (Vice City radardisc) -->
+      <div id="radar" aria-hidden="true"></div>
 
       <!-- Interaction prompt (Press E ... ) -->
       <div id="prompt" class="hidden"><span id="prompt-text"></span></div>
@@ -61,6 +81,7 @@
         <div id="touch-buttons">
           <button id="btn-run" class="touch-btn">Run</button>
           <button id="btn-use" class="touch-btn">Use</button>
+          <button id="btn-map" class="touch-btn touch-btn-small">Map</button>
         </div>
       </div>
     </div>
@@ -102,12 +123,15 @@
           <div><b>Mouse</b><span>Look around</span></div>
           <div><b>Shift</b><span>Run (uses stamina)</span></div>
           <div><b>E / Space</b><span>Interact &amp; advance</span></div>
+          <div><b>M</b><span>Map of Judah</span></div>
+          <div><b>Esc</b><span>Pause</span></div>
         </div>
         <div class="controls-grid controls-touch">
           <div><b>Left thumb</b><span>Move</span></div>
           <div><b>Right thumb</b><span>Look around</span></div>
           <div><b>Run</b><span>Sprint (uses stamina)</span></div>
           <div><b>Use</b><span>Interact &amp; advance</span></div>
+          <div><b>Map</b><span>Chart of the march</span></div>
         </div>
         <button id="start-button" class="primary-button">Begin the Pursuit</button>
       </div>
@@ -115,8 +139,27 @@
     </div>
 
     <!-- Victory overlay -->
+    <!-- Pause + Map of Judah (the GTA frontend MAPS page) -->
+    <div id="pause-screen" class="hidden">
+      <div id="pause-card">
+        <div id="pause-menu-panel">
+          <h2>Paused</h2>
+          <p class="pause-sub">The march waits for you.</p>
+          <button id="pause-resume" class="primary-button">Resume the march</button>
+          <button id="pause-map" class="secondary-button">Map of Judah</button>
+          <button id="pause-restart" class="secondary-button danger">Begin again</button>
+        </div>
+        <div id="pause-map-panel" class="hidden">
+          <h2>Map of Judah</h2>
+          <canvas id="map-canvas"></canvas>
+          <button id="pause-resume-2" class="primary-button">Back to the march</button>
+        </div>
+      </div>
+    </div>
+
     <div id="victory-screen" class="hidden">
       <div id="victory-card">
+        <div id="mission-passed">MISSION PASSED</div>
         <h1>Recovered All</h1>
         <p class="verse">
           David recovered all that the Amalekites had carried away, and rescued his two wives.

@@ -65,15 +65,32 @@ No server, database, or environment variables are required. Everything is client
 | **Mouse wheel** | *(reserved)* |
 | **Shift** | Run — drains the stamina bar (15 units/sec) |
 | **E / Space** | Interact, pick up, advance dialogue |
-| **Esc** | Release the mouse pointer |
+| **Esc** | Pause / release the mouse pointer |
+| **M** | Map of Judah (full chart of the march) |
 
-### Playing on a phone
+### The Vice City interface
+
+The game plays with the interface of a classic open-world epic, rebuilt in our
+own procedural style after studying the reversed GTA III / Vice City engine
+([daynz/GTAviceCity](https://github.com/daynz/GTAviceCity)) — design patterns
+only, no copyrighted assets:
+
+- A circular **radar** bottom-left: rotating map, mission blip, north tick,
+  speed-scaled zoom (walk close, sprint wide)
+- **District banners** as you enter each phase ("Ziklag — a town in the Negev")
+- A **mission timer** and **pursuit stars** — the raiders of Amalek flare when
+  they spot you
+- **Esc** pauses into the march menu; **M** charts the **Map of Judah** with
+  all seven districts and your objective
+- A "**MISSION PASSED**" flourish when the story completes
+
+## Playing on a phone
 
 The game detects touch devices and adapts automatically:
 
 - **Left thumb** — a dynamic virtual joystick appears where you touch to move (analog speed)
 - **Right thumb** — drag anywhere else to look around
-- **Run / Use** — on-screen buttons; *Use* talks to people and advances dialogue
+- **Run / Use / Map** — on-screen buttons; *Use* talks to people and advances dialogue
 - Portrait play widens the camera field of view and shows a gentle "turn your phone" hint
 - The desktop prompt "Press E" reads "Tap Use"
 - A lighter performance profile kicks in (pixel ratio capped at 1.3, 1024² shadows, 45% grass/particle/creature density, no MSAA) so mid-range phones stay smooth
