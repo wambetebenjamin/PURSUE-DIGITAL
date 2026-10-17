@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="description" content="PURSUE — a 3D action-adventure retelling of 1 Samuel 30. Play as David and recover everything." />
+    <title>PURSUE — 1 Samuel 30</title>
+    <script type="module" crossorigin src="./assets/index-CJdpox68.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/three-ByHpQkXH.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-J69T8lAy.css">
+  </head>
+  <body>
+    <!-- WebGL canvas is injected here by the engine -->
+    <div id="app"></div>
+
+    <!-- ===================== HTML/CSS UI OVERLAY ===================== -->
+    <div id="ui-root">
+      <!-- Sound toggle (procedural audio on/off) -->
+      <button id="audio-toggle" title="Toggle sound" aria-label="Toggle sound">♪</button>
+
+      <!-- Portrait-play hint (phones) -->
+      <div id="rotate-hint" class="hidden">Turn your phone sideways for the full view</div>
+
+      <!-- Persistent top bar: objective, stamina, compass -->
+      <header id="hud">
+        <div id="hud-objective">
+          <span class="hud-label">Objective</span>
+          <span id="objective-text">Reach the Desert Edge</span>
+        </div>
+        <div id="hud-stamina">
+          <span class="hud-label">Stamina</span>
+          <div id="stamina-track"><div id="stamina-fill"></div></div>
+        </div>
+        <div id="hud-compass">
+          <span class="hud-label">Heading</span>
+          <span id="compass-text">N 0°</span>
+        </div>
+        <div id="hud-right">
+          <div id="hud-timer-wrap">
+            <span class="hud-label">Time</span>
+            <span id="hud-timer">0:00</span>
+          </div>
+          <div id="pursuit" title="Amalekite pursuit">
+            <div id="pursuit-stars">
+              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- District banner — the zone-name card of the march -->
+      <div id="zone-banner" class="hidden">
+        <span id="zone-name"></span>
+        <span id="zone-tag"></span>
+      </div>
+
+      <!-- Circular radar, bottom-left (Vice City radardisc) -->
+      <div id="radar" aria-hidden="true"></div>
+
+      <!-- Interaction prompt (Press E ... ) -->
+      <div id="prompt" class="hidden"><span id="prompt-text"></span></div>
+
+      <!-- Transient alert (detections etc.) -->
+      <div id="alert-banner" class="hidden"><span id="alert-text"></span></div>
+
+      <!-- Narrative / dialogue modal -->
+      <div id="modal-root" class="hidden">
+        <div id="modal-card" class="theme-ziklag">
+          <span id="modal-phase"></span>
+          <h2 id="modal-title"></h2>
+          <p id="modal-speaker" class="hidden"></p>
+          <p id="modal-body"></p>
+          <cite id="modal-cite" class="hidden"></cite>
+          <div id="modal-buttons"></div>
+        </div>
+      </div>
+
+      <!-- Pointer-lock resume hint -->
+      <div id="resume-hint" class="hidden">Click to capture the mouse &nbsp;·&nbsp; ESC releases it</div>
+
+      <!-- Touch controls (phones only — see ui/TouchControls.js) -->
+      <div id="touch-ui" aria-hidden="true">
+        <div id="joy-base"><div id="joy-knob"></div></div>
+        <div id="touch-buttons">
+          <button id="btn-run" class="touch-btn">Run</button>
+          <button id="btn-use" class="touch-btn">Use</button>
+          <button id="btn-map" class="touch-btn touch-btn-small">Map</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start / title screen -->
+    <div id="start-screen">
+      <div class="sun-disc"></div>
+      <div class="sun-stripes"></div>
+      <svg class="palm-silhouette palm-left" viewBox="0 0 240 320" aria-hidden="true">
+        <path fill="currentColor" d="M112 318 C 104 244 100 180 116 132 C 122 112 132 96 146 82 L 156 92 C 138 110 128 130 122 154 C 112 200 116 262 124 318 Z"/>
+        <path fill="currentColor" d="M148 80 C 118 50 78 36 38 40 C 76 28 124 36 152 66 Z"/>
+        <path fill="currentColor" d="M152 76 C 140 44 108 18 68 10 C 112 12 150 34 162 66 Z"/>
+        <path fill="currentColor" d="M156 74 C 162 42 184 16 220 8 C 192 22 170 46 164 76 Z"/>
+        <path fill="currentColor" d="M160 82 C 188 58 222 52 236 58 C 212 58 184 70 168 92 Z"/>
+        <path fill="currentColor" d="M150 88 C 126 78 92 82 68 96 C 98 86 130 88 154 100 Z"/>
+        <path fill="currentColor" d="M154 72 C 150 48 158 26 174 12 C 158 32 154 52 160 74 Z"/>
+      </svg>
+      <svg class="palm-silhouette palm-right" viewBox="0 0 240 320" aria-hidden="true">
+        <path fill="currentColor" d="M112 318 C 104 244 100 180 116 132 C 122 112 132 96 146 82 L 156 92 C 138 110 128 130 122 154 C 112 200 116 262 124 318 Z"/>
+        <path fill="currentColor" d="M148 80 C 118 50 78 36 38 40 C 76 28 124 36 152 66 Z"/>
+        <path fill="currentColor" d="M152 76 C 140 44 108 18 68 10 C 112 12 150 34 162 66 Z"/>
+        <path fill="currentColor" d="M156 74 C 162 42 184 16 220 8 C 192 22 170 46 164 76 Z"/>
+        <path fill="currentColor" d="M160 82 C 188 58 222 52 236 58 C 212 58 184 70 168 92 Z"/>
+        <path fill="currentColor" d="M150 88 C 126 78 92 82 68 96 C 98 86 130 88 154 100 Z"/>
+        <path fill="currentColor" d="M154 72 C 150 48 158 26 174 12 C 158 32 154 52 160 74 Z"/>
+      </svg>
+      <div class="start-card-wrap">
+      <div id="start-card">
+        <h1>PURSUE</h1>
+        <p class="subtitle">A retelling of 1 Samuel 30–31</p>
+        <p class="story">
+          Ziklag is ash. The families are gone, driven south into the wilderness.
+          Two hundred of your men are too spent to cross the brook — you go on with four hundred.
+          Find the one who knows the road. Fall upon the camp. Bring every soul home.
+          <em>Recover all.</em>
+        </p>
+        <div class="controls-grid controls-desktop">
+          <div><b>WASD / Arrows</b><span>Move</span></div>
+          <div><b>Mouse</b><span>Look around</span></div>
+          <div><b>Shift</b><span>Run (uses stamina)</span></div>
+          <div><b>E / Space</b><span>Interact &amp; advance</span></div>
+          <div><b>M</b><span>Map of Judah</span></div>
+          <div><b>Esc</b><span>Pause</span></div>
+        </div>
+        <div class="controls-grid controls-touch">
+          <div><b>Left thumb</b><span>Move</span></div>
+          <div><b>Right thumb</b><span>Look around</span></div>
+          <div><b>Run</b><span>Sprint (uses stamina)</span></div>
+          <div><b>Use</b><span>Interact &amp; advance</span></div>
+          <div><b>Map</b><span>Chart of the march</span></div>
+        </div>
+        <button id="start-button" class="primary-button">Begin the Pursuit</button>
+      </div>
+      </div>
+    </div>
+
+    <!-- Victory overlay -->
+    <!-- Pause + Map of Judah (the GTA frontend MAPS page) -->
+    <div id="pause-screen" class="hidden">
+      <div id="pause-card">
+        <div id="pause-menu-panel">
+          <h2>Paused</h2>
+          <p class="pause-sub">The march waits for you.</p>
+          <button id="pause-resume" class="primary-button">Resume the march</button>
+          <button id="pause-map" class="secondary-button">Map of Judah</button>
+          <button id="pause-restart" class="secondary-button danger">Begin again</button>
+        </div>
+        <div id="pause-map-panel" class="hidden">
+          <h2>Map of Judah</h2>
+          <canvas id="map-canvas"></canvas>
+          <button id="pause-resume-2" class="primary-button">Back to the march</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="victory-screen" class="hidden">
+      <div id="victory-card">
+        <div id="mission-passed">MISSION PASSED</div>
+        <h1>Recovered All</h1>
+        <p class="verse">
+          David recovered all that the Amalekites had carried away, and rescued his two wives.
+          Nothing was missing — not one thing, small or great, sons or daughters, spoil, or
+          anything that had been taken. David recovered all.
+        </p>
+        <p class="citation">1 Samuel 30:18–19</p>
+        <hr class="verse-divider" />
+        <p class="verse epilogue">
+          To the elders of Judah he sent gifts from the spoil. And on the slopes of Gilboa,
+          Saul fell that same day — but David grew stronger, and Judah anointed him king in Hebron.
+        </p>
+        <p class="citation">1 Samuel 30:26–31 · 31:6 · 2 Samuel 2:4</p>
+        <button id="restart-button" class="primary-button">Play Again</button>
+      </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading"><div class="spinner"></div><span>Sounding the wilderness…</span></div>
+
+  </body>
+</html>
