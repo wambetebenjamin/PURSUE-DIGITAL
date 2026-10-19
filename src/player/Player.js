@@ -10,6 +10,8 @@ import { Mat, Geo } from '../utils/materials.js';
 import { CONTROLS, PLAYER } from '../constants.js';
 import { Stamina } from './Stamina.js';
 import { dampFactor, lerpAngle } from '../utils/math.js';
+import { createDetailedHuman } from '../entities/CharacterRig.js';
+import { audio } from '../audio/AudioEngine.js';
 
 const _dir = new THREE.Vector3();
 const _forward = new THREE.Vector3();
@@ -23,6 +25,7 @@ export class Player {
 
     this.velocity = new THREE.Vector3();
     this.groundHeight = 0; // set by the active zone each frame
+    this.health = 1; // vitality — the oil in the lamp (HUD), regenerates slowly
     this.running = false;
     this.moving = false;
     this.interactRequested = false;
@@ -33,50 +36,59 @@ export class Player {
 
   // ---------------------------------------------------------------- rig
   _buildRig() {
-    const g = this.group;
+    // David: hardened Levantine warrior — sun-bronzed, bearded, lamellar
+    // leather over a faded earth-tone tunic, red sash, sandals caked in dust.
+    const rig = createDetailedHuman({
+      palette: {
+        skin: Mat.skinPbr(),
+        cloth: Mat.clothPbr(),
+        cloth2: Mat.leatherPbrWarm(),
+        hair: Mat.hairPbr(),
+        hairCard: Mat.hairCard(),
+        leather: Mat.leatherPbr(),
+        metal: Mat.bronzePbr(),
+        accent: Mat.clothPbrMadder(),
+      },
+      pose: 'standing',
+      beard: 'full',
+      hairStyle: 'short',
+      armor: 'leather',
+      detail: 'full',
+      seed: 7,
+    });
+    this.rig = rig;
+    this.group.add(rig);
 
-    // --- legs (pivot at the hip) ---
-    this.legL = pivotLimb(0.16, 0.78, Mat.tunicDavid(), Mat.skinDark(), -0.17);
-    this.legR = pivotLimb(0.16, 0.78, Mat.tunicDavid(), Mat.skinDark(), 0.17);
-    g.add(this.legL, this.legR);
+    const parts = rig.userData.parts;
+    this.armL = parts.armL;
+    this.armR = parts.armR;
+    this.legL = parts.legL;
+    this.legR = parts.legR;
+    this.head = parts.head;
+    this.torso = parts.torso;
 
-    // --- torso + sash ---
-    const torso = new THREE.Mesh(Geo.box(), Mat.tunicDavid());
-    torso.scale.set(0.62, 0.78, 0.36);
-    torso.position.y = 1.12;
-    torso.castShadow = true;
-
-    const sash = new THREE.Mesh(Geo.box(), Mat.sashDavid());
-    sash.scale.set(0.66, 0.16, 0.4);
-    sash.position.y = 0.82;
-
-    // --- head, hair, beard ---
-    const head = new THREE.Mesh(Geo.sphere(), Mat.skin());
-    head.scale.setScalar(0.42);
-    head.position.y = 1.78;
-    head.castShadow = true;
-
-    const hair = new THREE.Mesh(Geo.sphere(), Mat.hair());
-    hair.scale.set(0.46, 0.3, 0.46);
-    hair.position.set(0, 1.94, 0.02);
-
-    const beard = new THREE.Mesh(Geo.sphere(), Mat.hair());
-    beard.scale.set(0.3, 0.22, 0.18);
-    beard.position.set(0, 1.62, 0.18);
-
-    // --- arms (pivot at the shoulder) ---
-    this.armL = pivotArm(Mat.tunicDavid(), Mat.skin(), -0.42);
-    this.armR = pivotArm(Mat.tunicDavid(), Mat.skin(), 0.42);
-    this.armR.rotation.x = -0.35; // shepherd's ready stance
-
-    // --- shepherd bag ---
+    // shepherd's bag at the hip
     const bag = new THREE.Mesh(Geo.box(), Mat.sashDavid());
     bag.scale.set(0.22, 0.3, 0.14);
     bag.position.set(-0.36, 1.0, -0.24);
     bag.rotation.z = 0.18;
+    bag.castShadow = true;
 
-    g.add(torso, sash, head, hair, beard, this.armL, this.armR, bag);
-    g.traverse((o) => {
+    // the king's sword at his thigh
+    const scabbard = new THREE.Mesh(Geo.cyl(), Mat.leatherDark());
+    scabbard.scale.set(0.075, 0.85, 0.14);
+    scabbard.position.set(0.34, 0.72, -0.1);
+    scabbard.rotation.x = 0.28;
+    scabbard.rotation.z = -0.12;
+    scabbard.castShadow = true;
+    const hilt = new THREE.Mesh(Geo.box(), Mat.brass());
+    hilt.scale.set(0.05, 0.22, 0.05);
+    hilt.position.set(0.38, 1.18, -0.14);
+    hilt.rotation.x = 0.28;
+    hilt.castShadow = true;
+
+    this.group.add(bag, scabbard, hilt);
+    this.group.traverse((o) => {
       if (o.isMesh) {
         o.castShadow = true;
         o.receiveShadow = false;
@@ -90,6 +102,7 @@ export class Player {
     this.group.rotation.y = yaw;
     this.velocity.set(0, 0, 0);
     this.stamina.reset();
+    this.health = 1;
     this.running = false;
     this.moving = false;
     this._gait = 0;
@@ -109,13 +122,20 @@ export class Player {
    * @param {{x:number,z:number,r:number}[]} colliders
    */
   update(dt, cameraYaw, elapsed, bounds, colliders) {
-    // --- movement input in camera space ---
+    // --- movement input in camera space (keyboard or touch joystick) ---
     let ix = 0;
     let iz = 0;
-    if (this.input.isDown(CONTROLS.forward)) iz += 1;
-    if (this.input.isDown(CONTROLS.back)) iz -= 1;
-    if (this.input.isDown(CONTROLS.right)) ix += 1;
-    if (this.input.isDown(CONTROLS.left)) ix -= 1;
+    const joy = this.input.moveAxis;
+    const joyMagnitude = joy ? Math.hypot(joy.x, joy.y) : 0;
+    if (joyMagnitude > 0.08) {
+      ix = joy.x;
+      iz = joy.y;
+    } else {
+      if (this.input.isDown(CONTROLS.forward)) iz += 1;
+      if (this.input.isDown(CONTROLS.back)) iz -= 1;
+      if (this.input.isDown(CONTROLS.right)) ix += 1;
+      if (this.input.isDown(CONTROLS.left)) ix -= 1;
+    }
 
     _forward.set(-Math.sin(cameraYaw), 0, -Math.cos(cameraYaw));
     _right.set(Math.cos(cameraYaw), 0, -Math.sin(cameraYaw));
@@ -125,12 +145,13 @@ export class Player {
       .addScaledVector(_right, ix);
 
     const hasInput = _dir.lengthSq() > 0.0001;
+    const analogScale = Math.min(1, joyMagnitude > 0.08 ? joyMagnitude : 1);
     if (hasInput) _dir.normalize();
 
     // --- stamina gate ---
     const wantsRun = this.input.isDown(CONTROLS.run);
     this.running = this.stamina.update(dt, wantsRun, hasInput);
-    const targetSpeed = this.running ? PLAYER.runSpeed : PLAYER.walkSpeed;
+    const targetSpeed = (this.running ? PLAYER.runSpeed : PLAYER.walkSpeed) * analogScale;
 
     // --- accelerate / friction ---
     const targetVX = _dir.x * targetSpeed;
@@ -190,10 +211,18 @@ export class Player {
     this.armL.rotation.x = -swing * 0.8;
     this.armR.rotation.x = swing * 0.6 - 0.35;
 
-    // subtle idle breathing
+    // footsteps: one per stride plant
+    const sign = swing > 0.05 ? 1 : swing < -0.05 ? -1 : 0;
+    if (sign !== 0 && sign !== this._lastStrideSign && this.moving) {
+      audio.step(this.running);
+    }
+    this._lastStrideSign = sign;
+
+    // subtle idle breathing (chest rises, shoulders follow)
     this._armIdle = (this._armIdle ?? 0) + dt;
+    const breathe = Math.sin(this._armIdle * 1.6) * 0.035;
+    this.torso.position.y = 1.14 + Math.sin(this._armIdle * 1.5) * 0.014;
     if (!this.moving) {
-      const breathe = Math.sin(this._armIdle * 1.6) * 0.035;
       this.armL.rotation.z = 0.08 + breathe;
       this.armR.rotation.z = -0.08 - breathe;
     } else {
