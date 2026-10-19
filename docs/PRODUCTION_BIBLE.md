@@ -292,3 +292,114 @@ one row in `World`, and new copy — the loop itself never changes.
 Unreal-specific notes (Nanite, post-process LUT volumes) are honored in spirit:
 virtualized micro-detail → instancing; the 5600K/6500K/3200K grading → per-zone
 lighting triads; roughness/SSS doctrine → the material table in §3.*
+
+## 9. The cinematic overhaul (Pass 8)
+
+The brief for this pass was a full replacement — characters, world, light,
+camera and interface — moving from "stylised low-poly" to "ultra-realistic,
+immersive cinematic". Everything below is real-time, procedural, and runs in
+the same static Vite build (no downloaded art, no texture atlases, no
+Unreal-only features). The translation of each Unreal concept is given in
+brackets.
+
+### 9a. Characters — anatomy, skin, hair, gear
+
+* **Anatomy.** `entities/CharacterRig.js` keeps the ~8-draw-call merged rig but
+  the head is now sculpted from asymmetric masses: split brow ridge with a
+  permanent squint, one cheekbone set higher, a nose broken off-centre with
+  separate alar wings and nostril shadows, a hard mouth line, sun creases at
+  the eye corners, a scar through one brow, square wind-burned jaw corners and
+  forehead furrows. A per-figure `seed` drives the asymmetry, so no two named
+  characters read as the same face.
+* **Skin.** `utils/pbr.js → skinMaterial()` is a `MeshPhysicalMaterial` with
+  pore/wrinkle bump (`surfaces.poresMap`), a sun-baked mottled albedo with
+  wind-burn blotches and settled dust, a thin sweat clearcoat, and an injected
+  **subsurface term** (wrapped thin-part transmission + Fresnel rim in
+  `uSSSColor`, plus a warm dust lift on upward-facing skin). [Screen-space SSS
+  → analytic wrap/rim approximation.]
+* **Hair & beards.** Real **hair cards**: layered quads wearing a strand alpha
+  map (`strandAlphaMap`) with anisotropic shading, sun-bleached tips, grey
+  flecks and dust in the sheen. Ten to thirteen cards crown each skull, seven
+  build the nape, eight more fall for long hair, and nineteen beard/moustache
+  cards hang from the jaw. Cards are merged per material, so hair still costs
+  one extra draw call per figure. [Strand-based groom → alpha-tested cards.]
+* **Gear.** Lamellar rows gained a bandolier with a bronze buckle, hip pouch and
+  amulet; bronze scale armor gained battle dents and a sweat-darkened strap;
+  every armored arm has laced bracers with bronze studs; sandals have a second
+  cracked strap and a toe thong. Materials are physically based: cracked leather
+  bump, hammered/scuffed metal roughness maps, woven linen sheen, high
+  environment reflections on bronze and iron.
+
+### 9b. World — Ziklag, the wilderness, the camp
+
+* **Ziklag.** Every burnt shell now sits on a hand-hewn limestone plinth of
+  individual dressed blocks, with fallen blocks, mud-brick chunks, four charred
+  roof beams sagging through the roof, soot-scarred wall tops, soot decals and
+  cracked-earth scars on the ground. Six collapsed-timber piles still glow at
+  the joints; five pottery clusters and an abandoned weapon rack dress the
+  ruins. Smoke is now a billowing **sprite volume** (soft smoke texture on the
+  particle shader) at nearly twice the size, plus a dense granary column and
+  falling ash.
+* **Besor brook.** Turquoise water with a procedural **ripple height field**
+  sampled as a bump map and scrolled on two axes every frame, wet glossy flints
+  half-sunk in the shallows, wet stones along the banks, acacia groves, dry
+  scrub, instanced gravel/flint micro-debris across the path and sun-cracked
+  earth patches. [Photogrammetry/8K → seeded procedural maps at 256–512²,
+  instanced micro-debris.]
+* **Raider camp.** Tents gained patched, sun-bleached canvas panels, a stitched
+  ridge seam and a dust-darkened hem; weapon racks, pottery clusters, scorched
+  ground and glowing ash beds under every fire. The first campfire casts real
+  point-light shadows; the rest flicker. [Dynamic campfire GI → one shadowed
+  hero light + baked/faked falloff.]
+* **Dust & heat.** Dust streams, ground-hugging haze and heat shimmer are
+  billboard volumes; the post pass adds a refractive shimmer band and a warm
+  particulate veil.
+
+### 9c. Light, atmosphere & camera
+
+* **Desert GI.** Strong hemisphere bounce (pale sand as the ground colour)
+  throws warm light into shadowed alcoves, an IBL environment at 0.52 intensity
+  gives metal and skin something to reflect, and the low sun still rakes long
+  shadows across the ruins. [Lumen → hemisphere + IBL + per-zone light triads.]
+* **God rays.** Screen-space radial scattering in the grade shader, aimed at the
+  projected sun each frame and occluded by a bright-pass, so the smoke columns
+  carve visible shafts.
+* **Heat haze.** A lower-frame refraction wobble (two frequencies) that rises
+  with the noon grade.
+* **Motion blur.** A 5-tap smear along the camera's *measured* screen-space
+  flow (point 12 m ahead projected through this and last frame's view-
+  projection), so sprinting and whip-pans drag like a real lens.
+* **Depth of field.** `BokehPass` (desktop) with focus tracking the player
+  distance and aperture widening in clear air. [Physical camera DOF → bokeh
+  depth pass.]
+* **Handheld camera.** Layered breathing sway plus a slow weight shift,
+  amplified while sprinting, and a decaying trauma shake kicked by detection.
+  Camera roll is included, so it reads as an operator, not a rig.
+
+### 9d. Diegetic interface — no modern UI remains
+
+| Was | Now |
+|---|---|
+| Neon bar HUD | Torn **vellum** charge strip with a wax seal; the objective is written in ink |
+| Green stamina bar | **Stone relief channel** holding deep wine; the wine surges when exhausted |
+| (new) vitality | **Clay oil lamp** on a bronze rim: the flame shrinks, dims and gutters with health |
+| Digital compass text | **Hammered-bronze astrolabe** with a swinging wax-red needle and etched ticks |
+| Neon radar disc | **Sheepskin scroll chart** with bronze rollers, torn deckle edges, ink plates, charcoal crosses, a wax seal and an inked player arrow |
+| Mission clock | **Clay tablet** with incised numerals |
+| Wanted stars | Five **branded wax seals** (aleph brand) that light as the pursuit rises |
+| Glass pause menu | **Vellum codex** with gilded rules, page marks, bronze-clasp corners and bronze-leaf buttons |
+| — | **The Satchel** page: procedurally shaded still-life icons (oil lamp, iron dagger, worn tunic, water skin, sling & stones, the scroll) |
+| Purple title card | Vellum title leaf over a **desert dawn**, date-palm silhouettes, gilded rule |
+
+Typography is **Frank Ruhl Libre** (a Hebrew-rooted serif with a full Latin
+alphabet, OFL) for display, numerals and seals, over **EB Garamond** for body
+copy. No tracked all-caps template labels; the only capitals are in scripture
+citations.
+
+### 9e. Performance & verification
+
+The whole pass keeps the shared-material and merged-geometry discipline: hair
+cards add one draw call per named figure; smoke sprites use one draw call per
+emitter; micro-debris is instanced; decals share two materials. DOF is disabled
+on phones, shadows drop to 1024², particle density to 45%. Headless smoke passes
+**57/57** and the production build is clean.

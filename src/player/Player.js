@@ -25,6 +25,7 @@ export class Player {
 
     this.velocity = new THREE.Vector3();
     this.groundHeight = 0; // set by the active zone each frame
+    this.health = 1; // vitality — the oil in the lamp (HUD), regenerates slowly
     this.running = false;
     this.moving = false;
     this.interactRequested = false;
@@ -39,19 +40,21 @@ export class Player {
     // leather over a faded earth-tone tunic, red sash, sandals caked in dust.
     const rig = createDetailedHuman({
       palette: {
-        skin: Mat.skin(),
-        cloth: Mat.tunicDavid(),
-        cloth2: Mat.tunicEarth(),
-        hair: Mat.hair(),
-        leather: Mat.leatherDark(),
-        metal: Mat.brass(),
-        accent: Mat.sashDavid(),
+        skin: Mat.skinPbr(),
+        cloth: Mat.clothPbr(),
+        cloth2: Mat.leatherPbrWarm(),
+        hair: Mat.hairPbr(),
+        hairCard: Mat.hairCard(),
+        leather: Mat.leatherPbr(),
+        metal: Mat.bronzePbr(),
+        accent: Mat.clothPbrMadder(),
       },
       pose: 'standing',
       beard: 'full',
       hairStyle: 'short',
       armor: 'leather',
       detail: 'full',
+      seed: 7,
     });
     this.rig = rig;
     this.group.add(rig);
@@ -99,6 +102,7 @@ export class Player {
     this.group.rotation.y = yaw;
     this.velocity.set(0, 0, 0);
     this.stamina.reset();
+    this.health = 1;
     this.running = false;
     this.moving = false;
     this._gait = 0;

@@ -11,8 +11,10 @@ import { Mat } from '../../utils/materials.js';
 import {
   createRockField, createPalm, createDryBush, createBeacon, createRock, createHumanoid,
   createReeds, createGrassField, createMountainRidge, createBirdFlock,
-  createButterflies, createGrazingSheep,
+  createButterflies, createGrazingSheep, createAcacia, createDesertScrub,
+  createPebbleField, createWetStones, createCrackedPatch,
 } from '../props/PropFactory.js';
+import { rippleBumpMap, smokeSpriteMap } from '../../utils/surfaces.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
@@ -53,7 +55,8 @@ export function createDesertZone() {
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0xbcd4f0, 0xe0c896, 1.05);
+  // strong sky/ground bounce: pale sand throws warm light into every shadow
+  const hemi = new THREE.HemisphereLight(0xbcd4f0, 0xf0d4a0, 1.28);
   group.add(hemi);
 
   const sun = new THREE.DirectionalLight(0xfff2d0, 1.8); // blazing Miami noon
@@ -98,6 +101,12 @@ export function createDesertZone() {
   waterMat.specular.set(0xffffff);
   waterMat.shininess = 180;
   waterMat.opacity = 0.9;
+  // flowing ripple field, scrolled continuously by the zone update
+  const ripple = rippleBumpMap([7, 2]);
+  waterMat.bumpMap = ripple;
+  waterMat.bumpScale = 0.55;
+  waterMat.combine = THREE.MultiplyOperation;
+  waterMat.reflectivity = 0.35;
   waterMat.onBeforeCompile = (shader) => {
     shader.uniforms.uTime = { value: 0 };
     shader.vertexShader = `uniform float uTime;\n${shader.vertexShader}`.replace(
@@ -124,6 +133,12 @@ export function createDesertZone() {
     stone.scale.setScalar(s);
     group.add(stone);
   }
+  // wet, glossy flints half-sunk in the shallows
+  const wet = createWetStones(46, 110, 5, (x, z) => desertHeight(x, z) - 0.34);
+  group.add(wet);
+  const wetBank = createWetStones(20, 90, 12, (x, z) => desertHeight(x, z) + 0.08);
+  wetBank.position.z = 7.5;
+  group.add(wetBank);
 
   // ---------------------------------------------------- valley walls
   // big instanced rock fields hug the playable corridor — dry, porous,
@@ -247,6 +262,49 @@ export function createDesertZone() {
     group.add(bush);
   }
 
+  // ------------------------------------------------- acacias & scrub
+  // the flat-topped thorn trees that mark every wadi in the Negev
+  const acaciaSpots = [
+    [-34, 28], [30, 14], [-26, -30], [34, -44], [-40, 60], [38, 74],
+    [-18, 46], [22, -70], [-38, -76], [42, 44],
+  ];
+  acaciaSpots.forEach(([x, z], i) => {
+    if (Math.abs(z) < 11) return; // keep the ford clear
+    const acacia = createAcacia(i + 1);
+    acacia.position.set(x, desertHeight(x, z), z);
+    acacia.scale.setScalar(0.8 + seededRandom(i * 3.3) * 0.55);
+    acacia.rotation.y = seededRandom(i * 5.9) * Math.PI * 2;
+    group.add(acacia);
+    colliders.push({ x, z, r: 0.7 });
+  });
+  // sun-resistant scrub, thickest along the banks
+  for (let i = 0; i < 34; i++) {
+    const x = (seededRandom(i * 4.3) - 0.5) * 96;
+    const z = (seededRandom(i * 7.1) - 0.5) * 230;
+    const nearBank = Math.abs(z) < 16;
+    if (!nearBank && i % 3 === 0) continue;
+    const bush = createDesertScrub(i + 5);
+    bush.position.set(x, desertHeight(x, z), z);
+    bush.scale.setScalar(0.7 + seededRandom(i * 2.7) * 0.8);
+    group.add(bush);
+  }
+
+  // micro-debris: gravel and flint glinting across the path
+  const gravel = createPebbleField(260, 120, 3, desertHeight);
+  group.add(gravel);
+  const gravelBank = createPebbleField(140, 90, 9, desertHeight);
+  gravelBank.position.z = 4;
+  group.add(gravelBank);
+
+  // sun-cracked, flaking ground away from the water
+  for (let i = 0; i < 9; i++) {
+    const x = (seededRandom(i * 6.7) - 0.5) * 80;
+    const z = 18 + seededRandom(i * 8.9) * 90;
+    const patch = createCrackedPatch(i + 40, 4 + seededRandom(i) * 4);
+    patch.position.set(x, desertHeight(x, z) + 0.03, z);
+    group.add(patch);
+  }
+
   // ---------------------------------------------------------- beacon
   const beacon = createBeacon('Arid Field', 0xffc857);
   beacon.position.set(DESERT.exit.x, desertHeight(DESERT.exit.x, DESERT.exit.z), DESERT.exit.z);
@@ -258,6 +316,7 @@ export function createDesertZone() {
 
   // ------------------------------------------------------- particles
   const dust = new ParticleEmitter({
+    map: smokeSpriteMap(),
     count: 110,
     origin: new THREE.Vector3(0, 3, 0),
     spread: 55,
@@ -325,6 +384,11 @@ export function createDesertZone() {
     waterLevel: -0.32,
     update(dt, time) {
       if (waterMat.userData.shader) waterMat.userData.shader.uniforms.uTime.value = time;
+      // drift the ripple field: the Besor never holds still
+      if (waterMat.bumpMap) {
+        waterMat.bumpMap.offset.x = (waterMat.bumpMap.offset.x + dt * 0.045) % 1;
+        waterMat.bumpMap.offset.y = (waterMat.bumpMap.offset.y - dt * 0.018) % 1;
+      }
       dust.update(dt);
       foam.update(dt);
       haze.update(dt);

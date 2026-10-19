@@ -42,7 +42,7 @@ export class Engine {
     // from reading as plastic under pure Lambert shading
     const pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.06).texture;
-    this.scene.environmentIntensity = 0.38;
+    this.scene.environmentIntensity = 0.52;
     pmrem.dispose();
 
     this.camera = new THREE.PerspectiveCamera(

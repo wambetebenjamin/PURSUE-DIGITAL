@@ -22,6 +22,43 @@ function mesh(geo, mat, sx = 1, sy = 1, sz = 1, x = 0, y = 0, z = 0) {
   return m;
 }
 
+/**
+ * Bake a static prop into one mesh per material.
+ *
+ * Props are authored as readable little hierarchies of primitives; at runtime
+ * that would be dozens of draw calls per ruin. Everything here is immobile,
+ * so we flatten the group's world matrices into merged geometries — a burnt
+ * house drops from ~30 draws to ~7, an acacia from 14 to 2.
+ */
+function bakeStatic(root) {
+  root.updateMatrixWorld(true);
+  const byMat = new Map();
+  root.traverse((o) => {
+    if (!o.isMesh || o.isInstancedMesh) return;
+    const geo = o.geometry.clone();
+    geo.applyMatrix4(o.matrixWorld);
+    // normalise attribute sets so mixed primitives can merge
+    for (const name of Object.keys(geo.attributes)) {
+      if (name !== 'position' && name !== 'normal' && name !== 'uv') {
+        geo.deleteAttribute(name);
+      }
+    }
+    if (!byMat.has(o.material)) byMat.set(o.material, []);
+    byMat.get(o.material).push(geo);
+  });
+
+  const out = new THREE.Group();
+  for (const [mat, geos] of byMat) {
+    const merged = mergeGeometries(geos, false);
+    if (!merged) continue;
+    const m = new THREE.Mesh(merged, mat);
+    m.castShadow = true;
+    m.receiveShadow = true;
+    out.add(m);
+  }
+  return out;
+}
+
 // -------------------------------------------------------------- houses
 /** A burnt, partially-collapsed house. */
 export function createBurntHouse(seed = 1) {
@@ -53,11 +90,55 @@ export function createBurntHouse(seed = 1) {
     }
   });
 
-  // slumped roof
+  // ---------------------------------------------------------- stone base
+  // hand-hewn limestone plinth under the burnt mud-brick — the town was
+  // built of stone before the fire took the roof and the timber
+  for (let side = 0; side < 4; side++) {
+    const along = side < 2 ? w + 0.4 : d + 0.4;
+    const bx = side === 2 ? -(w / 2 + 0.14) : side === 3 ? w / 2 + 0.14 : 0;
+    const bz = side === 0 ? -(d / 2 + 0.14) : side === 1 ? d / 2 + 0.14 : 0;
+    for (let k = 0; k < 3; k++) {
+      const t = (k - 1) * (along / 3.4);
+      const bxk = side < 2 ? bx + t : bx;
+      const bzk = side < 2 ? bz : bz + t;
+      const block = mesh(Geo.box(), Mat.hewnLimestone(),
+        side < 2 ? along / 3.3 : 0.34, 0.3, side < 2 ? 0.34 : along / 3.3,
+        bxk, 0.16, bzk);
+      block.rotation.y = (r(200 + side * 4 + k) - 0.5) * 0.06;
+      g.add(block);
+    }
+  }
+  // mud-brick chunks and fallen dressed blocks
+  for (let i = 0; i < 4; i++) {
+    const s = 0.3 + r(210 + i) * 0.35;
+    const chunk = mesh(Geo.box(), Mat.hewnLimestone(), s * 1.5, s, s,
+      (r(220 + i) - 0.5) * (w + 2.6), s * 0.5, (r(230 + i) - 0.5) * (d + 2.6));
+    chunk.rotation.set(r(240 + i) * 0.5, r(250 + i) * 3, (r(260 + i) - 0.5) * 0.4);
+    g.add(chunk);
+  }
+
+  // slumped roof, with charred beams sagging through it
   const roof = mesh(Geo.box(), Mat.charRoof(), w + 0.5, 0.16, d + 0.5, 0, h + 0.12, 0);
   roof.rotation.z = (r(6) - 0.5) * 0.34;
   roof.rotation.x = (r(7) - 0.5) * 0.22;
   g.add(roof);
+  for (let i = 0; i < 4; i++) {
+    const beam = mesh(Geo.box(), Mat.charWood(), 0.14, 0.14, d + 1.2,
+      0, h - 0.05,
+      0);
+    beam.position.x = (i - 1.5) * (w / 4.4);
+    beam.position.y = h - 0.05 + r(270 + i) * 0.12;
+    beam.rotation.x = 0.06 + r(280 + i) * 0.18;
+    beam.rotation.z = (r(290 + i) - 0.5) * 0.12;
+    g.add(beam);
+  }
+  // soot-scarred wall tops (limestone blackened by the fire)
+  for (const [sx, sz, sxx, szz] of [
+    [w * 0.5, 0, 0.22, d], [-w * 0.5, 0, 0.22, d],
+    [0, d * 0.5, w, 0.22], [0, -d * 0.5, w, 0.22],
+  ]) {
+    g.add(mesh(Geo.box(), Mat.soot(), sxx * 0.98, 0.5, szz * 0.98, sx, h * 0.72, sz));
+  }
 
   // glowing ember patch (under the roof line)
   const embers = mesh(Geo.box(), Mat.ember(), w * 0.36, 0.06, d * 0.3, (r(8) - 0.5) * 1.2, 0.26, (r(9) - 0.5) * 1.2);
@@ -74,7 +155,7 @@ export function createBurntHouse(seed = 1) {
     g.add(deb);
   }
 
-  return g;
+  return bakeStatic(g);
 }
 
 /** Charred tree trunk with a few stubby branches. */
@@ -193,12 +274,28 @@ export function createTent(seed = 1) {
     rope.rotation.x = 0.7;
     g.add(rope);
   }
+
+  // canvas wear: sun-bleached patches, a stitched seam, a sagging hem
+  for (let i = 0; i < 4; i++) {
+    const patch = mesh(Geo.box(), i % 2 ? Mat.tentCloth() : Mat.tentClothAlt(),
+      0.5 + r(20 + i) * 0.6, 0.4 + r(30 + i) * 0.5, 0.03,
+      (r(40 + i) - 0.5) * 2.8, 0.5 + r(50 + i) * 1.1, 1.52 + r(60 + i) * 0.02);
+    patch.rotation.z = (r(70 + i) - 0.5) * 0.5;
+    patch.position.y = 0.5 + r(50 + i) * 0.9;
+    g.add(patch);
+  }
+  // stitched ridge seam down the roof
+  g.add(mesh(Geo.box(), Mat.rope(), 0.06, 1.3, 0.06, 0, 2.55, 0.05));
+  // sagging hem, darker where the dew and dust collect
+  const hem = mesh(Geo.box(), Mat.tentClothAlt(), 3.5, 0.16, 3.1, 0, 0.06, 0);
+  hem.rotation.z = (r(80) - 0.5) * 0.05;
+  g.add(hem);
   return g;
 }
 
 // --------------------------------------------------------------- fires
 /** Bonfire: logs + stylized flame + optional point light. */
-export function createBonfire(withLight = true) {
+export function createBonfire(withLight = true, castShadow = false) {
   const g = new THREE.Group();
 
   for (let i = 0; i < 5; i++) {
@@ -218,6 +315,14 @@ export function createBonfire(withLight = true) {
   if (withLight) {
     light = new THREE.PointLight(0xff7b2e, 42, 26, 2);
     light.position.set(0, 2.1, 0);
+    if (castShadow) {
+      // one hero fire throws real shadows; the rest fake it with flicker
+      light.castShadow = true;
+      light.shadow.mapSize.set(512, 512);
+      light.shadow.camera.near = 0.4;
+      light.shadow.camera.far = 24;
+      light.shadow.bias = -0.004;
+    }
     g.add(light);
   }
 
@@ -285,8 +390,35 @@ export function createCage() {
  * @param {{beard?:string, hairStyle?:string, armor?:string, robe?:boolean,
  *          detail?:string}} [opts]
  */
+let _pbrSwap = null;
+/** Lambert palette → physical palette for the named figures. */
+function pbrSwapMap() {
+  if (_pbrSwap) return _pbrSwap;
+  _pbrSwap = new Map([
+    [Mat.skin(), Mat.skinPbr()],
+    [Mat.skinDark(), Mat.skinPbrDark()],
+    [Mat.hair(), Mat.hairPbr()],
+    [Mat.leatherDark(), Mat.leatherPbr()],
+    [Mat.brass(), Mat.bronzePbr()],
+    [Mat.steelBloody(), Mat.ironPbr()],
+    [Mat.royalBronze(), Mat.bronzePbr()],
+  ]);
+  return _pbrSwap;
+}
+
 export function createHumanoid(palette, pose = 'standing', opts = {}) {
-  return createDetailedHuman({ palette, pose, ...opts });
+  // named figures (detail: 'full') get PBR skin/gear + strand-card hair;
+  // crowd extras keep the cheap Lambert palettes
+  const full = (opts.detail ?? 'full') === 'full';
+  let upgraded = palette;
+  if (full) {
+    const swap = pbrSwapMap();
+    const next = {};
+    for (const [k, v] of Object.entries(palette)) next[k] = swap.get(v) ?? v;
+    if (!next.hairCard) next.hairCard = opts.grayHair ? Mat.hairCardGray() : Mat.hairCard();
+    upgraded = next;
+  }
+  return createDetailedHuman({ palette: upgraded, pose, ...opts });
 }
 
 // ------------------------------------------------------------ beacons
@@ -1166,4 +1298,218 @@ export function createJar(seed = 1, mat = null) {
   g.add(mesh(Geo.torus(), m, 0.18, 0.045, 0.18, 0, 0.86, 0));
   g.rotation.y = r(1) * Math.PI;
   return g;
+}
+
+
+// ============================================================ PASS 8 props
+/**
+ * Acacia — the flat-topped thorn tree of the wadi. A leaning trunk, a few
+ * forked limbs and two or three umbrella canopies made of flattened, spiky
+ * clusters. Cheap (one material) but instantly reads "Judean wilderness".
+ */
+export function createAcacia(seed = 1) {
+  const g = new THREE.Group();
+  const r = (n) => seededRandom(seed * 5.7 + n);
+  const h = 3.4 + r(1) * 2.2;
+
+  const trunk = mesh(Geo.cyl(), Mat.acaciaBark(), 0.24, h, 0.24, 0, h / 2, 0);
+  trunk.rotation.z = (r(2) - 0.5) * 0.24;
+  g.add(trunk);
+
+  // forked limbs
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI * 2 + r(3) * 0.5;
+    const limb = mesh(Geo.cyl(), Mat.acaciaBark(), 0.10, 1.5, 0.10,
+      Math.cos(a) * 0.55, h * 0.82, Math.sin(a) * 0.55);
+    limb.rotation.z = Math.cos(a) * 0.75;
+    limb.rotation.x = -Math.sin(a) * 0.75;
+    g.add(limb);
+  }
+
+  // umbrella canopy — flattened clusters, deliberately uneven
+  const pads = 3 + ((r(4) * 3) | 0);
+  for (let i = 0; i < pads; i++) {
+    const a = (i / pads) * Math.PI * 2 + r(10 + i) * 0.8;
+    const rad = 0.7 + r(20 + i) * 1.5;
+    const pad = mesh(Geo.sphere(), Mat.acaciaLeaf(),
+      2.6 + r(30 + i) * 1.4, 0.5 + r(40 + i) * 0.3, 2.2 + r(50 + i) * 1.2,
+      Math.cos(a) * rad, h + 0.25 + r(60 + i) * 0.35, Math.sin(a) * rad);
+    pad.rotation.y = r(70 + i) * Math.PI;
+    g.add(pad);
+  }
+  // a few bare twigs poking through the canopy
+  for (let i = 0; i < 5; i++) {
+    const a = r(80 + i) * Math.PI * 2;
+    const twig = mesh(Geo.cyl(), Mat.acaciaBark(), 0.035, 1.1, 0.035,
+      Math.cos(a) * (1.2 + r(90 + i)), h + 0.5, Math.sin(a) * (1.2 + r(100 + i)));
+    twig.rotation.z = (r(110 + i) - 0.5) * 1.1;
+    twig.rotation.x = (r(120 + i) - 0.5) * 1.1;
+    g.add(twig);
+  }
+  return bakeStatic(g);
+}
+
+/** A dry, sun-resistant desert shrub — a fist of pale thorny stems. */
+export function createDesertScrub(seed = 1) {
+  const g = new THREE.Group();
+  const r = (n) => seededRandom(seed * 3.9 + n);
+  for (let i = 0; i < 9; i++) {
+    const a = r(i * 2.1) * Math.PI * 2;
+    const h = 0.3 + r(i * 3.7) * 0.55;
+    const stem = mesh(Geo.cyl(), Mat.desertScrub(), 0.035, h, 0.035,
+      Math.cos(a) * 0.16, h / 2, Math.sin(a) * 0.16);
+    stem.rotation.z = Math.cos(a) * (0.2 + r(i * 5.3) * 0.65);
+    stem.rotation.x = -Math.sin(a) * (0.2 + r(i * 6.1) * 0.65);
+    g.add(stem);
+  }
+  // seed heads / dry flower tufts
+  for (let i = 0; i < 4; i++) {
+    g.add(mesh(Geo.sphere(), Mat.desertScrub(), 0.14, 0.1, 0.14,
+      (r(i) - 0.5) * 0.4, 0.34 + r(i * 2) * 0.3, (r(i * 3) - 0.5) * 0.4));
+  }
+  return bakeStatic(g);
+}
+
+/** Instanced micro-debris: the gravel and cracked flint of the Judean path. */
+export function createPebbleField(count, area, seed = 1, groundHeight = () => 0) {
+  const n = qualityCount(count, 12);
+  const geo = Geo.dodeca();
+  const inst = new THREE.InstancedMesh(geo, Mat.rockDark(), n);
+  inst.castShadow = false;
+  inst.receiveShadow = true;
+  const dummy = new THREE.Object3D();
+  for (let i = 0; i < n; i++) {
+    const x = (seededRandom(seed * 2.3 + i * 1.7) - 0.5) * area;
+    const z = (seededRandom(seed * 4.1 + i * 2.9) - 0.5) * area;
+    const s = 0.05 + seededRandom(seed * 6.7 + i) * 0.22;
+    dummy.position.set(x, groundHeight(x, z) + s * 0.22, z);
+    dummy.rotation.set(seededRandom(i * 3.3) * 3, seededRandom(i * 5.1) * 3, seededRandom(i * 7.7) * 3);
+    dummy.scale.set(s, s * 0.7, s * 1.2);
+    dummy.updateMatrix();
+    inst.setMatrixAt(i, dummy.matrix);
+  }
+  inst.instanceMatrix.needsUpdate = true;
+  return inst;
+}
+
+/** Scattered raider pottery: whole jars, a tipped amphora, fired shards. */
+export function createPotteryCluster(seed = 1) {
+  const g = new THREE.Group();
+  const r = (n) => seededRandom(seed * 8.3 + n);
+  for (let i = 0; i < 5; i++) {
+    const jar = new THREE.Group();
+    const body = mesh(Geo.sphere(), r(i) > 0.4 ? Mat.pottery() : Mat.potteryDark(),
+      0.42 + r(i * 2) * 0.2, 0.5 + r(i * 3) * 0.24, 0.42 + r(i * 4) * 0.2, 0, 0.3, 0);
+    const neck = mesh(Geo.cyl(), Mat.pottery(), 0.15, 0.22, 0.15, 0, 0.62, 0);
+    const rim = mesh(Geo.cyl(), Mat.potteryDark(), 0.21, 0.05, 0.21, 0, 0.74, 0);
+    jar.add(body, neck, rim);
+    jar.position.set((r(i * 5) - 0.5) * 1.8, 0, (r(i * 6) - 0.5) * 1.8);
+    jar.rotation.set(r(i * 7) > 0.7 ? 1.3 : 0, r(i * 8) * 6, r(i * 9) > 0.7 ? 0.4 : 0);
+    g.add(jar);
+  }
+  // shards
+  for (let i = 0; i < 6; i++) {
+    const shard = mesh(Geo.box(), Mat.pottery(), 0.16 + r(i) * 0.12, 0.02, 0.2,
+      (r(i * 2) - 0.5) * 2.4, 0.02, (r(i * 3) - 0.5) * 2.4);
+    shard.rotation.set(0, r(i * 4) * 6, (r(i * 5) - 0.5) * 0.5);
+    g.add(shard);
+  }
+  return bakeStatic(g);
+}
+
+/** A makeshift rack of spears and round hide shields. */
+export function createWeaponRack(seed = 1) {
+  const g = new THREE.Group();
+  const r = (n) => seededRandom(seed * 6.1 + n);
+  for (let side = -1; side <= 1; side += 2) {
+    const post = mesh(Geo.cyl(), Mat.cageWood(), 0.08, 1.9, 0.08, side * 1.1, 0.95, 0);
+    post.rotation.z = side * 0.16;
+    g.add(post);
+    const foot = mesh(Geo.cyl(), Mat.cageWood(), 0.07, 1.3, 0.07, side * 0.85, 0.4, 0.45);
+    foot.rotation.x = -0.9;
+    g.add(foot);
+  }
+  g.add(mesh(Geo.cyl(), Mat.cageWood(), 0.06, 2.5, 0.06, 0, 1.55, 0).rotateZ(Math.PI / 2));
+  // spears leaning on the rack
+  for (let i = 0; i < 4; i++) {
+    const x = -0.8 + i * 0.55;
+    const shaft = mesh(Geo.cyl(), Mat.cedarWood(), 0.045, 2.5, 0.045, x, 1.25, 0.18);
+    shaft.rotation.z = (r(i) - 0.5) * 0.18;
+    const head = mesh(Geo.cone(), Mat.ironPbr(), 0.11, 0.42, 0.11, x, 2.56, 0.18);
+    head.rotation.z = -Math.PI;
+    g.add(shaft, head);
+  }
+  // shields
+  for (let i = 0; i < 2; i++) {
+    const shield = mesh(Geo.cyl(), Mat.leatherPbr(), 0.62, 0.08, 0.62, -0.45 + i * 0.9, 0.72, 0.42);
+    shield.rotation.x = Math.PI / 2 - 0.18;
+    const boss = mesh(Geo.sphere(), Mat.bronzePbr(), 0.18, 0.09, 0.18, -0.45 + i * 0.9, 0.62, 0.55);
+    g.add(shield, boss);
+  }
+  return bakeStatic(g);
+}
+
+/** Collapsed roof timbers, still smouldering at the joints. */
+export function createCollapsedTimber(seed = 1) {
+  const g = new THREE.Group();
+  const r = (n) => seededRandom(seed * 4.7 + n);
+  for (let i = 0; i < 7; i++) {
+    const len = 1.8 + r(i) * 2.4;
+    const beam = mesh(Geo.box(), Mat.charWood(), 0.18 + r(i * 2) * 0.12, len, 0.2, 0, 0, 0);
+    beam.position.set((r(i * 3) - 0.5) * 1.6, len * 0.35, (r(i * 4) - 0.5) * 1.6);
+    beam.rotation.set((r(i * 5) - 0.5) * 1.2, r(i * 6) * 3, (r(i * 7) - 0.5) * 1.4);
+    g.add(beam);
+  }
+  // glowing joints
+  for (let i = 0; i < 4; i++) {
+    const ember = new THREE.Mesh(Geo.sphere(), Mat.emberBed());
+    ember.scale.set(0.16 + r(i) * 0.12, 0.08, 0.16 + r(i * 2) * 0.12);
+    ember.position.set((r(i * 3) - 0.5) * 1.4, 0.07, (r(i * 4) - 0.5) * 1.4);
+    g.add(ember);
+  }
+  return bakeStatic(g);
+}
+
+/** A ground decal of soot and char around a burnt structure. */
+export function createSootPatch(seed = 1, radius = 3.2) {
+  const r = (n) => seededRandom(seed * 9.1 + n);
+  const patch = new THREE.Mesh(new THREE.CircleGeometry(radius, 18), Mat.soot());
+  patch.rotation.x = -Math.PI / 2;
+  patch.rotation.z = r(1) * Math.PI * 2;
+  patch.scale.set(1, 0.7 + r(2) * 0.5, 1);
+  patch.position.y = 0.02;
+  patch.renderOrder = 1;
+  return patch;
+}
+
+/** A decal of sun-cracked, flaking earth. */
+export function createCrackedPatch(seed = 1, radius = 4) {
+  const r = (n) => seededRandom(seed * 8.7 + n);
+  const patch = new THREE.Mesh(new THREE.CircleGeometry(radius, 16), Mat.crackedEarth());
+  patch.rotation.x = -Math.PI / 2;
+  patch.rotation.z = r(1) * Math.PI * 2;
+  patch.scale.set(1, 0.65 + r(2) * 0.5, 1);
+  patch.position.y = 0.015;
+  patch.renderOrder = 1;
+  return patch;
+}
+
+/** Wet river stones — dark, glossy, half-sunk in the Besor shallows. */
+export function createWetStones(count, area, seed = 1, groundHeight = () => 0) {
+  const n = qualityCount(count, 10);
+  const inst = new THREE.InstancedMesh(Geo.dodeca(), Mat.wetStone(), n);
+  inst.receiveShadow = true;
+  const dummy = new THREE.Object3D();
+  for (let i = 0; i < n; i++) {
+    const x = (seededRandom(seed * 3.1 + i * 1.9) - 0.5) * area;
+    const z = (seededRandom(seed * 5.3 + i * 2.3) - 0.5) * 8;
+    const s = 0.25 + seededRandom(seed * 7.7 + i) * 0.65;
+    dummy.position.set(x, groundHeight(x, z) + s * 0.18, z);
+    dummy.rotation.set(seededRandom(i * 2.7) * 3, seededRandom(i * 4.3) * 3, seededRandom(i * 6.1) * 3);
+    dummy.scale.set(s, s * 0.6, s * 1.1);
+    dummy.updateMatrix();
+    inst.setMatrixAt(i, dummy.matrix);
+  }
+  inst.instanceMatrix.needsUpdate = true;
+  return inst;
 }

@@ -24,12 +24,18 @@ const VERT = /* glsl */ `
 `;
 
 const FRAG = /* glsl */ `
+  uniform sampler2D uMap;
+  uniform float uHasMap;
   varying float vAlpha;
   varying vec3 vColor;
   void main() {
     float d = length(gl_PointCoord - vec2(0.5));
     if (d > 0.5) discard;
-    float a = vAlpha * smoothstep(0.5, 0.12, d);
+    // soft disc, or the billowing smoke sprite when one is supplied
+    float disc = smoothstep(0.5, 0.12, d);
+    float sprite = texture2D(uMap, gl_PointCoord).a;
+    float a = vAlpha * mix(disc, sprite, uHasMap);
+    if (a < 0.002) discard;
     gl_FragColor = vec4(vColor, a);
   }
 `;
@@ -50,6 +56,7 @@ const FRAG = /* glsl */ `
  * @property {number} rate           particles per second (<=0 = all at once)
  * @property {THREE.Color|number} color
  * @property {THREE.Color|number} [colorEnd]
+ * @property {THREE.Texture} [map]   soft sprite alpha (smoke billows)
  * @property {boolean} [additive]
  */
 export class ParticleEmitter {
@@ -81,7 +88,17 @@ export class ParticleEmitter {
     geometry.setAttribute('aSize', new THREE.BufferAttribute(sizes, 1));
     geometry.setAttribute('aAlpha', new THREE.BufferAttribute(alphas, 1));
 
+    // a 1×1 white fallback keeps the sampler bound on soft-disc emitters
+    if (!ParticleEmitter._white) {
+      const white = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1);
+      white.needsUpdate = true;
+      ParticleEmitter._white = white;
+    }
     this.material = new THREE.ShaderMaterial({
+      uniforms: {
+        uMap: { value: cfg.map ?? ParticleEmitter._white },
+        uHasMap: { value: cfg.map ? 1 : 0 },
+      },
       vertexShader: VERT,
       fragmentShader: FRAG,
       transparent: true,

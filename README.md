@@ -70,7 +70,12 @@ No server, database, or environment variables are required. Everything is client
 
 ### The Vice City look
 
-The graphics are graded to 1986 Miami rather than desert realism:
+> *Superseded in Pass 8 by the cinematic grade (§The cinematic overhaul), which
+> keeps the same palette logic — saturated skies, split-toned shadows, bloom —
+> but aims it at a photoreal desert rather than neon Miami. The history below is
+> kept because the grade architecture is unchanged.*
+
+The Pass 7 graphics were graded to 1986 Miami rather than desert realism:
 
 - **Neutral tone mapping** (Khronos PBR Neutral) so saturated pinks and cyans survive to the grade
 - **Three-stop skies** — saturated zenith, electric mid band, hot pastel horizon haze, fat sun disc with wide halo
@@ -79,6 +84,11 @@ The graphics are graded to 1986 Miami rather than desert realism:
 - **Palm avenues** flank the travel corridors; the brook runs Vice City turquoise
 
 ## The Vice City interface
+
+> *Pass 8 replaced this layer with the diegetic interface described under “The
+> cinematic overhaul”: the radar is now a sheepskin scroll, the stars are wax
+> seals, and the pause screen is a vellum codex. The interaction contracts
+> (radar zoom, district banners, timer, pursuit) are unchanged.*
 
 The game plays with the interface of a classic open-world epic, rebuilt in our
 own procedural style after studying the reversed GTA III / Vice City engine
@@ -93,6 +103,23 @@ only, no copyrighted assets:
 - **Esc** pauses into the march menu; **M** charts the **Map of Judah** with
   all seven districts and your objective
 - A "**MISSION PASSED**" flourish when the story completes
+
+## The cinematic overhaul
+
+Pass 8 replaced the stylised look end to end: **anatomical, asymmetric
+characters** with subsurface-skinned faces, strand-card hair and beards and
+physically based gear; **lit environments** with limestone plinths, soot and
+ember beds, collapsing timbers, acacia groves, gravel micro-debris, wet stones
+and a flowing ripple-shaded brook; **atmosphere** with volumetric smoke, dust,
+god rays, heat haze, camera-motion blur, depth of field and handheld camera;
+and a **fully diegetic interface** — vellum charge strip, clay oil-lamp
+vitality, stone-and-wine breath gauge, bronze astrolabe, sheepskin scroll map,
+clay tablet clock, wax pursuit seals, a vellum codex pause screen and a
+satchel of procedurally rendered goods.
+
+The whole thing is still procedural and real-time: no image assets, no
+downloaded models, one static build. See `docs/PRODUCTION_BIBLE.md` §9 for the
+full material, geometry and shader notes.
 
 ## Playing on a phone
 

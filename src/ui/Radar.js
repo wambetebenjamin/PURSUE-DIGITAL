@@ -20,6 +20,7 @@ import { CAMP } from '../world/zones/CampZone.js';
 import { SPOILS } from '../world/zones/SpoilsZone.js';
 import { GATE } from '../world/zones/GateZone.js';
 import { GILBOA } from '../world/zones/GilboaZone.js';
+import { parchmentCanvas } from '../utils/surfaces.js';
 
 /** Literary district tags, the zone-name banners of the march. */
 export const ZONE_TAGS = Object.freeze({
@@ -88,6 +89,14 @@ function buildPlates() {
 
 const _v = new THREE.Vector2();
 
+/** Radial gradient that survives the headless canvas stub. */
+function inkGradient(ctx, ...args) {
+  const g = typeof ctx['createRadialGradient'] === 'function'
+    ? ctx['createRadialGradient'](...args)
+    : null;
+  return g && typeof g.addColorStop === 'function' ? g : { addColorStop() {} };
+}
+
 export class Radar {
   /**
    * @param {HTMLElement} host container div; a canvas is created inside it
@@ -145,7 +154,7 @@ export class Radar {
   }
 
   // ------------------------------------------------------------ drawing
-  /** world XZ → canvas XY inside the disc (heading-up, player at centre). */
+  /** world XZ → canvas XY inside the sheet (heading-up, player at centre). */
   _toCanvas(wx, wz, cx, cy, radius) {
     const dx = wx - this.player.x;
     const dz = wz - this.player.z;
@@ -158,41 +167,80 @@ export class Radar {
     return _v;
   }
 
+  /** Ragged sheepskin sheet path — hand-torn edges, never a clean circle. */
+  _sheetPath(ctx, x, y, w, h, seed = 3) {
+    const jag = 0.9 + (seed % 5) * 0.16;
+    ctx.beginPath();
+    const steps = 18;
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      const px = x + t * w;
+      const py = y + Math.sin(t * 11 + seed) * 1.2;
+      if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+    }
+    for (let i = 0; i <= steps; i++) {
+      const t = i / steps;
+      ctx.lineTo(x + w + Math.sin(t * 9 + seed * 2) * 1.2, y + t * h);
+    }
+    for (let i = steps; i >= 0; i--) {
+      const t = i / steps;
+      ctx.lineTo(x + t * w, y + h + Math.sin(t * 12 + seed * 3) * 1.2 * jag);
+    }
+    for (let i = steps; i >= 0; i--) {
+      const t = i / steps;
+      ctx.lineTo(x + Math.sin(t * 10 + seed * 4) * 1.2, y + t * h);
+    }
+    ctx.closePath();
+  }
+
   renderDisc() {
     const ctx = this.ctx;
     const W = this.canvas.width;
     const H = this.canvas.height;
     const cx = W / 2;
     const cy = H / 2;
-    const radius = Math.min(W, H) / 2 - 6;
+    const pad = W * 0.055;
+    const radius = Math.min(W, H) / 2 - pad;
 
     ctx.clearRect(0, 0, W, H);
 
-    // --- disc body (radardisc sprite) ---
+    // --- the sheet itself: aged sheepskin, clipped to a torn edge
     ctx.save();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+    this._sheetPath(ctx, pad, pad, W - pad * 2, H - pad * 2, 5);
     ctx.clip();
 
-    ctx.fillStyle = '#141022';
+    try {
+      ctx.drawImage(parchmentCanvas(), 0, 0, W, H);
+    } catch (_e) {
+      ctx.fillStyle = '#e3cfa6';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // ink wash vignette at the edges of the vellum
+    const vg = inkGradient(ctx, cx, cy, radius * 0.55, cx, cy, radius * 1.15);
+    vg.addColorStop(0, 'rgba(90, 62, 30, 0)');
+    vg.addColorStop(1, 'rgba(70, 44, 18, 0.34)');
+    ctx.fillStyle = vg;
     ctx.fillRect(0, 0, W, H);
 
-    // land plates under the blips
+    // --- hand-drawn district plates (ink outline, hatched interior)
     for (const plate of this.plates) {
       const p = this._toCanvas(plate.cx, plate.cz, cx, cy, radius);
       const px = (plate.w / (this.range * Math.SQRT2 * 2)) * radius;
       const pz = (plate.h / (this.range * Math.SQRT2 * 2)) * radius;
-      ctx.fillStyle = 'rgba(196, 154, 92, 0.28)';
-      ctx.strokeStyle = 'rgba(255, 214, 150, 0.35)';
+      ctx.fillStyle = 'rgba(122, 82, 34, 0.16)';
+      ctx.strokeStyle = 'rgba(58, 38, 18, 0.6)';
       ctx.lineWidth = Math.max(1, W / 150);
+      ctx.setLineDash([Math.max(3, W / 40), Math.max(2, W / 70)]);
       ctx.beginPath();
-      ctx.roundRect(p.x - px, p.y - pz, px * 2, pz * 2, radius * 0.12);
+      ctx.roundRect(p.x - px, p.y - pz, px * 2, pz * 2, radius * 0.05);
       ctx.fill();
       ctx.stroke();
+      ctx.setLineDash([]);
     }
 
-    // heading grid — faint cross-rotating with the map
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.07)';
+    // --- latitude / longitude ink rules, rotating with the map
+    ctx.strokeStyle = 'rgba(72, 46, 20, 0.14)';
     ctx.lineWidth = 1;
     for (let i = -2; i <= 2; i++) {
       const a = this._toCanvas(this.player.x + i * this.range * 0.5, this.player.z - this.range, cx, cy, radius);
@@ -203,90 +251,111 @@ export class Radar {
       ctx.beginPath(); ctx.moveTo(c.x, c.y); ctx.lineTo(d.x, d.y); ctx.stroke();
     }
 
-    // --- objective blip (square coord blip, pulsing) ---
+    // --- objective: a charcoal-ringed wax seal
     if (this._objective) {
       const o = this._toCanvas(this._objective.x, this._objective.z, cx, cy, radius);
       const dist = Math.hypot(o.x - cx, o.y - cy);
-      const clamped = dist > radius * 0.86;
-      const pulse = 1 + Math.sin(this._pulse * 4) * 0.12;
-      const size = (W / 22) * pulse;
+      const clamped = dist > radius * 0.82;
+      const pulse = 1 + Math.sin(this._pulse * 3.2) * 0.08;
+      const size = (W / 20) * pulse;
 
       let bx = o.x;
       let by = o.y;
       if (clamped) {
-        const k = (radius * 0.86) / dist;
+        const k = (radius * 0.82) / dist;
         bx = cx + (o.x - cx) * k;
         by = cy + (o.y - cy) * k;
-      }
-      ctx.fillStyle = '#ff2e88';
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.lineWidth = Math.max(1, W / 130);
-      if (clamped) {
-        // edge chevron pointing toward the blip
         const ang = Math.atan2(o.y - cy, o.x - cx);
         ctx.save();
         ctx.translate(bx, by);
         ctx.rotate(ang);
+        ctx.fillStyle = '#7a2418';
+        ctx.strokeStyle = 'rgba(42, 24, 10, 0.85)';
+        ctx.lineWidth = Math.max(1, W / 140);
         ctx.beginPath();
-        ctx.moveTo(size * 0.7, 0);
-        ctx.lineTo(-size * 0.45, -size * 0.6);
-        ctx.lineTo(-size * 0.45, size * 0.6);
+        ctx.moveTo(size * 0.8, 0);
+        ctx.lineTo(-size * 0.4, -size * 0.6);
+        ctx.lineTo(-size * 0.4, size * 0.6);
         ctx.closePath();
         ctx.fill();
         ctx.stroke();
         ctx.restore();
       } else {
+        // wax seal body
+        ctx.save();
+        ctx.translate(bx, by);
+        const g = inkGradient(ctx, -size * 0.2, -size * 0.25, size * 0.1, 0, 0, size * 0.85);
+        g.addColorStop(0, '#a8402a');
+        g.addColorStop(0.65, '#7a2418');
+        g.addColorStop(1, '#4a140c');
+        ctx.fillStyle = g;
         ctx.beginPath();
-        ctx.rect(bx - size / 2, by - size / 2, size, size);
+        for (let i = 0; i < 9; i++) {
+          const a = (i / 9) * Math.PI * 2;
+          const rr = size * (0.62 + (i % 2) * 0.12);
+          const x = Math.cos(a) * rr;
+          const y = Math.sin(a) * rr;
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
         ctx.fill();
+        ctx.strokeStyle = 'rgba(40, 18, 8, 0.75)';
+        ctx.lineWidth = Math.max(1, W / 160);
         ctx.stroke();
+        // the brand: a palm-script mark
+        ctx.fillStyle = 'rgba(240, 214, 168, 0.85)';
+        ctx.font = `${Math.round(size * 0.9)}px "Frank Ruhl Libre", Georgia, serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('\u05D0', 0, size * 0.06);
+        ctx.restore();
       }
     }
 
     ctx.restore();
 
-    // --- rim: neon ring (radardisc border) ---
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-    ctx.lineWidth = Math.max(2, W / 42);
-    ctx.strokeStyle = 'rgba(47, 224, 255, 0.55)';
+    // --- deckle edge: burnt ink line just inside the torn border
+    ctx.save();
+    this._sheetPath(ctx, pad, pad, W - pad * 2, H - pad * 2, 5);
+    ctx.strokeStyle = 'rgba(74, 46, 18, 0.55)';
+    ctx.lineWidth = Math.max(1.4, W / 90);
     ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(cx, cy, radius - Math.max(1, W / 90), 0, Math.PI * 2);
-    ctx.lineWidth = Math.max(1.5, W / 70);
-    ctx.strokeStyle = 'rgba(255, 46, 136, 0.5)';
-    ctx.stroke();
+    ctx.restore();
 
-    // --- north tick on the ring (RADAR_SPRITE_NORTH) ---
-    const nAng = this.heading; // north (−Z) rotates opposite the map
-    const nx = cx + Math.sin(nAng) * (radius - 2);
-    const ny = cy - Math.cos(nAng) * (radius - 2);
-    ctx.fillStyle = '#ffd264';
-    ctx.font = `bold ${Math.round(W / 8)}px Inter, sans-serif`;
+    // --- north tick, set in a blackletter-feeling serif
+    const nAng = this.heading;
+    const nx = cx + Math.sin(nAng) * (radius * 0.87);
+    const ny = cy - Math.cos(nAng) * (radius * 0.87);
+    ctx.fillStyle = 'rgba(52, 32, 14, 0.9)';
+    ctx.font = `700 ${Math.round(W / 15)}px "Frank Ruhl Libre", Georgia, serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('N', nx, ny);
 
-    // --- player triangle, fixed at centre pointing up ---
-    const pSize = W / 13;
+    // --- player: an inked arrow with a red wax pin
+    const pSize = W / 15;
     ctx.save();
     ctx.translate(cx, cy);
-    ctx.fillStyle = '#f5efe2';
-    ctx.strokeStyle = 'rgba(20, 12, 32, 0.9)';
-    ctx.lineWidth = Math.max(1, W / 120);
+    ctx.fillStyle = '#2e2010';
+    ctx.strokeStyle = 'rgba(244, 228, 194, 0.9)';
+    ctx.lineWidth = Math.max(1, W / 150);
     ctx.beginPath();
     ctx.moveTo(0, -pSize);
-    ctx.lineTo(pSize * 0.62, pSize * 0.72);
-    ctx.lineTo(0, pSize * 0.3);
-    ctx.lineTo(-pSize * 0.62, pSize * 0.72);
+    ctx.lineTo(pSize * 0.6, pSize * 0.7);
+    ctx.lineTo(0, pSize * 0.28);
+    ctx.lineTo(-pSize * 0.6, pSize * 0.7);
     ctx.closePath();
     ctx.fill();
     ctx.stroke();
+    ctx.fillStyle = '#8c2a18';
+    ctx.beginPath();
+    ctx.arc(0, pSize * 0.12, pSize * 0.16, 0, Math.PI * 2);
+    ctx.fill();
     ctx.restore();
   }
 
   // ------------------------------------------------- full map (MAPS page)
-  /** The pause-screen chart of the whole march. */
+  /** The pause-screen chart of the whole march, drawn on vellum. */
   renderFullMap(canvas, playerPos, heading) {
     if (!canvas || typeof canvas.getContext !== 'function') return;
     const ctx = canvas.getContext('2d');
@@ -308,61 +377,99 @@ export class Radar {
     const oy = H / 2 - ((minZ + maxZ) / 2) * k;
 
     ctx.clearRect(0, 0, W, H);
-    ctx.fillStyle = '#141022';
-    ctx.fillRect(0, 0, W, H);
+
+    // sheet
+    ctx.save();
+    this._sheetPath(ctx, 6, 6, W - 12, H - 12, 9);
+    ctx.clip();
+    try {
+      ctx.drawImage(parchmentCanvas(), 0, 0, W, H);
+    } catch (_e) {
+      ctx.fillStyle = '#e3cfa6';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    // ink graticule
+    ctx.strokeStyle = 'rgba(90, 62, 30, 0.10)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 48) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+    }
+    for (let y = 0; y < H; y += 48) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+    }
 
     for (const plate of this.plates) {
       const x = plate.cx * k + ox;
       const y = plate.cz * k + oy;
       const w = plate.w * k;
       const h = plate.h * k;
-      ctx.fillStyle = 'rgba(196, 154, 92, 0.32)';
-      ctx.strokeStyle = 'rgba(255, 214, 150, 0.45)';
+      ctx.fillStyle = 'rgba(122, 82, 34, 0.13)';
+      ctx.strokeStyle = 'rgba(58, 38, 18, 0.62)';
       ctx.lineWidth = 2;
+      ctx.setLineDash([8, 5]);
       ctx.beginPath();
-      ctx.roundRect(x - w / 2, y - h / 2, w, h, 12);
+      ctx.roundRect(x - w / 2, y - h / 2, w, h, 8);
       ctx.fill();
       ctx.stroke();
+      ctx.setLineDash([]);
 
       const tag = ZONE_TAGS[plate.state];
       if (tag) {
-        ctx.fillStyle = 'rgba(255, 236, 200, 0.95)';
-        ctx.font = '600 13px Inter, sans-serif';
+        ctx.fillStyle = 'rgba(48, 30, 12, 0.92)';
+        ctx.font = `italic 16px "EB Garamond", Georgia, serif`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.fillText(tag[0], x, y - h / 2 - 12);
       }
 
-      // waypoints as small dots
-      ctx.fillStyle = 'rgba(255, 214, 150, 0.5)';
+      // waypoints as ink crosses
+      ctx.strokeStyle = 'rgba(76, 48, 20, 0.55)';
+      ctx.lineWidth = 1.4;
       for (const p of plate.pts) {
+        const wx = p.x * k + ox;
+        const wy = p.z * k + oy;
         ctx.beginPath();
-        ctx.arc(p.x * k + ox, p.y !== undefined ? p.z * k + oy : p.z * k + oy, 2.5, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.moveTo(wx - 3, wy); ctx.lineTo(wx + 3, wy);
+        ctx.moveTo(wx, wy - 3); ctx.lineTo(wx, wy + 3);
+        ctx.stroke();
       }
     }
 
-    // objective blip
+    // objective: wax seal with the aleph brand
     if (this._objective) {
       const x = this._objective.x * k + ox;
       const y = this._objective.z * k + oy;
-      ctx.fillStyle = '#ff2e88';
-      ctx.strokeStyle = '#fff';
-      ctx.lineWidth = 2;
+      const g = inkGradient(ctx, x - 3, y - 3, 2, x, y, 13);
+      g.addColorStop(0, '#a8402a');
+      g.addColorStop(0.7, '#7a2418');
+      g.addColorStop(1, '#4a140c');
+      ctx.fillStyle = g;
       ctx.beginPath();
-      ctx.rect(x - 7, y - 7, 14, 14);
+      for (let i = 0; i < 9; i++) {
+        const a = (i / 9) * Math.PI * 2;
+        const rr = 12 * (0.68 + (i % 2) * 0.12);
+        const px = x + Math.cos(a) * rr;
+        const py = y + Math.sin(a) * rr;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
       ctx.fill();
-      ctx.stroke();
+      ctx.fillStyle = 'rgba(240, 214, 168, 0.9)';
+      ctx.font = '700 14px "Frank Ruhl Libre", Georgia, serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('\u05D0', x, y + 1);
     }
 
-    // player arrow (rotated with heading)
+    // player arrow
     const px = playerPos.x * k + ox;
     const py = playerPos.z * k + oy;
     ctx.save();
     ctx.translate(px, py);
     ctx.rotate(heading);
-    ctx.fillStyle = '#f5efe2';
-    ctx.strokeStyle = '#141022';
+    ctx.fillStyle = '#2e2010';
+    ctx.strokeStyle = 'rgba(244, 228, 194, 0.9)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(0, -12);
@@ -374,11 +481,15 @@ export class Radar {
     ctx.stroke();
     ctx.restore();
 
-    // legend
-    ctx.fillStyle = 'rgba(255, 236, 200, 0.8)';
-    ctx.font = '11px Inter, sans-serif';
+    // cartouche + legend
+    ctx.fillStyle = 'rgba(58, 36, 14, 0.9)';
+    ctx.font = 'italic 15px "EB Garamond", Georgia, serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'bottom';
-    ctx.fillText('✦ your path  ·  ■ objective  ·  N is up', 14, H - 12);
+    ctx.fillText('the march of David, from Ziklag to Gilboa', 20, H - 20);
+    ctx.font = '13px "EB Garamond", Georgia, serif';
+    ctx.fillStyle = 'rgba(70, 44, 18, 0.75)';
+    ctx.fillText('N is up   ·   seal = the charge   ·   crosses = waypoints', 20, H - 40);
+    ctx.restore();
   }
 }

@@ -9,7 +9,10 @@ import { QUALITY } from '../../core/quality.js';
 import { Mat, Geo } from '../../utils/materials.js';
 import {
   createBurntHouse, createCharredTree, createBeacon, createGateWithDrifts,
+  createSootPatch, createCollapsedTimber, createPotteryCluster, createWeaponRack,
+  createCrackedPatch,
 } from '../props/PropFactory.js';
+import { smokeSpriteMap } from '../../utils/surfaces.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
@@ -39,7 +42,7 @@ export function createZiklagZone() {
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0x6a5a78, 0x8a5a38, 0.9);
+  const hemi = new THREE.HemisphereLight(0x7a6a90, 0xd09a68, 1.15);
   group.add(hemi);
 
   // 5600K golden-hour key light held LOW on the horizon — long raking shadows
@@ -108,6 +111,41 @@ export function createZiklagZone() {
     updaters.push((t) => house.userData.update?.(t));
   });
 
+  // soot scars and cracked earth around every burnt shell
+  housePositions.forEach(([x, z], i) => {
+    const soot = createSootPatch(i + 1, 4.2 + seededRandom(i * 2.7) * 2.4);
+    soot.position.set(x + (seededRandom(i * 3.1) - 0.5) * 2, ziklagHeight(x, z) + 0.02,
+      z + (seededRandom(i * 4.3) - 0.5) * 2);
+    group.add(soot);
+    if (i % 3 === 0) {
+      const crack = createCrackedPatch(i + 20, 5 + seededRandom(i) * 3);
+      crack.position.set(x + 4, ziklagHeight(x + 4, z) + 0.02, z - 3);
+      group.add(crack);
+    }
+  });
+
+  // collapsed roof timbers and the raiders' abandoned gear
+  const timberSpots = [[-7, 10], [13, -8], [-12, -24], [18, 6], [-18, -4], [6, 20]];
+  timberSpots.forEach(([x, z], i) => {
+    const timber = createCollapsedTimber(i + 1);
+    timber.position.set(x, ziklagHeight(x, z), z);
+    timber.rotation.y = seededRandom(i * 6.3) * Math.PI * 2;
+    group.add(timber);
+  });
+  for (let i = 0; i < 5; i++) {
+    const x = (seededRandom(i * 5.3) - 0.5) * 54;
+    const z = (seededRandom(i * 8.1) - 0.5) * 44;
+    const pottery = createPotteryCluster(i + 3);
+    pottery.position.set(x, ziklagHeight(x, z), z);
+    pottery.rotation.y = seededRandom(i * 2.9) * Math.PI * 2;
+    group.add(pottery);
+  }
+  const rack = createWeaponRack(4);
+  rack.position.set(-17, ziklagHeight(-17, 14), 14);
+  rack.rotation.y = 0.8;
+  group.add(rack);
+  colliders.push({ x: -17, z: 14, r: 1.3 });
+
   // charred trees
   for (let i = 0; i < 9; i++) {
     const a = seededRandom(i * 5.1) * Math.PI * 2;
@@ -160,7 +198,9 @@ export function createZiklagZone() {
   updaters.push((t) => beacon.userData.update(t));
 
   // ------------------------------------------------------- particles
+  const smokeMap = smokeSpriteMap();
   const smokeA = new ParticleEmitter({
+    map: smokeMap,
     count: 90,
     origin: new THREE.Vector3(-9, 2.2, 16),
     spread: 2.4,
@@ -169,14 +209,15 @@ export function createZiklagZone() {
     drift: 0.5,
     life: 6.5,
     lifeJitter: 0.35,
-    size: 26,
-    sizeGrow: 42,
-    alpha: 0.34,
+    size: 34,
+    sizeGrow: 64,
+    alpha: 0.5,
     rate: 0,
     color: 0x4a4038,
     colorEnd: 0x241f1c,
   });
   const smokeB = new ParticleEmitter({
+    map: smokeMap,
     count: 70,
     origin: new THREE.Vector3(12, 2.2, -2),
     spread: 2.0,
@@ -185,14 +226,15 @@ export function createZiklagZone() {
     drift: 0.45,
     life: 7,
     lifeJitter: 0.35,
-    size: 24,
-    sizeGrow: 40,
-    alpha: 0.3,
+    size: 32,
+    sizeGrow: 58,
+    alpha: 0.44,
     rate: 0,
     color: 0x52453c,
     colorEnd: 0x2a221e,
   });
   const smokeC = new ParticleEmitter({
+    map: smokeMap,
     count: 70,
     origin: new THREE.Vector3(11, 2.2, -16),
     spread: 2.2,
@@ -201,9 +243,9 @@ export function createZiklagZone() {
     drift: 0.5,
     life: 6.8,
     lifeJitter: 0.35,
-    size: 25,
-    sizeGrow: 40,
-    alpha: 0.32,
+    size: 33,
+    sizeGrow: 60,
+    alpha: 0.46,
     rate: 0,
     color: 0x4e4238,
     colorEnd: 0x281f1a,
@@ -227,6 +269,7 @@ export function createZiklagZone() {
   });
   // dense, lingering black column from the collapsed granary
   const smokeColumn = new ParticleEmitter({
+    map: smokeMap,
     count: 110,
     origin: new THREE.Vector3(20, 3.4, -28),
     spread: 2.8,
@@ -235,9 +278,9 @@ export function createZiklagZone() {
     drift: 1.0,
     life: 9.5,
     lifeJitter: 0.3,
-    size: 30,
-    sizeGrow: 58,
-    alpha: 0.42,
+    size: 42,
+    sizeGrow: 88,
+    alpha: 0.58,
     rate: 0,
     color: 0x2c2622,
     colorEnd: 0x120e0c,
@@ -294,7 +337,24 @@ export function createZiklagZone() {
     color: 0xd9be86,
     colorEnd: 0xb89a66,
   });
-  group.add(smokeA.points, smokeB.points, smokeC.points, embers.points, smokeColumn.points, dustStreams.points, heatShimmer.points, sandDrift.points);
+  // falling ash — the town is still settling, ember-grey against the sun
+  const ashFall = new ParticleEmitter({
+    count: 150,
+    origin: new THREE.Vector3(0, 7, -6),
+    spread: 30,
+    rise: -0.32,
+    riseJitter: 0.7,
+    drift: 0.55,
+    life: 12,
+    lifeJitter: 0.4,
+    size: 3,
+    sizeGrow: 1,
+    alpha: 0.5,
+    rate: 0,
+    color: 0x9a8e84,
+    colorEnd: 0x4a423c,
+  });
+  group.add(smokeA.points, smokeB.points, smokeC.points, embers.points, smokeColumn.points, dustStreams.points, heatShimmer.points, sandDrift.points, ashFall.points);
 
   // scavenger birds circling the smoke column
   const birds = createBirdFlock(8, new THREE.Vector3(10, 0, -10), 34, 26, 5);
@@ -320,6 +380,7 @@ export function createZiklagZone() {
       dustStreams.update(dt);
       heatShimmer.update(dt);
       sandDrift.update(dt);
+      ashFall.update(dt);
       fireA.intensity = 26 + Math.sin(time * 11) * 8;
       fireB.intensity = 22 + Math.sin(time * 9 + 2) * 7;
       for (const u of updaters) u(time);

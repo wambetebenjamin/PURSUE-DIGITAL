@@ -10,12 +10,14 @@
  */
 import * as THREE from 'three';
 import { QUALITY } from '../../core/quality.js';
-import { Mat } from '../../utils/materials.js';
+import { Mat, Geo } from '../../utils/materials.js';
 import {
   createTent, createBonfire, createCage, createHumanoid,
   createRockField, createBeacon, createTreasurePile, createSpilledAmphora,
   createRug, createCamel, createMountainRidge,
+  createWeaponRack, createPotteryCluster, createSootPatch, createCrackedPatch,
 } from '../props/PropFactory.js';
+import { smokeSpriteMap } from '../../utils/surfaces.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
@@ -188,15 +190,49 @@ export function createCampZone() {
     colliders.push({ x, z, r: 2.5 });
   });
 
+  // ------------------------------------------- raider gear & plunder
+  const rackSpots = [[-14, 22], [22, 4], [-24, -28]];
+  rackSpots.forEach(([x, z], i) => {
+    const rack = createWeaponRack(i + 2);
+    rack.position.set(x, campHeight(x, z), z);
+    rack.rotation.y = seededRandom(i * 5.5) * Math.PI;
+    group.add(rack);
+    colliders.push({ x, z, r: 1.2 });
+  });
+  for (let i = 0; i < 7; i++) {
+    const x = (seededRandom(i * 8.3) - 0.5) * 76;
+    const z = (seededRandom(i * 6.1) - 0.5) * 90;
+    const pottery = createPotteryCluster(i + 11);
+    pottery.position.set(x, campHeight(x, z), z);
+    pottery.rotation.y = seededRandom(i * 3.7) * Math.PI * 2;
+    group.add(pottery);
+  }
+
   // ------------------------------------------------------- bonfires
   const fireSpots = [[-8, 18], [20, 18], [-22, -12], [10, -22]];
   fireSpots.forEach(([x, z], i) => {
-    const fire = createBonfire(i < 3); // max 3 dynamic point lights
+    const fire = createBonfire(i < 3, i === 0); // max 3 lights; the first casts shadows
     fire.position.set(x, campHeight(x, z), z);
     group.add(fire);
     colliders.push({ x, z, r: 1.1 });
     timeUpdaters.push((t) => fire.userData.update(t));
+
+    // scorched ground and glowing ash ring beneath each fire
+    const soot = createSootPatch(i + 31, 2.4 + seededRandom(i) * 1.1);
+    soot.position.set(x, campHeight(x, z) + 0.02, z);
+    group.add(soot);
+    const bed = new THREE.Mesh(Geo.sphere(), Mat.emberBed());
+    bed.scale.set(1.2, 0.12, 1.2);
+    bed.position.set(x, campHeight(x, z) + 0.07, z);
+    group.add(bed);
   });
+  for (let i = 0; i < 5; i++) {
+    const x = (seededRandom(i * 7.7) - 0.5) * 70;
+    const z = (seededRandom(i * 9.1) - 0.5) * 90;
+    const crack = createCrackedPatch(i + 50, 5 + seededRandom(i) * 3);
+    crack.position.set(x, campHeight(x, z) + 0.02, z);
+    group.add(crack);
+  }
 
   // fire particles on two of them
   fireSpots.slice(0, 2).forEach(([x, z]) => {
@@ -350,6 +386,7 @@ export function createCampZone() {
 
   // --------------------------------------------------- campfire smoke
   const smoke = new ParticleEmitter({
+    map: smokeSpriteMap(),
     count: 70,
     origin: new THREE.Vector3(-8, campHeight(-8, 18) + 2, 18),
     spread: 1.2,

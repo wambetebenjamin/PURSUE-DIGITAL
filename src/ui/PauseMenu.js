@@ -8,6 +8,7 @@
  *
  * DOM ids are created when missing so the module is headless-safe (smoke).
  */
+import { renderSatchel } from './Inventory.js';
 export class PauseMenu {
   /**
    * @param {{ onResume: () => void, onRestart: () => void, radar: import('./Radar.js').Radar }} opts
@@ -17,7 +18,7 @@ export class PauseMenu {
     this.onRestart = onRestart;
     this.radar = radar;
     this.isOpen = false;
-    this.page = 'menu'; // 'menu' | 'map'
+    this.page = 'menu'; // 'menu' | 'map' | 'satchel'
 
     this.screen = document.getElementById('pause-screen');
     this.btnResume = document.getElementById('pause-resume');
@@ -26,6 +27,9 @@ export class PauseMenu {
     this.btnRestart = document.getElementById('pause-restart');
     this.menuPanel = document.getElementById('pause-menu-panel');
     this.mapPanel = document.getElementById('pause-map-panel');
+    this.satchelPanel = document.getElementById('pause-satchel-panel');
+    this.btnSatchel = document.getElementById('pause-satchel');
+    this.satchelHost = document.getElementById('satchel-grid');
     // headless fakes may lack getContext — renderFullMap guards and no-ops
     this.mapCanvas = document.getElementById('map-canvas');
 
@@ -38,6 +42,11 @@ export class PauseMenu {
     if (this.btnMap) {
       this.btnMap.addEventListener('click', () => this.showPage('map'));
     }
+    if (this.btnSatchel) {
+      this.btnSatchel.addEventListener('click', () => this.showPage('satchel'));
+    }
+    const back3 = document.getElementById('pause-resume-3');
+    if (back3) back3.addEventListener('click', () => this.close());
     if (this.btnRestart) {
       this.btnRestart.addEventListener('click', () => {
         this.close();
@@ -70,10 +79,12 @@ export class PauseMenu {
     this.page = page;
     if (this.menuPanel) this.menuPanel.classList.toggle('hidden', page !== 'menu');
     if (this.mapPanel) this.mapPanel.classList.toggle('hidden', page !== 'map');
+    if (this.satchelPanel) this.satchelPanel.classList.toggle('hidden', page !== 'satchel');
     if (page === 'map') {
       this._sizeMap();
       this.render();
     }
+    if (page === 'satchel') renderSatchel(this.satchelHost);
   }
 
   close(notify = true) {

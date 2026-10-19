@@ -12,6 +12,9 @@ export class HUD {
     this.objectiveText = document.getElementById('objective-text');
     this.staminaFill = document.getElementById('stamina-fill');
     this.compassText = document.getElementById('compass-text');
+    this.compassNeedle = document.getElementById('compass-needle');
+    this.lamp = document.getElementById('lamp-wrap');
+    this.flame = document.getElementById('lamp-flame');
     this.prompt = document.getElementById('prompt');
     this.promptText = document.getElementById('prompt-text');
     this.alertBanner = document.getElementById('alert-banner');
@@ -28,6 +31,7 @@ export class HUD {
     this._alertTimer = 0;
     this._promptVisible = false;
     this._staminaWarning = false;
+    this._health = 1;
     this._zoneTimer = 0;
     this._zoneFade = 0;
     this._pursuit = -1;
@@ -83,6 +87,29 @@ export class HUD {
   setCompass(headingDegrees) {
     const deg = Math.round(headingDegrees) % 360;
     this.compassText.textContent = `${compassLabel(deg)} ${deg}°`;
+    // the astrolabe needle swings under the fixed ring
+    if (this.compassNeedle && this.compassNeedle.style) {
+      this.compassNeedle.style.transform = `rotate(${-deg}deg)`;
+    }
+  }
+
+  /**
+   * Vitality — the oil in the lamp. The flame shrinks and gutters as health
+   * falls; at a quarter it turns from gold to a smoky red.
+   */
+  setHealth(ratio) {
+    const r = clamp(ratio, 0, 1);
+    if (Math.abs(r - this._health) < 0.004) return;
+    this._health = r;
+    if (this.flame && this.flame.style) {
+      this.flame.style.transform = `translateX(-50%) scale(${0.45 + r * 0.55}, ${0.4 + r * 0.6})`;
+      this.flame.style.opacity = String(0.35 + r * 0.65);
+      this.flame.classList.toggle('low', r < 0.3);
+    }
+    if (this.lamp && this.lamp.style) {
+      this.lamp.classList.toggle('guttering', r < 0.3);
+      if (this.lamp.style.setProperty) this.lamp.style.setProperty('--oil', String(r));
+    }
   }
 
   showPrompt(text) {

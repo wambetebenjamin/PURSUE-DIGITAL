@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="PURSUE — a 3D action-adventure retelling of 1 Samuel 30. Play as David and recover everything." />
     <title>PURSUE — 1 Samuel 30</title>
-    <script type="module" crossorigin src="./assets/index-D9YXffBG.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/three-ByHpQkXH.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-J69T8lAy.css">
+    <script type="module" crossorigin src="./assets/index-BUQe4rmr.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/three-B6l6zzyn.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-DnPA6Fo2.css">
   </head>
   <body>
     <!-- WebGL canvas is injected here by the engine -->
@@ -21,28 +21,76 @@
       <!-- Portrait-play hint (phones) -->
       <div id="rotate-hint" class="hidden">Turn your phone sideways for the full view</div>
 
-      <!-- Persistent top bar: objective, stamina, compass -->
+      <!-- ============ DIEGETIC HUD: vellum, bronze, oil & wine ============ -->
       <header id="hud">
+        <!-- vitality: a clay oil lamp; the flame sinks as David weakens -->
+        <div id="hud-vitals">
+          <div id="lamp-wrap" title="Vitality">
+            <svg id="lamp" viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <linearGradient id="bronze-lamp" x1="0" y1="0" x2="0.2" y2="1">
+                  <stop offset="0" stop-color="#e2be7c"/>
+                  <stop offset="0.3" stop-color="#b08a44"/>
+                  <stop offset="0.62" stop-color="#7a5624"/>
+                  <stop offset="1" stop-color="#3c2a12"/>
+                </linearGradient>
+                <linearGradient id="clay-lamp" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#b8785a"/>
+                  <stop offset="0.6" stop-color="#8a4c34"/>
+                  <stop offset="1" stop-color="#4c2618"/>
+                </linearGradient>
+              </defs>
+              <!-- handle -->
+              <path d="M30 42 C 10 34, 8 66, 28 67" fill="none"
+                    stroke="url(#bronze-lamp)" stroke-width="6" stroke-linecap="round"/>
+              <!-- body of the lamp -->
+              <path d="M27 57 C 33 75, 76 77, 84 57 C 86 51, 82 47, 73 47 L 38 47 C 29 47, 25 51, 27 57 Z"
+                    fill="url(#clay-lamp)"/>
+              <!-- bronze rim + spout -->
+              <path d="M44 47 L 69 47 L 67 41 L 46 41 Z" fill="url(#bronze-lamp)"/>
+              <path d="M80 55 L 99 48 L 94 60 Z" fill="url(#bronze-lamp)"/>
+              <!-- incised wave band -->
+              <path d="M34 58 q 6 -4 12 0 t 12 0 t 12 0" fill="none"
+                    stroke="rgba(20,10,4,0.55)" stroke-width="1.6"/>
+              <!-- wick -->
+              <path d="M84 54 L 92 51" stroke="#2a1a0c" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+            <div id="lamp-flame" aria-hidden="true"></div>
+            <span class="hud-label lamp-label">Oil</span>
+          </div>
+          <div id="hud-stamina">
+            <span class="hud-label">Breath</span>
+            <div id="stamina-track" aria-hidden="true">
+              <div id="stamina-fill"></div>
+              <span class="gauge-sheen"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- the charge: a torn vellum strip -->
         <div id="hud-objective">
-          <span class="hud-label">Objective</span>
+          <span class="hud-label">The Charge</span>
           <span id="objective-text">Reach the Desert Edge</span>
         </div>
-        <div id="hud-stamina">
-          <span class="hud-label">Stamina</span>
-          <div id="stamina-track"><div id="stamina-fill"></div></div>
-        </div>
+
+        <!-- heading: a hammered-bronze astrolabe -->
         <div id="hud-compass">
           <span class="hud-label">Heading</span>
-          <span id="compass-text">N 0°</span>
+          <div id="compass-dial" aria-hidden="true">
+            <div id="compass-needle"></div>
+            <span id="compass-text">N 0°</span>
+          </div>
         </div>
+
+        <!-- the hour on a clay tablet; the pursuit as branded seals -->
         <div id="hud-right">
           <div id="hud-timer-wrap">
-            <span class="hud-label">Time</span>
+            <span class="hud-label">The Hour</span>
             <span id="hud-timer">0:00</span>
           </div>
           <div id="pursuit" title="Amalekite pursuit">
             <div id="pursuit-stars">
-              <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+              <span>&#10022;</span><span>&#10022;</span><span>&#10022;</span><span>&#10022;</span><span>&#10022;</span>
             </div>
           </div>
         </div>
@@ -54,8 +102,11 @@
         <span id="zone-tag"></span>
       </div>
 
-      <!-- Circular radar, bottom-left (Vice City radardisc) -->
-      <div id="radar" aria-hidden="true"></div>
+      <!-- The scroll chart, bottom-left: sheepskin, charcoal ink -->
+      <div id="radar-frame" aria-hidden="true">
+        <div id="radar-rollers"><span></span><span></span></div>
+        <div id="radar"></div>
+      </div>
 
       <!-- Interaction prompt (Press E ... ) -->
       <div id="prompt" class="hidden"><span id="prompt-text"></span></div>
@@ -146,16 +197,26 @@
     <div id="pause-screen" class="hidden">
       <div id="pause-card">
         <div id="pause-menu-panel">
+          <span class="page-mark">The March</span>
           <h2>Paused</h2>
-          <p class="pause-sub">The march waits for you.</p>
+          <p class="pause-sub">The wilderness waits for no one.</p>
           <button id="pause-resume" class="primary-button">Resume the march</button>
           <button id="pause-map" class="secondary-button">Map of Judah</button>
+          <button id="pause-satchel" class="secondary-button">The Satchel</button>
           <button id="pause-restart" class="secondary-button danger">Begin again</button>
         </div>
         <div id="pause-map-panel" class="hidden">
+          <span class="page-mark">Chart</span>
           <h2>Map of Judah</h2>
           <canvas id="map-canvas"></canvas>
           <button id="pause-resume-2" class="primary-button">Back to the march</button>
+        </div>
+        <div id="pause-satchel-panel" class="hidden">
+          <span class="page-mark">Goods</span>
+          <h2>The Satchel</h2>
+          <p class="pause-sub">What the wilderness has given, and what it has taken.</p>
+          <div id="satchel-grid"></div>
+          <button id="pause-resume-3" class="primary-button">Back to the march</button>
         </div>
       </div>
     </div>

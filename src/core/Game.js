@@ -198,6 +198,9 @@ export class Game {
           audio.ui('alert');
           this.pursuit = 5; // wanted-stars spike: the raiders have seen you
           this.hud.showAlert(NARRATIVE.detectionAlert, VISION.alertDuration);
+          // a blade in the dark: the lamp dims, the camera takes the hit
+          this.player.health = Math.max(0.2, this.player.health - 0.14);
+          this.cameraRig.shake(0.6);
           // driven back to the valley mouth
           p.x = CAMP.spawn.x;
           p.z = CAMP.spawn.z;
@@ -305,6 +308,9 @@ export class Game {
     if (tag) this.hud.showZone(tag[0], tag[1]);
     audio.setAmbience(PHASE_AMBIENCE[stateName] ?? 'none');
     postFX.setGrade(PHASE_GRADES[stateName] ?? 'clear');
+    // the sun drives the screen-space god rays — aim them at this phase's key
+    if (zone.sun) postFX.setSunDirection(zone.sun.position);
+    postFX.setFocus(5.5);
     if (stateName === STATES.GILBOA) audio.grief();
     this.player.spawn(
       new THREE.Vector3(
@@ -421,6 +427,7 @@ export class Game {
       this.hud.update(dt);
       this.world.update(dt, elapsed, this.player.position);
       this.cameraRig.update(dt, this.player.position);
+      postFX.setFocus(this.cameraRig.focusDistance);
       this.input.endFrame();
       return;
     }
@@ -450,6 +457,9 @@ export class Game {
 
       // --- camera (sprint kick while running) ---
       this.cameraRig.update(dt, this.player.position, this.player.running);
+      postFX.setFocus(this.cameraRig.focusDistance);
+      // vitality recovers in the shade between skirmishes
+      this.player.health = Math.min(1, this.player.health + dt * 0.018);
 
       // --- radar (heading-up, speed zoom) ---
       const speedRatio = Math.min(1, this.player.velocity.length() / PLAYER.runSpeed);
@@ -461,6 +471,7 @@ export class Game {
 
       // --- HUD ---
       this.hud.setStamina(this.player.stamina.ratio, this.player.stamina.exhausted);
+      this.hud.setHealth?.(this.player.health);
       this.hud.setCompass(this.cameraRig.headingDegrees());
     } else {
       // victory: keep the scene breathing behind the overlay

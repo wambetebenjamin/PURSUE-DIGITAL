@@ -11,6 +11,13 @@ import {
   sandTexture, grassTexture, dirtTexture, ashTexture, stoneTexture,
   basaltTexture, clothTexture, leatherTexture, woodTexture, fleshTexture,
 } from './textures.js';
+import {
+  skinMaterial, hairMaterial, hairCardMaterial,
+  leatherMaterial, clothMaterial, metalMaterial,
+} from './pbr.js';
+import {
+  sootAlbedoMap, crackedEarthBump, limestoneBumpMap,
+} from './surfaces.js';
 
 const cache = new Map();
 
@@ -41,6 +48,38 @@ export const Mat = {
   })),
 
   // --- Vegetation / props ---
+  pottery: () => cached('pottery', () => new THREE.MeshStandardMaterial({
+    color: 0xa8643e, roughness: 0.85, metalness: 0, flatShading: true,
+  })),
+  potteryDark: () => cached('potteryDark', () => new THREE.MeshStandardMaterial({
+    color: 0x6e3e28, roughness: 0.9, metalness: 0, flatShading: true,
+  })),
+  acaciaBark: () => cached('acaciaBark', () => new THREE.MeshLambertMaterial({ color: 0x5a4632, flatShading: true })),
+  acaciaLeaf: () => cached('acaciaLeaf', () => new THREE.MeshLambertMaterial({ color: 0x3f5a2a, flatShading: true })),
+  desertScrub: () => cached('desertScrub', () => new THREE.MeshLambertMaterial({ color: 0x8a8050, flatShading: true })),
+  wetStone: () => cached('wetStone', () => new THREE.MeshStandardMaterial({
+    color: 0x8a8378, roughness: 0.16, metalness: 0.04,
+    map: stoneTexture([3, 3], '#7d786e', '#5a564e', '#a09a8e'), envMapIntensity: 1.1,
+  })),
+  soot: () => cached('soot', () => new THREE.MeshStandardMaterial({
+    color: 0xffffff, map: sootAlbedoMap([3, 3]), roughness: 1, metalness: 0,
+    transparent: true, opacity: 0.92, depthWrite: false,
+    polygonOffset: true, polygonOffsetFactor: -2,
+  })),
+  crackedEarth: () => cached('crackedEarth', () => new THREE.MeshStandardMaterial({
+    color: 0xc9b490, roughness: 1, metalness: 0,
+    map: dirtTexture([4, 4]), bumpMap: crackedEarthBump([4, 4]), bumpScale: 0.12,
+    transparent: true, opacity: 0.9, depthWrite: false,
+    polygonOffset: true, polygonOffsetFactor: -2,
+  })),
+  hewnLimestone: () => cached('hewnLimestone', () => new THREE.MeshStandardMaterial({
+    color: 0xffffff, map: stoneTexture([4, 4], '#c8b596', '#a48f6e', '#e2d2b0'),
+    bumpMap: limestoneBumpMap([4, 4]), bumpScale: 0.03, roughness: 0.9, metalness: 0,
+  })),
+  emberBed: () => cached('emberBed', () => new THREE.MeshBasicMaterial({
+    color: 0xff5a1e, transparent: true, opacity: 0.5,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+  })),
   dryBush: () => cached('dryBush', () => new THREE.MeshLambertMaterial({ color: 0x6d6a3c, flatShading: true })),
   palmTrunk: () => cached('palmTrunk', () => new THREE.MeshLambertMaterial({ color: 0x6e4f33, flatShading: true })),
   palmLeaf: () => cached('palmLeaf', () => new THREE.MeshLambertMaterial({ color: 0x4c6b2f, flatShading: true })),
@@ -80,6 +119,25 @@ export const Mat = {
   tunicAmalekite: () => cached('tunicAmalekite', () => new THREE.MeshLambertMaterial({ color: 0x7d3b2e })),
   tunicAmalekiteAlt: () => cached('tunicAmalekiteAlt', () => new THREE.MeshLambertMaterial({ color: 0x5e4632 })),
   tunicCaptive: () => cached('tunicCaptive', () => new THREE.MeshLambertMaterial({ color: 0x5b6b7a })),
+
+  // --- PASS 8: cinematic character materials (MeshPhysical + SSS / hair cards)
+  // David & named figures get these; crowd extras keep the cheap Lambert set.
+  skinPbr: () => cached('skinPbr', () => skinMaterial({ albedo: '#a06b45', sssStrength: 0.34, dust: 0.06 })),
+  skinPbrDark: () => cached('skinPbrDark', () => skinMaterial({ albedo: '#7a5236', sssStrength: 0.3, dust: 0.08 })),
+  skinPbrWeathered: () => cached('skinPbrWeathered', () => skinMaterial({ albedo: '#8a5c3e', sssStrength: 0.26, dust: 0.14, roughness: 0.72 })),
+  hairCard: () => cached('hairCard', () => hairCardMaterial({ color: '#241a12' })),
+  hairCardGray: () => cached('hairCardGray', () => hairCardMaterial({ color: '#5a5048' })),
+  hairPbr: () => cached('hairPbr', () => hairMaterial({ color: '#241a12' })),
+  leatherPbr: () => cached('leatherPbr', () => leatherMaterial({ color: 0x3a2c20, rough: 0.76 })),
+  leatherPbrWarm: () => cached('leatherPbrWarm', () => leatherMaterial({ color: 0x5a3a22, rough: 0.82 })),
+  clothPbr: () => cached('clothPbr', () => clothMaterial({ color: 0x8c5a38, sheen: 0.5 })),
+  clothPbrIndigo: () => cached('clothPbrIndigo', () => clothMaterial({ color: 0x4b5568, sheen: 0.55 })),
+  clothPbrCream: () => cached('clothPbrCream', () => clothMaterial({ color: 0xc7b291, sheen: 0.45 })),
+  clothPbrMadder: () => cached('clothPbrMadder', () => clothMaterial({ color: 0x8c2f24, sheen: 0.5 })),
+  bronzePbr: () => cached('bronzePbr', () => metalMaterial({ color: 0x9a6a2e, metalness: 0.95, rough: 0.38, bump: 0.016 })),
+  ironPbr: () => cached('ironPbr', () => metalMaterial({ color: 0x5a5f66, metalness: 1.0, rough: 0.34, bump: 0.014 })),
+  ironPbrDark: () => cached('ironPbrDark', () => metalMaterial({ color: 0x30343a, metalness: 0.9, rough: 0.52, bump: 0.018, patina: 0.25 })),
+  goldPbr: () => cached('goldPbr', () => metalMaterial({ color: 0xc99a3a, metalness: 1.0, rough: 0.28, bump: 0.01 })),
 
   // --- PHASE 4-7 PBR accents (prompt-specified Metallic/Roughness values) ---
   // "Blood-spattered steel (Metallic 1.0, Roughness 0.15)"
