@@ -1932,9 +1932,9 @@ body.touch-mode #radar {
 #lamp-flame {
   position: absolute;
   left: 79%;
-  top: 6%;
+  top: 8%;
   width: 20%;
-  height: 36%;
+  height: 42%;
   transform-origin: 50% 100%;
   border-radius: 50% 50% 46% 46% / 68% 68% 32% 32%;
   background:
@@ -2901,4 +2901,38 @@ body.touch-mode .touch-btn:active {
   #pursuit-stars span::before {
     font-size: 8px;
   }
+}
+
+/* typographic corrections: no modern tracked capital labels anywhere */
+.primary-button,
+.secondary-button,
+.touch-btn,
+#prompt,
+#modal-buttons button,
+#loading span {
+  text-transform: none;
+  letter-spacing: 0.015em;
+  font-variant: normal;
+}
+
+#loading {
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+#rotate-hint {
+  background:
+    linear-gradient(178deg, #e9d8b2 0%, #d3bb8c 100%);
+  border: 1px solid rgba(82, 55, 20, 0.45);
+  color: var(--ink);
+  font-family: var(--body);
+  font-style: italic;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+}
+
+/* the charge and page marks are the only small caps, and they are engraved */
+#hud-objective .hud-label,
+.page-mark {
+  font-variant: small-caps;
+  letter-spacing: 0.1em;
 }

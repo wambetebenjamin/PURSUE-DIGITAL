@@ -102,7 +102,7 @@ export class HUD {
     if (Math.abs(r - this._health) < 0.004) return;
     this._health = r;
     if (this.flame && this.flame.style) {
-      this.flame.style.transform = `translateX(-50%) scale(${0.45 + r * 0.55}, ${0.4 + r * 0.6})`;
+      this.flame.style.transform = `scale(${0.5 + r * 0.5}, ${0.42 + r * 0.58})`;
       this.flame.style.opacity = String(0.35 + r * 0.65);
       this.flame.classList.toggle('low', r < 0.3);
     }
