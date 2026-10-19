@@ -94,14 +94,14 @@ export const Mat = {
   flame: () => cached('flame', () => new THREE.MeshBasicMaterial({ color: 0xff8c2a })),
   flameCore: () => cached('flameCore', () => new THREE.MeshBasicMaterial({ color: 0xffd25e })),
   beacon: () => cached('beacon', () => new THREE.MeshBasicMaterial({
-    color: 0x53e0ff,
+    color: 0xffc36a,
     transparent: true,
     opacity: 0.55,
     depthWrite: false,
     blending: THREE.AdditiveBlending,
   })),
   beaconRing: () => cached('beaconRing', () => new THREE.MeshBasicMaterial({
-    color: 0x53e0ff,
+    color: 0xffc36a,
     transparent: true,
     opacity: 0.8,
     side: THREE.DoubleSide,
@@ -204,9 +204,10 @@ export const Mat = {
     depthWrite: false,
   })),
   arrowGlow: () => cached('arrowGlow', () => new THREE.MeshBasicMaterial({
-    color: 0x59f0c8,
+    // gilded brass, not neon: the guide belongs to this world
+    color: 0xffc36a,
     transparent: true,
-    opacity: 0.92,
+    opacity: 0.9,
   })),
 };
 

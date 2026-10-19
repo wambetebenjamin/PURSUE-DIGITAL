@@ -189,9 +189,9 @@ export function createZiklagZone() {
   colliders.push({ x: -24, z: 8, r: 2.2 });
 
   // ---------------------------------------------------------- beacon
-  const beacon = createBeacon('Desert Edge', 0x53e0ff);
+  const beacon = createBeacon('Desert Edge', 0xffc36a);
   beacon.position.set(ZIKLAG.waypoint.x, ziklagHeight(ZIKLAG.waypoint.x, ZIKLAG.waypoint.z), ZIKLAG.waypoint.z);
-  const label = makeTextSprite('DESERT EDGE', { color: '#c9f2ff', bg: 'rgba(8,20,32,0.55)' });
+  const label = makeTextSprite('DESERT EDGE', { color: '#ffeabd', bg: 'rgba(48,32,8,0.55)' });
   label.position.set(0, 6.4, 0);
   beacon.add(label);
   group.add(beacon);

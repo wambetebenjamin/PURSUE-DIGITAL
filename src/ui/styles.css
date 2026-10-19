@@ -2936,3 +2936,35 @@ body.touch-mode .touch-btn:active {
   font-variant: small-caps;
   letter-spacing: 0.1em;
 }
+
+/* remove the remaining tracked-caps labels from the older design system */
+#modal-phase,
+#modal-speaker,
+#modal-cite,
+#start-card .subtitle,
+#victory-card .citation,
+#prompt-text {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-family: var(--body);
+}
+
+#modal-phase {
+  font-style: italic;
+  letter-spacing: 0.08em;
+}
+
+#start-card .subtitle {
+  letter-spacing: 0.04em;
+  font-style: italic;
+}
+
+#victory-card .citation {
+  letter-spacing: 0.03em;
+  font-style: italic;
+}
+
+#prompt-text {
+  letter-spacing: 0.01em;
+  font-size: 14px;
+}

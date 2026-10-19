@@ -267,7 +267,7 @@ class PostFX {
 
   /** Direction *toward* the sun in world space (drives the god rays). */
   setSunDirection(v) {
-    if (!v) return;
+    if (!v || (v.lengthSq && v.lengthSq() < 1e-6)) return;
     this._sunDir.copy(v).normalize();
   }
 

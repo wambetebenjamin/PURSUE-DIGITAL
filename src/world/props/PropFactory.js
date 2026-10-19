@@ -426,7 +426,7 @@ export function createHumanoid(palette, pose = 'standing', opts = {}) {
  * Glowing waypoint: pulsing ground ring + light pillar + floating label.
  * `group.userData.update(time)` animates the pulse.
  */
-export function createBeacon(label, colorHex = 0x53e0ff) {
+export function createBeacon(label, colorHex = 0xffc36a) {
   const g = new THREE.Group();
 
   const ring = new THREE.Mesh(Geo.ring(), Mat.beaconRing().clone());
