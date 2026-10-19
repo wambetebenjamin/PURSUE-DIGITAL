@@ -2865,3 +2865,40 @@ body.touch-mode .touch-btn:active {
     0 0 16px rgba(180, 120, 48, 0.35),
     inset 0 1px 0 rgba(255, 250, 232, 0.75);
 }
+
+/* very narrow phones: let the charge drop to its own row */
+@media (max-width: 480px) {
+  #hud {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+
+  #hud-vitals {
+    order: 1;
+  }
+
+  #hud-right {
+    order: 1;
+    margin-left: auto;
+  }
+
+  #hud-objective {
+    order: 3;
+    flex: 1 1 100%;
+    max-width: none;
+    padding: 5px 18px 7px;
+  }
+
+  #hud-stamina {
+    width: 64px;
+  }
+
+  #pursuit-stars span {
+    width: 12px;
+    height: 12px;
+  }
+
+  #pursuit-stars span::before {
+    font-size: 8px;
+  }
+}
