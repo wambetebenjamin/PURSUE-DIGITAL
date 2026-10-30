@@ -13,6 +13,7 @@ import { Input } from './core/Input.js';
 import { Game } from './core/Game.js';
 import { settings } from './core/settings.js';
 import { postFX } from './core/PostFX.js';
+import { initInstallShell } from './core/install.js';
 
 // ---------------------------------------------------------------- engine
 const mount = document.getElementById('app');
@@ -90,12 +91,32 @@ input.onPointerLockChange = (locked) => {
   resumeHint.classList.toggle('hidden', !showHint);
 };
 
+const shell = initInstallShell();
+
 startButton.addEventListener('click', () => {
   startScreen.classList.add('hidden');
   audio.init();
   audio.resume();
   game.start();
+  shell.begin();
+  // on a phone the browser chrome is the only thing the APK has and we do not
+  if (IS_TOUCH) shell.requestFullscreen();
 });
+
+// the screen may sleep over a paused march, and must not over a running one
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) shell.end();
+  else if (game.started && !game.paused && !game.finished) shell.begin();
+});
+
+// pause overlay, dialogue and victory all stop the clock: no wake lock there
+const shellSync = () => {
+  if (game.modal?.isOpen || game.paused || game.finished) shell.end();
+  else if (game.started) shell.begin();
+};
+// cheap and complete: polls the game's own state rather than instrumenting
+// every overlay that can stop the clock
+setInterval(shellSync, 700);
 
 // click anywhere on the canvas re-acquires the pointer (Input handles it),
 // but also hide the hint immediately for crisp feedback

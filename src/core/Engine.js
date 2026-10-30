@@ -7,7 +7,7 @@
 import * as THREE from 'three';
 import { postFX } from './PostFX.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { QUALITY } from './quality.js';
+import { QUALITY, IS_MOBILE } from './quality.js';
 
 export class Engine {
   /**
@@ -55,6 +55,14 @@ export class Engine {
     // Vice City-style post chain: bloom + retro-Miami grade
     postFX.init(this.renderer, this.scene, this.camera);
 
+    // ---- adaptive resolution governor (phones are a lottery of GPUs)
+    this._basePixelRatio = Math.min(window.devicePixelRatio, QUALITY.pixelRatio);
+    this._perfSteps = IS_MOBILE ? [1, 0.82, 0.68, 0.56] : [1, 0.85];
+    this._perfStep = 0;
+    this._perfAccum = 0;
+    this._perfFrames = 0;
+    this._perfQuiet = 0;
+
     this.clock = new THREE.Clock();
     this.elapsed = 0;
     this._raf = 0;
@@ -96,5 +104,48 @@ export class Engine {
 
     this.game.update(dt, this.elapsed);
     postFX.render(dt);
+    this._adapt(dt);
+  }
+
+  /**
+   * Keep the frame rate honest on unknown hardware.
+   *
+   * An APK is built for a device tier; a web build is opened on everything from
+   * a flagship to a five-year-old budget phone. This governor watches the real
+   * frame time and steps the render resolution down (never the world's content)
+   * when the device cannot hold ~40 fps. It only ever steps *down*, and only
+   * after two seconds of sustained trouble, so a loading hitch can never lock
+   * a good device into a blurry build.
+   */
+  _adapt(dt) {
+    if (dt <= 0) return;
+    this._perfAccum += dt;
+    this._perfFrames++;
+    if (this._perfAccum < 2) return;
+
+    const avg = this._perfAccum / this._perfFrames;
+    this._perfAccum = 0;
+    this._perfFrames = 0;
+
+    const last = this._perfStep >= this._perfSteps.length - 1;
+    if (avg > 1 / 40 && !last) {
+      this._perfQuiet++;
+      // two slow windows in a row before spending quality
+      if (this._perfQuiet >= 2) {
+        this._perfStep++;
+        this._perfQuiet = 0;
+        this._applyPixelRatio();
+      }
+    } else {
+      this._perfQuiet = 0;
+    }
+  }
+
+  _applyPixelRatio() {
+    const scale = this._perfSteps[this._perfStep];
+    const ratio = Math.max(0.6, this._basePixelRatio * scale);
+    this.renderer.setPixelRatio(ratio);
+    postFX.setPixelRatio(Math.min(ratio, IS_MOBILE ? 1.25 : 1.6));
+    this._onResize();
   }
 }

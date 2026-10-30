@@ -490,4 +490,30 @@ for (const state of zoneStates) {
     `${name} has a sane contrast curve`);
 }
 
+// ------------------------------------- pass 12: the installed-app shell
+const { initInstallShell } = await import('../src/core/install.js');
+const shell = initInstallShell();
+ok(shell && typeof shell.begin === 'function' && typeof shell.end === 'function',
+  'the install shell boots headless and exposes begin/end');
+ok(shell.isStandalone() === false, 'a browser tab is not standalone');
+ok(typeof shell.isIOS() === 'boolean', 'the iOS probe answers on any engine');
+// no service worker, no wake lock, no fullscreen in this environment: none may throw
+await shell.begin();
+await shell.end();
+ok(true, 'wake lock and fullscreen are optional, never fatal');
+shell.requestFullscreen();
+ok(true, 'a refused fullscreen request is swallowed');
+
+// the shell's own assets are the ones an install needs
+const { readFileSync: readFs, existsSync } = await import('node:fs');
+ok(existsSync('public/sw.js'), 'the service worker template ships');
+ok(/__PRECACHE__/.test(readFs('public/sw.js', 'utf8')), 'its precache list is injected at build time');
+for (const icon of ['icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'apple-touch-icon.png']) {
+  ok(existsSync(`public/icons/${icon}`), `install icon present: ${icon}`);
+}
+const png = readFs('public/icons/icon-512.png');
+ok(png[0] === 0x89 && png[1] === 0x50 && png.slice(12, 16).toString() === 'IHDR',
+  'the icon is a real PNG');
+ok(png.readUInt32BE(16) === 512 && png.readUInt32BE(20) === 512, 'the 512 icon is 512 square');
+
 console.log(`\nAll ${passed} checks passed.\n`);

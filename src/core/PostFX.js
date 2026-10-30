@@ -309,6 +309,12 @@ class PostFX {
     if (Number.isFinite(distance)) this._focusTarget = Math.max(1.2, distance);
   }
 
+  /** Render-resolution governor (see Engine._adapt). */
+  setPixelRatio(r) {
+    if (!this.composer || !Number.isFinite(r)) return;
+    this.composer.setPixelRatio(Math.max(0.5, r));
+  }
+
   setSize(w, h) {
     this.composer?.setSize(w, h);
     this._bloom?.setSize(w, h);
