@@ -822,3 +822,59 @@ without overwriting the record), payout into the stores, the charge chain
 run modifiers, drilling, hero unlock pricing, all four War Table leaves rendering,
 page visibility, the HUD tracker showing and hiding, the codex nav marking the
 active leaf, and persistence of the record.
+
+## 15. The stronghold kit (Pass 14)
+
+Pass 11 rebuilt the *air*; pass 14 rebuilds the *built world*. The reference
+strategy game's cities read as real because of a construction grammar that every
+walled settlement in history shares — and that grammar is public vocabulary, so
+it can be authored rather than copied.
+
+### 15a. What the kit contains
+
+`src/world/props/MedievalKit.js`:
+
+| Builder | Notes |
+|---|---|
+| `createCurtainWall({length,height,thickness,ruined,seed})` | laid in courses with a battered footing; merlons with seeded gaps when ruined; buttresses on the outer face; recessed arrow slits on the inner; a walkway floor |
+| `createDrumTower({radius,height,top,ruined})` | banded drum (open cylinder + solid base), battlement ring of 14 merlons or a conical slate roof with an iron finial, a doorway on the inner side |
+| `createGatehouse({span,height,towerRadius,ruined})` | masonry either side of the passage, a segmental arch of stepped corbels, a merloned wall-walk, a **raised** portcullis hanging its teeth in the arch, two flanking drum towers |
+| `createPalisade({length,height})` | sharpened stakes with two rails, each stake raked slightly |
+| `createBanner({color,height})` | shaft, crossbar, a cloth tongue that sways in `update`, a torn notch |
+| `createBrazier({withLight})` | three iron legs, a basket, glowing coals, a flame that scales with a two-frequency flicker; optional point light with its own flicker |
+| `createRubbleHeap`, `createSiegeLadder`, `createStoneSteps` | the after-effects and the access |
+
+All of it uses **our own materials** (`ashlarMat`, `ashlarDarkMat`,
+`sootStoneMat`, `ironMat`, `bannerClothMat`) — flat-shaded, cached, and shared
+across zones so the renderer batches them.
+
+### 15b. Baking
+
+Each builder assembles a readable hierarchy and then flattens it with the same
+guarantees as `PropFactory.bakeStatic`: geometries normalised to non-indexed,
+attribute sets reduced to position/normal/uv, merged per material. An intact
+30 m wall is ~456 triangles across a handful of meshes; the ruined variant is
+lighter (~336) because a broken wall is *less* stone, which the smoke suite
+asserts rather than assumes.
+
+### 15c. Where it stands
+
+- **Ziklag** — four ruined curtain runs, two drum towers (one crenellated, one
+  soot-black), a broken gatehouse the raiders came through, rubble at every
+  breach, and a brazier still burning out of habit. Colliders are registered
+  along each run so the camera probe and the player both meet the stone.
+- **Hebron (the gate)** — the intact statement version: gatehouse, steps,
+  curtain either side, two conical-roofed towers at the ends, banners of Judah
+  above the passage, braziers flanking the approach.
+- **Gilboa** — a fought-over rampart with a palisade in front of it, ladders
+  still against the wall, rubble, and one watch fire still lit.
+- **The Amalekite camp** — four palisade runs closing the approaches, braziers
+  at the gaps, and heaps of stone from a wall the raiders pulled down.
+
+### 15d. Verification
+
+Smoke grew from 203 to **223 checks**: every builder produces merged meshes,
+the ruined wall is measurably lighter than the intact one, banners expose their
+sway and braziers update without a renderer, and — the point of the pass — the
+kit is actually *in* the world: four wall runs at Ziklag with solid colliders,
+a curtain at Hebron, a rampart at Gilboa, and a fortified camp.

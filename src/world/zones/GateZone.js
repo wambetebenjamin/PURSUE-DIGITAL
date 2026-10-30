@@ -21,6 +21,10 @@ import {
   createBirdFlock, createButterflies, createJar,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
+import {
+  createGatehouse, createCurtainWall, createDrumTower, createBanner,
+  createBrazier, createStoneSteps,
+} from '../props/MedievalKit.js';
 import { ATMOSPHERE } from '../atmospheres.js';
 import { createLightingRig, attachRig } from '../effects/LightingRig.js';
 import { createHorizon } from '../effects/Horizon.js';
@@ -86,10 +90,48 @@ export function createGateZone() {
   }
 
   // ------------------------------------------------- the city gateway
-  const gate = createCityGate(2);
+  // Hebron's gate is intact, and it is the strongest thing on screen: two
+  // drum towers, a segmental arch, a raised portcullis, banners and fire.
+  const gate = createGatehouse({ span: 8.5, height: 10.5, towerRadius: 3.5, seed: 41 });
   gate.position.set(0, gateHeight(0, -14), -14);
   group.add(gate);
-  colliders.push({ x: -4.6, z: -14, r: 2.4 }, { x: 4.6, z: -14, r: 2.4 });
+  colliders.push({ x: -6.2, z: -14, r: 3.4 }, { x: 6.2, z: -14, r: 3.4 }, { x: 0, z: -14, r: 4.2 });
+
+  // steps up to the passage
+  const steps = createStoneSteps({ width: 9, steps: 4, rise: 0.2 });
+  steps.position.set(0, gateHeight(0, -9.4), -9.4);
+  group.add(steps);
+
+  // the curtain running away from the gate on both sides
+  for (const side of [-1, 1]) {
+    const wall = createCurtainWall({ length: 30, height: 7.4, thickness: 2.1, seed: 43 + side });
+    wall.position.set(side * 26, gateHeight(side * 26, -14), -14);
+    wall.rotation.y = Math.PI / 2;
+    group.add(wall);
+    colliders.push({ x: side * 26, z: -14, r: 3.2 }, { x: side * 20, z: -14, r: 3.0 });
+  }
+  // two more towers at the far ends of the curtain
+  for (const side of [-1, 1]) {
+    const tower = createDrumTower({ radius: 3.2, height: 10, top: 'cone', seed: 47 + side });
+    tower.position.set(side * 41, gateHeight(side * 41, -14), -14);
+    group.add(tower);
+    colliders.push({ x: side * 41, z: -14, r: 3.4 });
+  }
+
+  // banners of Judah over the gate, and braziers flanking the approach
+  const bannerColors = [0x7a1c18, 0x27314e];
+  [-4.2, 4.2].forEach((x, i) => {
+    const banner = createBanner({ color: bannerColors[i], height: 8.5, seed: 50 + i });
+    banner.position.set(x, gateHeight(x, -12.6), -12.6);
+    group.add(banner);
+    updaters.push((t) => banner.userData.sway?.(t));
+  });
+  [-7.5, 7.5].forEach((x, i) => {
+    const brazier = createBrazier({ withLight: i === 0, height: 1.6 });
+    brazier.position.set(x, gateHeight(x, -10), -10);
+    group.add(brazier);
+    updaters.push((t) => brazier.userData.update?.(t));
+  });
 
   // terraced limestone hills of Hebron beyond the gate
   for (let t = 0; t < 4; t++) {

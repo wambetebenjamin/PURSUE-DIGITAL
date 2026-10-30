@@ -21,6 +21,9 @@ import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
 import { applyTerrainColors } from '../../utils/terrain.js';
 import { createBirdFlock } from '../props/PropFactory.js';
+import {
+  createCurtainWall, createDrumTower, createGatehouse, createRubbleHeap, createBrazier,
+} from '../props/MedievalKit.js';
 
 export const ZIKLAG = {
   spawn: { x: 0, z: 26, yaw: 0 },
@@ -167,12 +170,68 @@ export function createZiklagZone() {
   group.add(granary);
   colliders.push({ x: 20, z: -28, r: 4.2 });
 
-  // heavy wooden gate banked by wind-blown sand drifts
+  // ------------------------------------------- the stronghold that was
+  // Ziklag was walled. The Amalekites burned it and went on; this is what is
+  // left of the curtain — a blackened ring broken in three places, the gate
+  // tower still standing because stone does not care who won.
+  const wallRuns = [
+    { x: -30, z: 18, ry: Math.PI * 0.5, len: 26, seed: 11 },
+    { x: 30, z: 6, ry: Math.PI * 0.5, len: 30, seed: 12 },
+    { x: -6, z: 34, ry: 0, len: 30, seed: 13 },
+    { x: 14, z: -40, ry: 0, len: 24, seed: 14 },
+  ];
+  for (const run of wallRuns) {
+    const wall = createCurtainWall({
+      length: run.len, height: 6.4, thickness: 2.0, ruined: true, seed: run.seed,
+    });
+    wall.position.set(run.x, ziklagHeight(run.x, run.z), run.z);
+    wall.rotation.y = run.ry;
+    group.add(wall);
+    // walk the wall line and register the rubble as solid
+    const dx = Math.cos(run.ry) * run.len / 2;
+    const dz = -Math.sin(run.ry) * run.len / 2;
+    for (let t = -1; t <= 1; t += 1) {
+      colliders.push({ x: run.x + dx * t, z: run.z + dz * t, r: 3.0 });
+    }
+  }
+
+  // two towers: one still holds, one has lost its crown
+  const towerA = createDrumTower({ radius: 3.4, height: 10.5, top: 'crenel', ruined: true, seed: 21 });
+  towerA.position.set(-30, ziklagHeight(-30, 2), 2);
+  group.add(towerA);
+  colliders.push({ x: -30, z: 2, r: 3.6 });
+
+  const towerB = createDrumTower({ radius: 3.1, height: 8.2, top: 'crenel', ruined: true, seed: 22, soot: true });
+  towerB.position.set(30, ziklagHeight(30, -8), -8);
+  group.add(towerB);
+  colliders.push({ x: 30, z: -8, r: 3.3 });
+
+  // the gatehouse the raiders came through
+  const gatehouse = createGatehouse({ span: 8, height: 9.4, towerRadius: 3.0, ruined: true, seed: 23 });
+  gatehouse.position.set(-24, ziklagHeight(-24, 8), 8);
+  gatehouse.rotation.y = 0.9;
+  group.add(gatehouse);
+  colliders.push({ x: -24, z: 8, r: 3.0 }, { x: -29, z: 5, r: 2.6 }, { x: -19, z: 11, r: 2.6 });
+
+  // broken masonry at the foot of every breach
+  [[-30, 12], [18, -37], [-14, 33], [26, 2], [-3, -12]].forEach(([x, z], i) => {
+    const heap = createRubbleHeap({ radius: 2.2 + seededRandom(i * 3.3) * 1.4, seed: 30 + i });
+    heap.position.set(x, ziklagHeight(x, z), z);
+    group.add(heap);
+  });
+
+  // the embers of the gate fire: a brazier still burning out of habit
+  const gateFire = createBrazier({ withLight: true });
+  gateFire.position.set(-20.5, ziklagHeight(-20.5, 10.5), 10.5);
+  group.add(gateFire);
+  updaters.push((t) => gateFire.userData.update?.(t));
+
+  // heavy wooden gate banked by wind-blown sand drifts, left where it fell
   const gate = createGateWithDrifts(5);
-  gate.position.set(-24, ziklagHeight(-24, 8), 8);
-  gate.rotation.y = 0.9;
+  gate.position.set(-18, ziklagHeight(-18, 14), 14);
+  gate.rotation.y = 1.6;
   group.add(gate);
-  colliders.push({ x: -24, z: 8, r: 2.2 });
+  colliders.push({ x: -18, z: 14, r: 2.2 });
 
   // ---------------------------------------------------------- beacon
   const beacon = createBeacon('Desert Edge', 0xffc36a);

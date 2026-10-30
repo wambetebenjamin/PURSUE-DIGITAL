@@ -17,7 +17,7 @@
  * Relative URLs throughout: the same file serves the Vercel root and the
  * GitHub Pages sub-path.
  */
-const VERSION = 'mvv9lqio';
+const VERSION = 'mvvbupso';
 const CACHE = `pursue-${VERSION}`;
 
 /** Files appended at build time, relative to the service worker's scope. */
@@ -26,7 +26,7 @@ const PRECACHE = [
   "./assets/EBGaramond-Italic-C2_346tT.ttf",
   "./assets/FrankRuhlLibre-DH22KwVP.ttf",
   "./assets/Inter-VF2RPR_K.ttf",
-  "./assets/index-Dca9qb-c.js",
+  "./assets/index-B_JHH50y.js",
   "./assets/index-TUuD7a9z.css",
   "./assets/three-CXh9M2zY.js",
   "./icons/apple-touch-icon.png",

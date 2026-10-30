@@ -19,6 +19,9 @@ import {
   createRockField, createRock, createChariotWreck, createShieldDebris,
   createHumanoid, createCrown, createBeacon, createMountainRidge,
 } from '../props/PropFactory.js';
+import {
+  createCurtainWall, createPalisade, createSiegeLadder, createRubbleHeap, createBrazier,
+} from '../props/MedievalKit.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { ATMOSPHERE } from '../atmospheres.js';
 import { createLightingRig, attachRig } from '../effects/LightingRig.js';
@@ -115,6 +118,38 @@ export function createGilboaZone() {
   }
 
   // ------------------------------------------- Saul + the broken wheel
+  // ---------------------------------------- the rampart on the ridge
+  // Gilboa has been fought over for a generation: a stone rampart, a palisade
+  // thrown up in front of it, ladders still against the wall, and the rubble
+  // of the last assault.
+  const rampart = createCurtainWall({ length: 34, height: 5.6, thickness: 1.8, ruined: true, seed: 71, soot: false });
+  rampart.position.set(0, gilboaHeight(0, -34), -34);
+  group.add(rampart);
+  for (let t = -1; t <= 1; t++) colliders.push({ x: t * 13, z: -34, r: 3.2 });
+
+  const palisade = createPalisade({ length: 26, height: 2.6, seed: 73 });
+  palisade.position.set(0, gilboaHeight(0, -27), -27);
+  group.add(palisade);
+  for (let t = -1; t <= 1; t++) colliders.push({ x: t * 10, z: -27, r: 2.2 });
+
+  [[-9, -30, 0.3], [11, -29, -0.25]].forEach(([x, z, ry], i) => {
+    const ladder = createSiegeLadder({ height: 7.2 });
+    ladder.position.set(x, gilboaHeight(x, z), z);
+    ladder.rotation.y = ry;
+    group.add(ladder);
+  });
+  [[-6, -24], [8, -25], [2, -31]].forEach(([x, z], i) => {
+    const heap = createRubbleHeap({ radius: 1.6 + seededRandom(i * 2.1) * 1.1, count: 9, seed: 80 + i });
+    heap.position.set(x, gilboaHeight(x, z), z);
+    group.add(heap);
+  });
+
+  // one brazier still lit on the rampart: somebody is still up there
+  const watchFire = createBrazier({ withLight: true, height: 1.7 });
+  watchFire.position.set(4, gilboaHeight(4, -33), -33);
+  group.add(watchFire);
+  updaters.push((t) => watchFire.userData.update?.(t));
+
   const wreck = createChariotWreck(2);
   wreck.position.set(2.4, gilboaHeight(2.4, 4.2), 4.2);
   wreck.rotation.y = -0.7;
