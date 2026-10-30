@@ -403,3 +403,65 @@ cards add one draw call per named figure; smoke sprites use one draw call per
 emitter; micro-debris is instanced; decals share two materials. DOF is disabled
 on phones, shadows drop to 1024², particle density to 45%. Headless smoke passes
 **57/57** and the production build is clean.
+
+## 10. Retrievals from the two reference sources (Pass 9)
+
+Two references were mined for this pass, both treated as **design sources, not
+asset sources**: we take structure and technique, and we re-implement
+everything in our own procedural pipeline.
+
+### 10a. `conradosaud/ThirdPersonPack` (Unity, MIT-style sample pack)
+
+The pack is a beginner-friendly third-person controller for Unity: two C#
+scripts (`ThirdPersonController.cs`, `CameraController.cs`), an animator
+controller with `run` / `sprint` / `crouch` / `air` parameters, locomotion
+clips, and a demo scene. The C# and the model (a CGTrader "Futurist Soldier"
+under its own licence) cannot be dropped into a Three.js build, so what was
+retrieved is the **controller grammar**:
+
+| In the pack | What we took | Where it lives now |
+|---|---|---|
+| `inputCrouch` toggle; −50 % velocity; crouch animator bool | Crouch/sneak: `KeyC` / `Ctrl`, half speed, knee bend + hip drop + torso lean, and stealth value | `constants.CONTROLS.crouch`, `PLAYER.crouchSpeed`, `Player.js`, `Locomotion.js` |
+| `animator.SetBool("run"/"sprint"/"air")` + `cc.velocity.magnitude` | A real locomotion **state machine** with published parameters, blending idle → walk → run → sprint → crouch-idle → crouch-walk | `src/player/Locomotion.js` (new) |
+| `sprintAdittion` added to base velocity | Sprint as an additive on the walk speed, gated by stamina | `Player.js` |
+| `canZoom` + `sensitivity` + `cameraLimit` | Wheel zoom clamped to 3.5 – 15 units, plus the existing pitch limits and look sensitivity | `Input.consumeWheel()`, `ThirdPersonCamera` |
+| Camera rig as a separate object that follows the player | Camera obstruction probe: march from the look target toward the ideal position and stop at the last clear sample, so rubble never swallows the shot | `ThirdPersonCamera._clearDistance()` |
+| `HeadHittingDetect()` raycast | Not adopted — the march has no jump, and Space is the interact key | — |
+| `PlayerAnimator.controller` / `.anim` clips / `.fbx` | Not adopted — clip data is bound to a Unity rig and the model has its own licence | — |
+
+Crouch also became a **gameplay** verb rather than a cosmetic one: inside the
+Amalekite camp a crouched man is detected at 52 % of the guard's range and only
+when he is squarely inside the cone (`VISION.crouchRange`,
+`VISION.crouchPeripheral` in `constants.js`), which makes the night camp an
+actual stealth approach instead of a sprint down the cone.
+
+### 10b. `freegameassets.com/fantasy-rpg-icons` (2044-icon catalogue)
+
+The catalogue is a **taxonomy + visual grammar** reference: armour split into
+head / chest / arms / belt / feet / cloak / weapon / off-hand, plus provisions,
+spoil and class items, each rendered as a centred, rim-lit object with its
+rarity carried by the frame rather than the art. We cannot ship those PNGs —
+the sandbox has no access to the asset CDN, and the pack's licence is the
+publisher's, not ours — so the *system* was rebuilt on our own procedural art:
+
+| From the catalogue | What we built |
+|---|---|
+| Slot taxonomy | `ui/items.js` — `SLOTS` (head, chest, arms, belt, feet, cloak, hand, off-hand) with one item each |
+| Category grouping | Four sections in the satchel: *Upon him*, *In the satchel*, *Spoil recovered*, *Relics of the pursuit* |
+| Rarity tiers | `RARITY` = worn / fine / royal, expressed as ink, bronze-ringed and gilded-plus-wax-seal frames in CSS |
+| Consistent art direction | `ui/icons.js` — 18 procedural painters sharing one grammar: single centred object, three-quarter view, warm key light upper-left, cool bounce lower-right, contact shadow, ink outline readable at 56 px |
+| Item metadata | Every item carries a name, a one-line account and the verse it comes from (1 Samuel 16–30) |
+| Item detail view | `#satchel-detail` — name, rarity, description, citation, and a four-cell tally (600 / 200 / 400 / 0) |
+
+**Drop-in path for a licensed pack.** Every item in `ui/items.js` may carry a
+`file` property. When it is set, `ui/Inventory.js` renders an `<img>` and skips
+the painter entirely, so a purchased or CC0 icon pack can be adopted without
+touching any layout code:
+
+```js
+// ui/items.js
+{ slot: 'chest', icon: 'lamellar', file: './assets/icons/armor/lamellar.png', … }
+```
+
+Our icons stay in place as the fallback, so a partially-supplied pack degrades
+gracefully instead of leaving holes.

@@ -62,8 +62,9 @@ No server, database, or environment variables are required. Everything is client
 | --- | --- |
 | **WASD / Arrow keys** | Move (camera-relative) |
 | **Mouse** | Orbit the third-person camera (click canvas to capture the pointer) |
-| **Mouse wheel** | *(reserved)* |
 | **Shift** | Run — drains the stamina bar (15 units/sec) |
+| **C / Ctrl** | Sneak low — half speed, half silhouette, guards see you at half range |
+| **Mouse wheel** | Camera distance (3.5 – 15 units) |
 | **E / Space** | Interact, pick up, advance dialogue |
 | **Esc** | Pause / release the mouse pointer |
 | **M** | Map of Judah (full chart of the march) |
@@ -120,6 +121,30 @@ satchel of procedurally rendered goods.
 The whole thing is still procedural and real-time: no image assets, no
 downloaded models, one static build. See `docs/PRODUCTION_BIBLE.md` §9 for the
 full material, geometry and shader notes.
+
+## The third-person grammar
+
+Two external references shaped pass 9, both used as design sources rather than
+asset sources:
+
+- **[conradosaud/ThirdPersonPack](https://github.com/conradosaud/ThirdPersonPack)**
+  (a Unity third-person sample) gave us the controller *grammar*: crouch as a
+  toggle with halved velocity, an animator that resolves `run / sprint / crouch
+  / air` parameters into blended locomotion, additive sprint, wheel zoom
+  clamped to the rig's limits, and a camera that probes for obstruction. Our
+  port lives in `src/player/Locomotion.js` (a state machine driven by published
+  parameters), `ThirdPersonCamera._clearDistance()` and `Player.js`. The C#
+  scripts, `.anim` clips and the pack's licensed character model are **not**
+  used — the rig would not survive the port and the model is not ours.
+- **[Fantasy RPG Icons](https://www.freegameassets.com/fantasy-rpg-icons)**
+  (2044 icons) gave us the inventory *system*: an eight-slot equipment
+  taxonomy, category grouping, rarity carried by the frame, and one shared art
+  grammar. All 18 satchel icons are painted procedurally in `src/ui/icons.js`;
+  no PNG from that pack is redistributed. Each item accepts a `file` property,
+  so a licensed pack can be dropped in later without layout changes.
+
+Crouch also changed the stealth design: in the Amalekite camp a crouched player
+is spotted at 52 % of the guard's range and only inside the cone.
 
 ## Playing on a phone
 

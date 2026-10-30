@@ -5,6 +5,7 @@
  * action buttons that synthesize keyboard events into Input:
  *   • Use  → KeyE   (interact / advance dialogue)
  *   • Run  → ShiftLeft (toggled)
+ *   • Low  → KeyC (toggled crouch)
  * Hidden entirely on desktop (body.touch-mode controls visibility).
  */
 export class TouchControls {
@@ -17,6 +18,7 @@ export class TouchControls {
     this.btnRun = document.getElementById('btn-run');
     this.btnUse = document.getElementById('btn-use');
     this.btnMap = document.getElementById('btn-map');
+    this.btnCrouch = document.getElementById('btn-crouch');
     this._runOn = false;
 
     if (!this.root) return;
@@ -63,6 +65,19 @@ export class TouchControls {
       else this.input.releaseKey('ShiftLeft');
       this.btnRun.classList.toggle('on', this._runOn);
     });
+
+    // --- Low button: toggles the crouch key (KeyC) ---
+    if (this.btnCrouch) {
+      let crouched = false;
+      this.btnCrouch.addEventListener('pointerdown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        crouched = !crouched;
+        this.input.pressKey('KeyC');
+        setTimeout(() => this.input.releaseKey('KeyC'), 0);
+        this.btnCrouch.classList.toggle('on', crouched);
+      });
+    }
 
     // --- Map button: opens the pause/map screen (KeyM edge) ---
     if (this.btnMap) {

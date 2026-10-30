@@ -2968,3 +2968,290 @@ body.touch-mode .touch-btn:active {
   letter-spacing: 0.01em;
   font-size: 14px;
 }
+
+/* ============================================================
+   PASS 9 — STANCE, CAMERA ZOOM, AND THE ILLUSTRATED SATCHEL
+   Sourced from a third-person controller pack (crouch parameter,
+   camera zoom, camera obstruction probe) and from the icon-system
+   grammar of the fantasy-RPG icon packs: centred rim-lit objects,
+   slot taxonomy, rarity carried by the frame.
+   ============================================================ */
+
+/* ------------------------------------------------ stance (sneak) */
+#stance-chip {
+  margin-top: 4px;
+  display: inline-block;
+  padding: 1px 8px 2px;
+  border-radius: 2px;
+  background: linear-gradient(178deg, #6a4a1c 0%, #4a3212 100%);
+  border: 1px solid rgba(224, 188, 124, 0.4);
+  color: #f0dfb8;
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+}
+
+#hud.sneaking .hud-label {
+  color: rgba(240, 222, 184, 0.52);
+}
+
+#hud.sneaking #stamina-fill {
+  filter: brightness(0.85);
+}
+
+/* --------------------------------------------------- satchel page */
+#pause-satchel-panel {
+  width: 100%;
+}
+
+#satchel-grid {
+  display: block;
+  width: 100%;
+  margin: clamp(8px, 1.4vw, 16px) 0;
+}
+
+#satchel-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 0.62fr);
+  gap: clamp(10px, 1.6vw, 20px);
+  align-items: start;
+  text-align: left;
+}
+
+.satchel-section + .satchel-section {
+  margin-top: clamp(8px, 1.4vw, 14px);
+}
+
+.satchel-head {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13px;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  color: rgba(88, 56, 22, 0.8);
+  margin: 0 0 6px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(120, 84, 36, 0.28);
+}
+
+.slot-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(5px, 0.9vw, 10px);
+}
+
+.item-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: clamp(5px, 0.9vw, 10px);
+}
+
+/* a tile is a framed icon, like an inventory square of old */
+.satchel-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 5px 5px;
+  margin: 0;
+  cursor: pointer;
+  background:
+    radial-gradient(120% 100% at 50% 0%, rgba(255, 250, 232, 0.55) 0%, rgba(255, 250, 232, 0) 62%),
+    linear-gradient(178deg, rgba(243, 232, 206, 0.92), rgba(212, 190, 146, 0.92));
+  border: 1px solid rgba(106, 74, 28, 0.42);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 250, 232, 0.6), 0 2px 6px rgba(50, 28, 8, 0.16);
+  font: inherit;
+  color: inherit;
+  transition: transform 0.14s ease, box-shadow 0.14s ease, border-color 0.14s ease;
+}
+
+.satchel-tile:hover {
+  transform: translateY(-1px);
+  border-color: rgba(106, 74, 28, 0.75);
+}
+
+/* rarity: the frame, not the art */
+.satchel-tile.worn {
+  border-color: rgba(96, 66, 28, 0.5);
+}
+
+.satchel-tile.fine {
+  border-color: rgba(150, 106, 40, 0.85);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 232, 0.65),
+    inset 0 0 0 2px rgba(196, 154, 74, 0.35),
+    0 2px 6px rgba(50, 28, 8, 0.2);
+}
+
+.satchel-tile.royal {
+  border-color: rgba(122, 86, 36, 0.95);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 232, 0.7),
+    inset 0 0 0 2px rgba(224, 188, 124, 0.55),
+    0 0 12px rgba(180, 118, 40, 0.28),
+    0 3px 8px rgba(50, 28, 8, 0.22);
+}
+
+.satchel-tile.royal::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 45% 55% 50% 50%;
+  background: radial-gradient(circle at 34% 30%, #b0442c, #7a2418 60%, #4e120a);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.satchel-tile.selected {
+  border-color: rgba(140, 42, 24, 0.9);
+  box-shadow:
+    inset 0 0 0 2px rgba(200, 130, 60, 0.55),
+    0 0 14px rgba(180, 96, 40, 0.35);
+  transform: translateY(-1px);
+}
+
+.satchel-tile.empty {
+  cursor: default;
+  opacity: 0.62;
+  background:
+    repeating-linear-gradient(45deg,
+      rgba(120, 84, 36, 0.06) 0 6px, rgba(120, 84, 36, 0) 6px 12px),
+    linear-gradient(178deg, rgba(236, 224, 198, 0.55), rgba(206, 184, 142, 0.55));
+  border-style: dashed;
+}
+
+.icon-canvas,
+.icon-img {
+  filter: drop-shadow(0 3px 5px rgba(40, 22, 6, 0.28));
+}
+
+.tile-name {
+  font-family: var(--body);
+  font-size: 11px;
+  line-height: 1.15;
+  text-align: center;
+  color: #3a2614;
+}
+
+.tile-slot {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: rgba(96, 62, 26, 0.65);
+  text-transform: uppercase;
+}
+
+.tile-empty-mark {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 11px;
+  color: rgba(96, 62, 26, 0.55);
+  padding: 18px 0;
+}
+
+/* ------------------------------------------------ the account pane */
+#satchel-detail {
+  min-height: 150px;
+  padding: 12px 14px;
+  background:
+    radial-gradient(140% 100% at 50% 0%, rgba(255, 250, 232, 0.45) 0%, rgba(255, 250, 232, 0) 62%),
+    linear-gradient(178deg, rgba(241, 230, 203, 0.9), rgba(214, 192, 148, 0.9));
+  border: 1px solid rgba(106, 74, 28, 0.4);
+  border-left: 3px solid rgba(140, 42, 24, 0.55);
+  border-radius: 2px;
+  box-shadow: inset 0 1px 0 rgba(255, 250, 232, 0.6);
+}
+
+.detail-name {
+  display: block;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 16px;
+  color: #33200e;
+}
+
+.detail-rarity {
+  display: inline-block;
+  margin: 3px 0 7px;
+  padding: 0 7px;
+  border-radius: 2px;
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 11px;
+  background: rgba(120, 84, 36, 0.14);
+  color: rgba(90, 58, 24, 0.9);
+}
+
+.detail-rarity.royal {
+  background: rgba(140, 42, 24, 0.16);
+  color: #7a2418;
+}
+
+.detail-blurb {
+  margin: 0 0 8px;
+  font-family: var(--body);
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: #3a2614;
+}
+
+.detail-verse {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(96, 62, 26, 0.8);
+}
+
+/* ----------------------------------------------------------- tally */
+.satchel-tally {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: clamp(8px, 1.4vw, 16px);
+  padding-top: 8px;
+  border-top: 1px solid rgba(120, 84, 36, 0.3);
+}
+
+.tally-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+
+.tally-n {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 18px;
+  color: #4a2c12;
+}
+
+.tally-label {
+  font-family: var(--body);
+  font-style: italic;
+  font-size: 11px;
+  text-align: center;
+  color: rgba(96, 62, 26, 0.8);
+}
+
+@media (max-width: 780px) {
+  #satchel-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .item-grid,
+  .slot-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .satchel-tally {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

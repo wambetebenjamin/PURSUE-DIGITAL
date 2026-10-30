@@ -314,4 +314,59 @@ ok(st.exhausted || st.value < 50, 'sustained sprint exhausts the player');
 frames(240); // walk idle → regen
 ok(st.value > 20, 'stamina regenerates while resting');
 
+// ---------------------------------------------------- pass 9: stance & zoom
+// crouch (the sneak parameter of a third-person controller) halves the speed
+// and the silhouette, and it must survive a zone change.
+press('KeyC');
+frames(2);
+ok(game.player.crouched === true, 'C drops the player into a crouch');
+ok(game.cameraRig.eyeDrop > 0, 'the camera ducks with the crouch');
+
+const beforeZoom = game.cameraRig.baseDistance;
+game.input.wheelDelta = 2;
+frames(1);
+ok(game.cameraRig.baseDistance > beforeZoom, 'the wheel pulls the camera back');
+game.input.wheelDelta = -20;
+frames(1);
+ok(game.cameraRig.baseDistance <= 3.6, 'the wheel clamps at the near limit');
+
+press('KeyC');
+frames(2);
+ok(game.player.crouched === false, 'C stands the player back up');
+
+// camera obstruction probe: obstacles are registered on every zone enter
+ok(Array.isArray(game.cameraRig.obstacles) && game.cameraRig.obstacles.length > 0,
+  'the camera probes the zone rubble');
+
+// locomotion state machine: the animator parameters resolve to a real state
+game.player.group.position.set(0, 0, 10);
+press('ShiftLeft');
+press('KeyW');
+frames(60);
+ok(['run', 'sprint'].includes(game.player.locomotion.state),
+  'the locomotion machine reports a moving state');
+release('KeyW');
+release('ShiftLeft');
+frames(60);
+ok(game.player.locomotion.state === 'idle' || game.player.locomotion.state === 'walk',
+  'and settles back toward idle');
+
+// ------------------------------------------------------- pass 9: the satchel
+game.pause.showPage('satchel');
+const satchel = document.getElementById('satchel-grid');
+ok(satchel.children.length >= 4, 'the satchel builds its sections');
+const tileCount = (() => {
+  let n = 0;
+  const walk = (node) => {
+    for (const c of node.children) {
+      if (c.classList && c.classList.contains && c.classList.contains('satchel-tile')) n++;
+      walk(c);
+    }
+  };
+  walk(satchel);
+  return n;
+})();
+ok(tileCount >= 18, `the satchel lays out every item (${tileCount} tiles)`);
+game.pause.close(false);
+
 console.log(`\nAll ${passed} checks passed.\n`);

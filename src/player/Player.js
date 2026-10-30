@@ -11,6 +11,7 @@ import { CONTROLS, PLAYER } from '../constants.js';
 import { Stamina } from './Stamina.js';
 import { dampFactor, lerpAngle } from '../utils/math.js';
 import { createDetailedHuman } from '../entities/CharacterRig.js';
+import { Locomotion } from './Locomotion.js';
 import { audio } from '../audio/AudioEngine.js';
 
 const _dir = new THREE.Vector3();
@@ -26,6 +27,9 @@ export class Player {
     this.velocity = new THREE.Vector3();
     this.groundHeight = 0; // set by the active zone each frame
     this.health = 1; // vitality — the oil in the lamp (HUD), regenerates slowly
+    this.crouched = false;   // sneaking: half speed, half silhouette
+    this.crouch01 = 0;       // smoothed crouch weight for the pose
+    this.locomotion = new Locomotion();
     this.running = false;
     this.moving = false;
     this.interactRequested = false;
@@ -103,9 +107,10 @@ export class Player {
     this.velocity.set(0, 0, 0);
     this.stamina.reset();
     this.health = 1;
+    this.crouched = false;
+    this.crouch01 = 0;
     this.running = false;
     this.moving = false;
-    this._gait = 0;
     this._armIdle = 0;
   }
 
@@ -148,10 +153,15 @@ export class Player {
     const analogScale = Math.min(1, joyMagnitude > 0.08 ? joyMagnitude : 1);
     if (hasInput) _dir.normalize();
 
-    // --- stamina gate ---
-    const wantsRun = this.input.isDown(CONTROLS.run);
+    // --- crouch toggle (KeyC / Ctrl): the sneak of the night camp ---
+    if (this.input.wasPressed(CONTROLS.crouch)) this.crouched = !this.crouched;
+    this.crouch01 += ((this.crouched ? 1 : 0) - this.crouch01) * Math.min(1, dt * 8);
+
+    // --- stamina gate (you cannot sprint while hunched) ---
+    const wantsRun = this.input.isDown(CONTROLS.run) && !this.crouched;
     this.running = this.stamina.update(dt, wantsRun, hasInput);
-    const targetSpeed = (this.running ? PLAYER.runSpeed : PLAYER.walkSpeed) * analogScale;
+    const baseWalk = this.crouched ? PLAYER.crouchSpeed : PLAYER.walkSpeed;
+    const targetSpeed = (this.running ? PLAYER.runSpeed : baseWalk) * analogScale;
 
     // --- accelerate / friction ---
     const targetVX = _dir.x * targetSpeed;
@@ -201,33 +211,48 @@ export class Player {
       );
     }
 
-    // --- gait animation ---
+    // --- gait: resolved by the locomotion state machine ---
     const speed = Math.sqrt(speed2);
-    const gaitSpeed = this.running ? 12.5 : 7.2;
-    if (this.moving) this._gait += dt * gaitSpeed * Math.min(1, speed / PLAYER.walkSpeed);
-    const swing = Math.sin(this._gait) * (this.running ? 0.85 : 0.55) * (this.moving ? 1 : 0);
-    this.legL.rotation.x = swing;
-    this.legR.rotation.x = -swing;
-    this.armL.rotation.x = -swing * 0.8;
-    this.armR.rotation.x = swing * 0.6 - 0.35;
+    const eventsBefore = this.locomotion.strideEvents;
+    const pose = this.locomotion.update(dt, {
+      speed,
+      walkSpeed: PLAYER.walkSpeed,
+      runSpeed: PLAYER.runSpeed,
+      sprinting: this.running,
+      crouched: this.crouched,
+      grounded: true,
+    });
 
-    // footsteps: one per stride plant
-    const sign = swing > 0.05 ? 1 : swing < -0.05 ? -1 : 0;
-    if (sign !== 0 && sign !== this._lastStrideSign && this.moving) {
+    const swing = this.locomotion.swing * pose.stride;
+    const crouch = this.crouch01;
+    // knees bend under a crouch; the arms tuck in with a slight forward bias
+    this.legL.rotation.x = swing + crouch * 0.62;
+    this.legR.rotation.x = -swing + crouch * 0.62;
+    this.armL.rotation.x = -swing * 0.8 - crouch * 0.35;
+    this.armR.rotation.x = swing * 0.6 - 0.35 - crouch * 0.35;
+    this.legL.rotation.z = crouch * 0.12;
+    this.legR.rotation.z = -crouch * 0.12;
+
+    // hip drop + forward lean: the whole rig settles into the sneak
+    this.rig.position.y = -pose.drop;
+    this.rig.rotation.x = pose.lean;
+
+    // footsteps: one per stride plant (the animator's step event)
+    if (this.locomotion.strideEvents !== eventsBefore && this.moving) {
       audio.step(this.running);
     }
-    this._lastStrideSign = sign;
 
     // subtle idle breathing (chest rises, shoulders follow)
     this._armIdle = (this._armIdle ?? 0) + dt;
     const breathe = Math.sin(this._armIdle * 1.6) * 0.035;
-    this.torso.position.y = 1.14 + Math.sin(this._armIdle * 1.5) * 0.014;
+    this.torso.position.y = 1.14 + Math.sin(this._armIdle * 1.5) * 0.014 - pose.drop * 0.55;
+    const armRest = 0.08 + pose.armBias + crouch * 0.1;
     if (!this.moving) {
-      this.armL.rotation.z = 0.08 + breathe;
-      this.armR.rotation.z = -0.08 - breathe;
+      this.armL.rotation.z = armRest + breathe;
+      this.armR.rotation.z = -armRest - breathe;
     } else {
-      this.armL.rotation.z = 0.08;
-      this.armR.rotation.z = -0.08;
+      this.armL.rotation.z = armRest;
+      this.armR.rotation.z = -armRest;
     }
 
     // --- interact edge ---

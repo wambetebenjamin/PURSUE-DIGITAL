@@ -15,6 +15,7 @@ export class HUD {
     this.compassNeedle = document.getElementById('compass-needle');
     this.lamp = document.getElementById('lamp-wrap');
     this.flame = document.getElementById('lamp-flame');
+    this.stanceChip = document.getElementById('stance-chip');
     this.prompt = document.getElementById('prompt');
     this.promptText = document.getElementById('prompt-text');
     this.alertBanner = document.getElementById('alert-banner');
@@ -32,6 +33,7 @@ export class HUD {
     this._promptVisible = false;
     this._staminaWarning = false;
     this._health = 1;
+    this._crouched = false;
     this._zoneTimer = 0;
     this._zoneFade = 0;
     this._pursuit = -1;
@@ -82,6 +84,16 @@ export class HUD {
       this._staminaWarning = exhausted;
       this.staminaFill.classList.toggle('exhausted', exhausted);
     }
+  }
+
+  /** Stance — the sneak chip appears only while hunched. */
+  setStance(crouched) {
+    if (crouched === this._crouched) return;
+    this._crouched = crouched;
+    if (this.stanceChip && this.stanceChip.classList) {
+      this.stanceChip.classList.toggle('hidden', !crouched);
+    }
+    if (this.hud && this.hud.classList) this.hud.classList.toggle('sneaking', crouched);
   }
 
   setCompass(headingDegrees) {

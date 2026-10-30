@@ -192,7 +192,7 @@ export class Game {
 
         // --- vision cones (distance + facing) ---
         const zone = this.world.activeZone;
-        const { detected } = zone.checkDetection(p);
+        const { detected } = zone.checkDetection(p, this.player.crouched);
         if (detected && this._detectionCooldown <= 0 && !this.modal.isOpen) {
           this._detectionCooldown = VISION.alertDuration;
           audio.ui('alert');
@@ -321,6 +321,8 @@ export class Game {
       zone.spawn.yaw,
     );
     this.player.groundHeight = zone.groundHeight(zone.spawn.x, zone.spawn.z);
+    // the camera probes this zone's rubble so it never clips through it
+    this.cameraRig.setObstacles(zone.colliders);
     this.cameraRig.reset(this.player.position, zone.spawn.yaw + Math.PI);
     this._setPrompt(null);
     this._detectionCooldown = 0;
@@ -455,7 +457,8 @@ export class Game {
       if (zone.servant) zone.servant.update(elapsed, this.servantServed);
       this.arrow.update(dt, this.player.position);
 
-      // --- camera (sprint kick while running) ---
+      // --- camera (sprint kick while running, ducking while crouched) ---
+      this.cameraRig.setStance(this.player.crouched);
       this.cameraRig.update(dt, this.player.position, this.player.running);
       postFX.setFocus(this.cameraRig.focusDistance);
       // vitality recovers in the shade between skirmishes
@@ -472,6 +475,7 @@ export class Game {
       // --- HUD ---
       this.hud.setStamina(this.player.stamina.ratio, this.player.stamina.exhausted);
       this.hud.setHealth?.(this.player.health);
+      this.hud.setStance?.(this.player.crouched);
       this.hud.setCompass(this.cameraRig.headingDegrees());
     } else {
       // victory: keep the scene breathing behind the overlay

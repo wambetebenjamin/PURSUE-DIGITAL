@@ -423,9 +423,13 @@ export function createCampZone() {
      * Guards slowly scan, so the cone breathes like an attention arc.
      * @returns {{detected:boolean, alert:number}} alert = 0..1 glow intensity
      */
-    checkDetection(playerPos) {
+    checkDetection(playerPos, crouched = false) {
       let detected = false;
       let maxProx = 0;
+      // a man on his belly in the dark is seen at half the distance and only
+      // when he is squarely inside the cone
+      const range = crouched ? VISION.range * VISION.crouchRange : VISION.range;
+      const halfAngle = crouched ? VISION.halfAngle * VISION.crouchPeripheral : VISION.halfAngle;
 
       for (const guard of guards) {
         const gx = guard.group.position.x;
@@ -434,21 +438,21 @@ export function createCampZone() {
         const dz = playerPos.z - gz;
         const dist = Math.sqrt(dx * dx + dz * dz);
 
-        const prox = 1 - Math.min(1, dist / VISION.range);
-        if (dist < VISION.range) {
+        const prox = 1 - Math.min(1, dist / range);
+        if (dist < range) {
           const angleToPlayer = Math.atan2(dx, dz);
           const diff = Math.abs(wrapAngle(angleToPlayer - guard.facing));
-          const inCone = diff < VISION.halfAngle;
+          const inCone = diff < halfAngle;
           if (inCone) {
             detected = true;
-            maxProx = Math.max(maxProx, prox * (1 - diff / VISION.halfAngle) + 0.35);
+            maxProx = Math.max(maxProx, prox * (1 - diff / halfAngle) + 0.35);
           }
         }
 
         // visual feedback on the cone
         const mat = guard.cone.material;
-        const alertness = dist < VISION.range
-          ? Math.max(0, 1 - Math.abs(wrapAngle(Math.atan2(dx, dz) - guard.facing)) / VISION.halfAngle)
+        const alertness = dist < range
+          ? Math.max(0, 1 - Math.abs(wrapAngle(Math.atan2(dx, dz) - guard.facing)) / halfAngle)
           : 0;
         mat.color.setHex(alertness > 0.55 ? 0xff4444 : 0xffd25e);
         mat.opacity = 0.12 + alertness * 0.28;

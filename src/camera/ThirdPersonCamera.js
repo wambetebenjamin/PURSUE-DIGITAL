@@ -19,6 +19,9 @@ export class ThirdPersonCamera {
     this.yaw = 0;
     this.pitch = 0.34;
     this.distance = CAMERA.distance;
+    this.baseDistance = CAMERA.distance; // user zoom (mouse wheel)
+    this.obstacles = null;               // zone colliders, for occlusion
+    this.eyeDrop = 0;                    // crouch lowers the look target
     this._sprint01 = 0; // damped sprint blend for FOV / distance push
     this._initialized = false;
 
@@ -39,7 +42,7 @@ export class ThirdPersonCamera {
   reset(targetPos, yaw = 0) {
     this.yaw = yaw;
     this.pitch = 0.34;
-    this.distance = CAMERA.distance;
+    this.distance = this.baseDistance;
     this._sprint01 = 0;
     this._applyImmediate(targetPos);
     this._initialized = true;
@@ -52,8 +55,38 @@ export class ThirdPersonCamera {
       targetPos.y + Math.sin(this.pitch) * this.distance + CAMERA.height,
       targetPos.z + Math.cos(this.yaw) * cp * this.distance,
     );
-    _lookAt.set(targetPos.x, targetPos.y + 1.55, targetPos.z);
+    _lookAt.set(targetPos.x, targetPos.y + 1.55 - this.eyeDrop, targetPos.z);
     this.camera.lookAt(_lookAt);
+  }
+
+  /**
+   * Camera obstruction handling (the CameraController depth probe of a
+   * third-person rig): march from the look target toward the ideal camera
+   * position and stop at the last clear sample, so rubble, walls and tents
+   * never swallow the view.
+   */
+  _clearDistance(targetPos, dirX, dirY, dirZ, wanted) {
+    const list = this.obstacles;
+    if (!list || !list.length) return wanted;
+    const pad = CAMERA.occlusionRadius + CAMERA.occlusionPadding;
+    const steps = 10;
+    let clear = 0.9; // never inside the player's own head
+    for (let i = 1; i <= steps; i++) {
+      const t = (i / steps) * wanted;
+      const x = targetPos.x + dirX * t;
+      const z = targetPos.z + dirZ * t;
+      let blocked = false;
+      for (let c = 0; c < list.length; c++) {
+        const o = list[c];
+        const dx = x - o.x;
+        const dz = z - o.z;
+        const rr = o.r + pad;
+        if (dx * dx + dz * dz < rr * rr) { blocked = true; break; }
+      }
+      if (blocked) break;
+      clear = t;
+    }
+    return clear;
   }
 
   update(dt, targetPos, sprinting = false) {
@@ -66,6 +99,16 @@ export class ThirdPersonCamera {
       this.pitch = clamp(this.pitch + md.y * CAMERA.sensitivity, CAMERA.pitchMin, CAMERA.pitchMax);
     }
 
+    // --- user zoom (mouse wheel / trackpad), clamped to the rig's limits
+    const wheel = this.input.consumeWheel ? this.input.consumeWheel() : 0;
+    if (wheel !== 0) {
+      this.baseDistance = clamp(
+        this.baseDistance + wheel * CAMERA.zoomStep,
+        CAMERA.minDistance,
+        CAMERA.maxDistance,
+      );
+    }
+
     // --- sprint feel (CCamera speed zoom analog): FOV kick + distance push ---
     this._sprint01 += ((sprinting ? 1 : 0) - this._sprint01) * Math.min(1, dt * 4);
     const aspect = this.camera.aspect || 1.6;
@@ -75,7 +118,7 @@ export class ThirdPersonCamera {
       this.camera.fov += (targetFov - this.camera.fov) * Math.min(1, dt * 5);
       this.camera.updateProjectionMatrix();
     }
-    this.distance = CAMERA.distance + this._sprint01 * CAMERA.sprintPush;
+    this.distance = this.baseDistance + this._sprint01 * CAMERA.sprintPush;
 
     // --- ideal camera position on a sphere around the player ---
     const cp = Math.cos(this.pitch);
@@ -88,10 +131,29 @@ export class ThirdPersonCamera {
     // never clip below the ground
     _desired.y = Math.max(_desired.y, targetPos.y + 0.85);
 
+    // --- occlusion: pull in when rubble or a wall would block the shot
+    const lookY = targetPos.y + 1.55 - this.eyeDrop;
+    const ox = _desired.x - targetPos.x;
+    const oy = _desired.y - lookY;
+    const oz = _desired.z - targetPos.z;
+    const want = Math.hypot(ox, oy, oz);
+    if (want > 0.001) {
+      const clear = this._clearDistance(targetPos, ox / want, oy / want, oz / want, want);
+      if (clear < want) {
+        const k2 = (clear - CAMERA.occlusionPadding) / want;
+        const t = Math.max(0.18, k2);
+        _desired.set(
+          targetPos.x + ox * t,
+          Math.max(targetPos.y + 0.75, lookY + oy * t),
+          targetPos.z + oz * t,
+        );
+      }
+    }
+
     const k = dampFactor(CAMERA.positionSmoothing, dt);
     this.camera.position.lerp(_desired, k);
 
-    _lookAt.set(targetPos.x, targetPos.y + 1.55, targetPos.z);
+    _lookAt.set(targetPos.x, lookY, targetPos.z);
     this.camera.lookAt(_lookAt);
 
     // ---------------- handheld organic motion
@@ -120,6 +182,16 @@ export class ThirdPersonCamera {
 
     // focus target for the depth-of-field pass
     this.focusDistance = this.camera.position.distanceTo(_lookAt);
+  }
+
+  /** Zone colliders the camera should not pass through. */
+  setObstacles(list) {
+    this.obstacles = list && list.length ? list : null;
+  }
+
+  /** Crouch: drop the look target so the shot stays over the shoulder. */
+  setStance(crouched) {
+    this.eyeDrop += ((crouched ? 0.34 : 0) - this.eyeDrop) * 0.25;
   }
 
   /** Compass bearing of the camera's forward direction, in degrees (0 = North = -Z). */

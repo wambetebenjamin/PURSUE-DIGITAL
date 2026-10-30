@@ -16,6 +16,7 @@ export class Input {
     this.pressed = new Set(); // edge-triggered, cleared every frame
     this.mouseDX = 0;
     this.mouseDY = 0;
+    this.wheelDelta = 0;   // accumulated wheel notches, consumed once per frame
     this.pointerLocked = false;
     this.enabled = true; // disabled while modals are open
 
@@ -54,6 +55,13 @@ export class Input {
     canvas.addEventListener('click', () => {
       if (this.enabled && !this.pointerLocked && !this.touchMode) this.requestLock();
     });
+
+    // wheel = camera distance (the CameraController zoom of a third-person rig)
+    canvas.addEventListener('wheel', (e) => {
+      if (!this.enabled) return;
+      e.preventDefault();
+      this.wheelDelta = Math.max(-4, Math.min(4, this.wheelDelta + Math.sign(e.deltaY)));
+    }, { passive: false });
 
     this._onLockChange = () => {
       this.pointerLocked = document.pointerLockElement === canvas;
@@ -199,6 +207,13 @@ export class Input {
     return list.some((c) => this.pressed.has(c));
   }
 
+  /** Wheel notches accumulated since the last call (positive = zoom out). */
+  consumeWheel() {
+    const d = this.wheelDelta;
+    this.wheelDelta = 0;
+    return d;
+  }
+
   consumeMouseDelta() {
     const d = { x: this.mouseDX, y: this.mouseDY };
     this.mouseDX = 0;
@@ -218,5 +233,5 @@ const IS_TOUCH = typeof window !== 'undefined'
 const GAME_KEYS = new Set([
   'KeyW', 'KeyA', 'KeyS', 'KeyD',
   'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
-  'Space', 'ShiftLeft', 'ShiftRight', 'KeyE',
+  'Space', 'ShiftLeft', 'ShiftRight', 'KeyE', 'KeyC', 'ControlLeft', 'ControlRight',
 ]);

@@ -66,6 +66,7 @@ export const CONTROLS = Object.freeze({
   right: ['KeyD', 'ArrowRight'],
   run: ['ShiftLeft', 'ShiftRight'],
   interact: ['KeyE', 'Space'],
+  crouch: ['KeyC', 'ControlLeft', 'ControlRight'],
 });
 
 export const PLAYER = Object.freeze({
@@ -75,6 +76,9 @@ export const PLAYER = Object.freeze({
   friction: 14,
   radius: 0.75,
   turnSmoothing: 11,
+  // crouched sneak: half speed, half the silhouette, harder to spot
+  crouchSpeed: 2.9,
+  crouchEyeDrop: 0.34,
 });
 
 export const STAMINA = Object.freeze({
@@ -98,12 +102,17 @@ export const CAMERA = Object.freeze({
   pitchMax: 1.12,
   sensitivity: 0.0021,
   positionSmoothing: 9,
+  zoomStep: 0.9,        // distance change per wheel notch
+  occlusionRadius: 0.55, // camera probe radius when pulling past rubble
+  occlusionPadding: 0.35,
 });
 
 export const VISION = Object.freeze({
   range: 10.5,
   halfAngle: 0.66, // radians (~38°) each side of the guard's facing
   alertDuration: 2.4,
+  crouchRange: 0.52, // a crouched man is seen at half the distance
+  crouchPeripheral: 0.7, // and only if he is squarely in the cone
 });
 
 export const NARRATIVE = Object.freeze({
