@@ -749,3 +749,76 @@ placeholder survived, or if any URL is root-absolute (the Pages sub-path test).
 The smoke suite grew to **167 checks**, adding the shell's headless boot, the
 optional-API guards (no wake lock, no service worker, no fullscreen must all be
 survivable), the service-worker template and the four icons as real 512 px PNGs.
+
+## 14. The campaign layer (Pass 13)
+
+Passes 1–12 build a pursuit: seven phases, one sitting, nothing kept. Pass 13
+adds the arc a strategy player expects — a reason to come back — without
+importing a monetisation model or a server. The source of the *shape* is
+`docs/REFERENCE_TEARDOWN.md`; every asset, number and line of code is ours.
+
+### 14a. Why the structure is the port
+
+The reference game's value to us is not its content (undead legions, historical
+heroes, city skins) — that content is wrong for 1 Samuel 30 and, more to the
+point, is not ours to use. What travels is the **scaffolding of a long game**:
+a task chain that always names the next step, stages that are scored rather
+than merely finished, a settlement whose levels are real modifiers, a roster
+whose power is a legible number, and an economy that connects the two.
+
+| Scaffold | In the reference | In PURSUE |
+|---|---|---|
+| next-step chain | chapter tasks | `TASKS` — seven charges, one per phase, versed |
+| scored stages | 1–3 stars per stage | swift / silent / unseen → 1–3 stars per phase |
+| settlement | citadel, barracks, farms, walls | Ziklag: hall, barracks, cistern, wall |
+| roster | summonable heroes, classes | six mighty men, blade / spear / bow, drilled |
+| economy | wood, stone, food, gold | provisions, bronze, timber, spoil |
+| meta screen | governor's city UI | the War Table, four vellum leaves |
+
+### 14b. The rules, in numbers
+
+- **Phase scoring.** `time ≤ 150 s` → swift; `alerts === 0` → silent; `crouched
+  > 12 s` → unseen. One star is the floor for finishing at all. Reward multiplier
+  is `1 + 0.5 × (stars − 1)`; only the best rating is retained.
+- **City modifiers.** `maxHealth = 1 + 0.10 × wall`, `staminaRegen = 1 + 0.09 ×
+  cistern`, `strength = 1 + 0.08 × barracks`, `renown = 1 + 0.10 × hall`. Read
+  once at `Game.start()` — never mid-run, so a phase can never change its rules
+  under the player.
+- **Band power.** `Σ hero.power × (1 + 0.18 × (level − 1))`, scaled by
+  `1 + 0.08 × barracks`. Heroes unlock at 2, 3, 5 and 7 campaign stars.
+- **Costs.** Buildings scale linearly from 40 + 35·lv timber; drills cost
+  25 + 18·lv bronze. Every spend is checked against the stores before it is
+  applied, so a refused action changes nothing (asserted in the smoke suite).
+
+### 14c. The War Table
+
+Built by `src/ui/WarTable.js` from the record alone — no duplicated numbers.
+Four leaves under a resource strip and a header carrying band power and stars.
+Buttons are the same wax-and-bronze language as the settings leaf; buildings show
+five pips, phases show three.
+
+### 14d. Reachability
+
+The reference never strands a player. Ours did: on a phone the pause overlay
+opened straight onto the Chart whose only exit was "back to the march", so the
+satchel, settings and War Table were keyboard-only. The **codex nav** (five
+leaves, top of every pause page, active state) closes that hole and is asserted
+in the smoke suite.
+
+### 14e. What the pass refuses
+
+Summoning, VIP tiers, packs, timers for sale, alliance rallies, PvP, seasonal
+power resets and auto-battle. Each is a mechanic of live-service retention or
+monetisation, not of this story; more importantly, each would delete something
+the game already does well. The band is the 600, the battle is the controller,
+and the only currency is what was taken back from Amalek.
+
+### 14f. Verification
+
+Smoke grew from 167 to **203 checks**. The campaign set covers: defaults,
+scoring (three stars for a swift silent unseen run; a worse walk scoring lower
+without overwriting the record), payout into the stores, the charge chain
+(complete once, claim once, next charge advances), build spending and refusal,
+run modifiers, drilling, hero unlock pricing, all four War Table leaves rendering,
+page visibility, the HUD tracker showing and hiding, the codex nav marking the
+active leaf, and persistence of the record.

@@ -516,4 +516,99 @@ ok(png[0] === 0x89 && png[1] === 0x50 && png.slice(12, 16).toString() === 'IHDR'
   'the icon is a real PNG');
 ok(png.readUInt32BE(16) === 512 && png.readUInt32BE(20) === 512, 'the 512 icon is 512 square');
 
+// --------------------------------- pass 13: the campaign (the War Table)
+const prog = await import('../src/core/progression.js');
+const { progression, TASKS, BUILDINGS, ROSTER, PHASE_ORDER } = prog;
+progression.reset();
+const p0 = progression.get();
+ok(p0.resources.provisions > 0 && p0.resources.spoil === 0, 'a new campaign opens with provisions, not spoil');
+ok(Object.keys(p0.buildings).length === BUILDINGS.length, 'every building starts at its first level');
+ok(prog.totalStars() === 0 && prog.bandPower() > 0, 'no stars yet; the band is David alone and his kin');
+
+// a phase is scored: swift + silent is three stars and the richest reward
+const before = progression.get().resources.spoil;
+const r1 = progression.recordPhase(PHASE_ORDER[3], { time: 90, alerts: 0, stealth: true });
+ok(r1.stars === 3, 'a swift, silent, unseen phase earns three stars');
+ok(progression.get().resources.spoil > before, 'and pays spoil into the stores');
+ok(progression.get().stars[PHASE_ORDER[3]] === 3, 'the star rating is remembered');
+
+// a worse walk never lowers the record
+const r2 = progression.recordPhase(PHASE_ORDER[3], { time: 400, alerts: 3 });
+ok(r2.stars === 1 && r2.best === false, 'a slow, noisy walk scores lower and stays a record');
+ok(progression.get().stars[PHASE_ORDER[3]] === 3, 'the best rating is kept');
+
+// the charge chain
+const task0 = TASKS[0];
+ok(progression.completeTask(task0.id) === true, 'a charge can be completed');
+ok(progression.completeTask(task0.id) === false, 'and cannot be completed twice');
+const claimBefore = progression.get().resources.provisions;
+const paid = progression.claimTask(task0.id);
+ok(paid && progression.get().resources.provisions > claimBefore, 'its reward is claimed once');
+ok(progression.claimTask(task0.id) === null, 'a claim cannot be paid twice');
+ok(prog.currentTask().id === TASKS[1].id, 'the tracker moves to the next charge');
+ok(prog.currentTask().verse.length > 0, 'every charge carries its verse');
+
+// the city: spends what it has, refuses what it does not
+const wallLv = progression.get().buildings.wall;
+progression.get().resources.timber = 9999;
+progression.get().resources.bronze = 9999;
+ok(progression.upgrade('wall') === wallLv + 1, 'a building can be raised when the stores allow');
+const poorSnapshot = JSON.parse(JSON.stringify(progression.get()));
+poorSnapshot.resources.timber = 0;
+poorSnapshot.resources.bronze = 0;
+const before2 = progression.get().buildings.wall;
+progression.get().resources.timber = 0;
+progression.get().resources.bronze = 0;
+ok(progression.upgrade('wall') === null, 'and is refused when they do not');
+ok(progression.get().buildings.wall === before2, 'a refused build changes nothing');
+
+// modifiers are real numbers the run uses
+progression.get().resources.bronze = 9999;
+progression.get().resources.provisions = 9999;
+const mods = prog.modifiers();
+ok(mods.maxHealth >= 1 && mods.staminaRegen >= 1 && mods.strength >= 1, 'the city yields run modifiers');
+ok(Number.isFinite(mods.bandPower), 'and a band power');
+
+// the mighty men: drill, unlock by stars, and a real power rise
+const powerBefore = prog.bandPower();
+progression.drill('david');
+ok(prog.bandPower() >= powerBefore, 'drilling a mighty man never lowers the band');
+const unlockStars = ROSTER.find((m) => !m.unlocked);
+ok(unlockStars && typeof unlockStars.unlockAt === 'number', 'locked men declare their price in stars');
+
+// the page itself
+game.pause.showPage('war');
+const warHost = document.getElementById('war-table');
+ok(warHost.children.length >= 4, 'the War Table builds its frame (head, stores, tabs, body)');
+ok(game.pause.war.tabButtons.length === 4, 'four leaves: charge, band, ziklag, campaign');
+for (const tab of ['charge', 'band', 'ziklag', 'campaign']) {
+  game.pause.war.show(tab);
+  ok(game.pause.war.body.children.length >= 1, `the ${tab} leaf renders`);
+}
+game.pause.war.show('charge');
+ok(!document.getElementById('pause-war-panel').classList.contains('hidden'),
+  'the War Table is the visible page');
+game.pause.showPage('menu');
+ok(document.getElementById('pause-war-panel').classList.contains('hidden'),
+  'and it yields back to the menu');
+
+// every leaf is reachable by touch, because a phone has no Escape key
+ok(game.pause.navButtons.length === 5, 'the codex nav offers all five leaves');
+game.pause.showPage('satchel');
+ok(game.pause.navButtons.find((b) => b.id === 'satchel').node.classList.contains('active'),
+  'the active leaf is marked');
+game.pause.showPage('menu');
+
+// the HUD tracker
+game.hud.setTask({ title: 'Cross the brook Besor' }, { done: 2, total: TASKS.length });
+ok(!document.getElementById('hud-task').classList.contains('hidden'), 'the charge shows in the HUD');
+ok(document.getElementById('task-text').textContent.includes('Besor'), 'with the task name');
+ok(document.getElementById('task-progress').textContent === `2 of ${TASKS.length}`, 'and the progress');
+game.hud.setTask(null);
+ok(document.getElementById('hud-task').classList.contains('hidden'), 'and hides when the charge is kept');
+
+// persistence
+ok(JSON.parse(localStorage.getItem('pursue.progress.v1')).stars[PHASE_ORDER[3]] === 3,
+  'the campaign persists to storage');
+
 console.log(`\nAll ${passed} checks passed.\n`);

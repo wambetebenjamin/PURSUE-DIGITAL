@@ -10,6 +10,7 @@
  */
 import { renderSatchel } from './Inventory.js';
 import { SettingsPanel } from './SettingsPanel.js';
+import { WarTable } from './WarTable.js';
 export class PauseMenu {
   /**
    * @param {{ onResume: () => void, onRestart: () => void, radar: import('./Radar.js').Radar }} opts
@@ -34,8 +35,16 @@ export class PauseMenu {
     this.settingsPanel = document.getElementById('pause-settings-panel');
     this.btnSettings = document.getElementById('pause-settings');
     this.settings = new SettingsPanel({ host: document.getElementById('settings-list'), onChange: onSettings });
+    this.warPanel = document.getElementById('pause-war-panel');
+    this.btnWar = document.getElementById('pause-war');
+    this.war = new WarTable({ host: document.getElementById('war-table'), onChange: onSettings });
     // headless fakes may lack getContext — renderFullMap guards and no-ops
     this.mapCanvas = document.getElementById('map-canvas');
+
+    // ---- the codex nav: every leaf reachable by touch, not only by Escape
+    this.nav = null;
+    this._buildNav();
+
 
     if (this.btnResume) {
       this.btnResume.addEventListener('click', () => this.close());
@@ -52,6 +61,11 @@ export class PauseMenu {
     if (this.btnSettings) {
       this.btnSettings.addEventListener('click', () => this.showPage('settings'));
     }
+    if (this.btnWar) {
+      this.btnWar.addEventListener('click', () => this.showPage('war'));
+    }
+    const back5 = document.getElementById('pause-resume-5');
+    if (back5) back5.addEventListener('click', () => this.close());
     const back4 = document.getElementById('pause-resume-4');
     if (back4) back4.addEventListener('click', () => this.close());
     const back3 = document.getElementById('pause-resume-3');
@@ -84,18 +98,56 @@ export class PauseMenu {
     if (this.screen) this.screen.classList.remove('hidden');
   }
 
+  _buildNav() {
+    const card = document.getElementById('pause-card');
+    if (!card || !card.appendChild || typeof document.createElement !== 'function') return;
+    const pages = [
+      ['menu', 'The March'],
+      ['map', 'Chart'],
+      ['satchel', 'Satchel'],
+      ['war', 'War Table'],
+      ['settings', 'Settings'],
+    ];
+    const nav = document.createElement('div');
+    nav.className = 'codex-nav';
+    this.navButtons = [];
+    for (const [id, label] of pages) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'codex-nav-btn';
+      btn.textContent = label;
+      btn.addEventListener('click', () => this.showPage(id));
+      nav.appendChild(btn);
+      this.navButtons.push({ id, node: btn });
+    }
+    // prepend so it sits above the page content
+    if (card.children && card.insertBefore) card.insertBefore(nav, card.children[0] || null);
+    else card.appendChild(nav);
+    this.nav = nav;
+  }
+
   showPage(page) {
     this.page = page;
     if (this.menuPanel) this.menuPanel.classList.toggle('hidden', page !== 'menu');
     if (this.mapPanel) this.mapPanel.classList.toggle('hidden', page !== 'map');
     if (this.satchelPanel) this.satchelPanel.classList.toggle('hidden', page !== 'satchel');
     if (this.settingsPanel) this.settingsPanel.classList.toggle('hidden', page !== 'settings');
+    if (this.warPanel) this.warPanel.classList.toggle('hidden', page !== 'war');
     if (page === 'settings' && this.settings) this.settings.open();
+    if (page === 'war' && this.war) this.war.open();
+    this._syncNav(page);
     if (page === 'map') {
       this._sizeMap();
       this.render();
     }
     if (page === 'satchel') renderSatchel(this.satchelHost);
+  }
+
+  _syncNav(page) {
+    if (!this.navButtons) return;
+    for (const b of this.navButtons) {
+      if (b.node.classList) b.node.classList.toggle('active', b.id === page);
+    }
   }
 
   close(notify = true) {

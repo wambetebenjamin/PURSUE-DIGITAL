@@ -17,6 +17,9 @@ export class HUD {
     this.flame = document.getElementById('lamp-flame');
     this.stanceChip = document.getElementById('stance-chip');
     this.veil = document.getElementById('vitality-veil');
+    this.taskChip = document.getElementById('hud-task');
+    this.taskText = document.getElementById('task-text');
+    this.taskProgress = document.getElementById('task-progress');
     this.prompt = document.getElementById('prompt');
     this.promptText = document.getElementById('prompt-text');
     this.alertBanner = document.getElementById('alert-banner');
@@ -175,6 +178,27 @@ export class HUD {
     void this.alertBanner.offsetWidth;
     this.alertBanner.classList.add('pop');
     this._alertTimer = duration;
+  }
+
+  /**
+   * The campaign's charge, shown under the phase objective: what is owed, and
+   * how much of the chain is behind us. Pass `null` to hide it.
+   * @param {{title: string}|null} task
+   * @param {{done?: number, total?: number}} [progress]
+   */
+  setTask(task, progress = {}) {
+    if (!this.taskChip) return;
+    if (!task) {
+      this.taskChip.classList.add('hidden');
+      return;
+    }
+    this.taskChip.classList.remove('hidden');
+    if (this.taskText) this.taskText.textContent = task.title;
+    if (this.taskProgress) {
+      const done = progress.done ?? 0;
+      const total = progress.total ?? 0;
+      this.taskProgress.textContent = total ? `${done} of ${total}` : '';
+    }
   }
 
   setVisible(visible) {

@@ -187,6 +187,33 @@ asset sources:
 Crouch also changed the stealth design: in the Amalekite camp a crouched player
 is spotted at 52 % of the guard's range and only inside the cone.
 
+## The campaign — the War Table
+
+A finished run used to leave nothing behind. Pass 13 adds the long arc, drawn
+from the structure of the mobile strategy reference
+([Land of Empires: Immortal](https://apps.apple.com/fr/app/land-of-empires-immortal/id1523256630))
+and rebuilt entirely on 1 Samuel 30 — see `docs/REFERENCE_TEARDOWN.md` for what
+was ported and what was refused.
+
+Four leaves, reachable from any pause page (and, on a phone, from the new
+**codex nav** along the top of the codex):
+
+| Leaf | What it holds |
+| --- | --- |
+| **The Charge** | seven tasks, one per phase, each with its verse and reward; claim when done |
+| **The Band** | six of David's mighty men (2 Sam 23) — blade, spear and bow; drill them with bronze; locked men join at a star price |
+| **Ziklag** | the town rebuilt: hall, barracks, cistern, wall — five levels each, each level a real modifier |
+| **The Campaign** | the seven phases and the stars remembered in each (swift, silent, unseen) |
+
+A phase is a **stage**: finish it in under 150 s for *swift*, without a single
+detection for *silent*, and crouched for 12 s or more for *unseen*. Three stars
+pays 1.5× the phase's resources — and the best rating is the one that is kept.
+
+Everything persists (`localStorage['pursue.progress.v1']`), so the second
+playthrough starts different from the first: a raised wall gives more lamp, a
+dry cistern gives less breath, a drilled band hits harder. Nothing is
+purchasable, nothing gates on time, and nothing is rolled at random.
+
 ## The preferences leaf
 
 Pass 10 gave the codex a fourth page: **Settings**, reached from the pause menu.
@@ -326,6 +353,8 @@ PURSUE-DIGITAL/
     │   ├── StateMachine.js     # generic FSM (enter/update/exit)
     │   ├── Input.js            # keyboard + Pointer-Lock mouse, edge-triggered actions
     │   ├── settings.js         # persisted preferences (localStorage) + change listeners
+    │   ├── progression.js      # the campaign: resources, town, band, stars, charges
+    │   ├── install.js          # install prompt, wake lock, standalone shell
     │   └── EventBus.js         # decoupled pub/sub
     ├── audio/
     │   └── AudioEngine.js      # procedural Web Audio: ambience, pads, footsteps, SFX
@@ -360,7 +389,8 @@ PURSUE-DIGITAL/
     │       └── Horizon.js      # haze plain + two pre-hazed ridge rings (aerial perspective)
     ├── ui/
     │   ├── HUD.js              # objective, stamina bar, compass, prompts, alerts
-    │   ├── PauseMenu.js        # codex pages: quit / map / satchel / settings
+    │   ├── PauseMenu.js        # codex pages + the nav: menu / chart / satchel / war / settings
+    │   ├── WarTable.js         # the campaign page: charge, band, Ziklag, stars
     │   ├── SettingsPanel.js    # the preferences leaf (sliders, wax seals, reset)
     │   ├── Inventory.js        # eight-slot satchel, rarity frames, detail pane, tally
     │   ├── items.js            # the 18-item satchel data + scripture for each
