@@ -20,6 +20,8 @@ export class ThirdPersonCamera {
     this.pitch = 0.34;
     this.distance = CAMERA.distance;
     this.baseDistance = CAMERA.distance; // user zoom (mouse wheel)
+    this.sensitivity = 1;   // look sensitivity multiplier (settings)
+    this.invertY = false;   // vertical axis inversion (settings)
     this.obstacles = null;               // zone colliders, for occlusion
     this.eyeDrop = 0;                    // crouch lowers the look target
     this._sprint01 = 0; // damped sprint blend for FOV / distance push
@@ -95,8 +97,10 @@ export class ThirdPersonCamera {
     // --- mouse / touch look ---
     const md = this.input.consumeMouseDelta();
     if (this.input.lookActive && this.input.enabled) {
-      this.yaw -= md.x * CAMERA.sensitivity;
-      this.pitch = clamp(this.pitch + md.y * CAMERA.sensitivity, CAMERA.pitchMin, CAMERA.pitchMax);
+      const sens = CAMERA.sensitivity * (this.sensitivity || 1);
+      this.yaw -= md.x * sens;
+      const dy = md.y * (this.invertY ? -1 : 1);
+      this.pitch = clamp(this.pitch + dy * sens, CAMERA.pitchMin, CAMERA.pitchMax);
     }
 
     // --- user zoom (mouse wheel / trackpad), clamped to the rig's limits

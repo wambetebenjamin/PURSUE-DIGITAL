@@ -11,6 +11,8 @@ import { TouchControls } from './ui/TouchControls.js';
 import { IS_TOUCH } from './core/quality.js';
 import { Input } from './core/Input.js';
 import { Game } from './core/Game.js';
+import { settings } from './core/settings.js';
+import { postFX } from './core/PostFX.js';
 
 // ---------------------------------------------------------------- engine
 const mount = document.getElementById('app');
@@ -40,6 +42,41 @@ const game = new Game({
 });
 gameHolder.current = game;
 
+// ------------------------------------------------------------- audio
+const audioToggle = document.getElementById('audio-toggle');
+audioToggle.addEventListener('click', () => {
+  audio.init();
+  audio.resume();
+  const on = !settings.get('sound');
+  // a silenced master that is switched back on must have somewhere to go
+  settings.set(on && settings.get('volume') === 0 ? { sound: true, volume: 0.55 } : { sound: on });
+});
+
+// ---------------------------------------------------- settings → systems
+const applySettings = (snap) => {
+  // audio — muted state and master gain are independent leaves
+  audio.setVolume(snap.volume);
+  audio.setMuted(!snap.sound);
+  const audible = snap.sound && snap.volume > 0;
+  audioToggle.classList.toggle('muted', !audible);
+  audioToggle.textContent = audible ? '♪' : '✕';
+  audioToggle.setAttribute('aria-label', audible ? 'Mute sound' : 'Unmute sound');
+  audioToggle.setAttribute('title', audible ? 'Mute sound' : 'Unmute sound');
+  // camera
+  game.cameraRig.sensitivity = snap.sensitivity;
+  game.cameraRig.invertY = snap.invertY;
+  game.cameraRig.handheld = snap.handheld ? 1 : 0;
+  if (snap.cameraDistance) game.cameraRig.baseDistance = snap.cameraDistance;
+  // post-processing
+  postFX.setFeatures({
+    godRays: snap.godRays,
+    depthOfField: snap.depthOfField,
+    filmGrain: snap.filmGrain,
+  });
+};
+applySettings(settings.get());
+settings.onChange(applySettings);
+
 // -------------------------------------------------------------- UI wiring
 const loadingEl = document.getElementById('loading');
 const startScreen = document.getElementById('start-screen');
@@ -60,16 +97,6 @@ startButton.addEventListener('click', () => {
   game.start();
 });
 
-// ------------------------------------------------------------- audio
-const audioToggle = document.getElementById('audio-toggle');
-audioToggle.addEventListener('click', () => {
-  audio.init();
-  audio.resume();
-  const muted = audio.toggleMuted();
-  audioToggle.classList.toggle('muted', muted);
-  audioToggle.textContent = muted ? '✕' : '♪';
-});
-
 // click anywhere on the canvas re-acquires the pointer (Input handles it),
 // but also hide the hint immediately for crisp feedback
 engine.canvas.addEventListener('click', () => {
@@ -83,6 +110,24 @@ window.addEventListener('touchstart', () => {
 }, { once: true, passive: true });
 
 // --------------------------------------------------------------- startup
+// --------------------------------------------------- cinematic mode (P)
+let cinematic = false;
+const letterbox = document.getElementById('letterbox');
+const setCinematic = (on) => {
+  cinematic = on;
+  document.body.classList.toggle('cinematic', on);
+  if (letterbox) letterbox.classList.toggle('on', on);
+  game.hud.setVisible(!on && game.started && !game.finished);
+};
+window.addEventListener('keydown', (e) => {
+  if (e.code === 'KeyP' && settings.get('cinematicKey') && game.started && !game.modal.isOpen) {
+    setCinematic(!cinematic);
+  }
+  if (e.code === 'Enter' && !startScreen.classList.contains('hidden')) {
+    startButton.click();
+  }
+});
+
 engine.start();
 
 // one warm-up frame so shaders compile before we drop the loading veil

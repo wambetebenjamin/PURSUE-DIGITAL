@@ -68,6 +68,8 @@ No server, database, or environment variables are required. Everything is client
 | **E / Space** | Interact, pick up, advance dialogue |
 | **Esc** | Pause / release the mouse pointer |
 | **M** | Map of Judah (full chart of the march) |
+| **P** | Clean frame — letterbox and hide the HUD for a still shot |
+| **Enter** | Begin the pursuit from the title card |
 
 ### The Vice City look
 
@@ -145,6 +147,37 @@ asset sources:
 
 Crouch also changed the stealth design: in the Amalekite camp a crouched player
 is spotted at 52 % of the guard's range and only inside the cone.
+
+## The preferences leaf
+
+Pass 10 gave the codex a fourth page: **Settings**, reached from the pause menu.
+It is a written page rather than a system dialog — three incised grooves with
+bronze hilts for the sliders, and pressed wax seals that fill crimson when set.
+
+| Leaf | Range | What it changes |
+| --- | --- | --- |
+| Look sensitivity | 40 – 200 % | `ThirdPersonCamera.sensitivity`, multiplied into the base look rate |
+| Camera distance | 3.5 – 15 m | the rig's resting distance (the wheel still overrides it in play) |
+| Sound volume | silent – 100 % | the master gain of the procedural audio graph |
+| Invert vertical look | seal | flips the pitch axis |
+| Handheld camera motion | seal | the organic sway and trauma shake amplitude |
+| God rays through the smoke | seal | the screen-space ray pass (also the sun's shadow intensity) |
+| Depth of field (desktop) | seal | the bokeh pass — off by default on phones |
+| Film grain | seal | grain and vignette |
+| Ambient sound | seal | mutes every layer without losing the stored volume |
+| Clean frame on P | seal | whether the P key is bound to cinematic mode |
+
+Everything writes through one store, `src/core/settings.js`
+(`settings.get / set / onChange / reset`), which persists to
+`localStorage['pursue.settings.v1']` and degrades to in-memory defaults when
+storage is blocked (private mode, `file://`). The panel is built by
+`src/ui/SettingsPanel.js`; main.js applies each change live, so nothing needs a
+reload and no leaf is a dead toggle.
+
+Low vitality rides the same idea as the letterbox: below ~35 % health the frame
+darkens at the edges (`#vitality-veil`) and begins to pulse, then recovers as
+the lamp is fed. Cinematic mode (`P`) letterboxes the frame to 7.5 vh bars and
+drops the HUD, radar, prompts and touch controls for a clean still.
 
 ## Playing on a phone
 
@@ -233,6 +266,7 @@ PURSUE-DIGITAL/
     │   ├── Game.js             # orchestrator: FSM, phase logic, per-frame update order
     │   ├── StateMachine.js     # generic FSM (enter/update/exit)
     │   ├── Input.js            # keyboard + Pointer-Lock mouse, edge-triggered actions
+    │   ├── settings.js         # persisted preferences (localStorage) + change listeners
     │   └── EventBus.js         # decoupled pub/sub
     ├── audio/
     │   └── AudioEngine.js      # procedural Web Audio: ambience, pads, footsteps, SFX
@@ -240,6 +274,7 @@ PURSUE-DIGITAL/
     │   └── ThirdPersonCamera.js# orbit camera: mouse look, smoothing, compass bearing
     ├── player/
     │   ├── Player.js           # David rig (primitives), movement, collisions, gait animation
+    │   ├── Locomotion.js       # animator-style state machine (run/sprint/crouch/air + stride)
     │   └── Stamina.js          # 0–100 run stamina, forced-walk on exhaustion
     ├── entities/
     │   ├── CharacterRig.js     # detailed merged-geometry humanoid builder
@@ -263,6 +298,11 @@ PURSUE-DIGITAL/
     │       └── SkyDome.js      # two-color gradient sky shader
     ├── ui/
     │   ├── HUD.js              # objective, stamina bar, compass, prompts, alerts
+    │   ├── PauseMenu.js        # codex pages: quit / map / satchel / settings
+    │   ├── SettingsPanel.js    # the preferences leaf (sliders, wax seals, reset)
+    │   ├── Inventory.js        # eight-slot satchel, rarity frames, detail pane, tally
+    │   ├── items.js            # the 18-item satchel data + scripture for each
+    │   ├── icons.js            # 18 procedural icon painters (no third-party PNGs)
     │   ├── DialogueModal.js    # narrative cards + multi-step dialogue sequences
     │   ├── VictoryScreen.js    # 1 Sam 30:18-19 overlay + Play Again
     │   └── styles.css          # full responsive overlay styling

@@ -4,10 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <meta name="description" content="PURSUE — a 3D action-adventure retelling of 1 Samuel 30. Play as David and recover everything." />
+    <meta name="theme-color" content="#1a1208" />
+    <meta property="og:title" content="PURSUE — 1 Samuel 30" />
+    <meta property="og:description" content="A cinematic retelling of 1 Samuel 30: pursue, and recover all." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%231a1208'/%3E%3Cpath d='M32 12c-6 10-6 18 0 28 6-10 6-18 0-28z' fill='%23e0bc7c'/%3E%3Cpath d='M32 40c-8 2-12 6-13 12 5-4 9-6 13-7z' fill='%23a8823c'/%3E%3Cpath d='M32 40c8 2 12 6 13 12-5-4-9-6-13-7z' fill='%23a8823c'/%3E%3C/svg%3E" />
     <title>PURSUE — 1 Samuel 30</title>
-    <script type="module" crossorigin src="./assets/index-B3MBY7lu.js"></script>
+    <script type="module" crossorigin src="./assets/index-CC-l_yQA.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/three-B6l6zzyn.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-CGh1fY8C.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-pIiGHIOp.css">
   </head>
   <body>
     <!-- WebGL canvas is injected here by the engine -->
@@ -109,6 +113,12 @@
         <div id="radar"></div>
       </div>
 
+      <!-- Cinematic mode: letterbox bars, HUD hidden (press P) -->
+      <div id="letterbox" aria-hidden="true"><span class="bar top"></span><span class="bar bottom"></span></div>
+
+      <!-- Low-vitality veil: the edges of the frame darken and pulse -->
+      <div id="vitality-veil" aria-hidden="true"></div>
+
       <!-- Interaction prompt (Press E ... ) -->
       <div id="prompt" class="hidden"><span id="prompt-text"></span></div>
 
@@ -208,6 +218,7 @@
           <button id="pause-resume" class="primary-button">Resume the march</button>
           <button id="pause-map" class="secondary-button">Map of Judah</button>
           <button id="pause-satchel" class="secondary-button">The Satchel</button>
+          <button id="pause-settings" class="secondary-button">Settings</button>
           <button id="pause-restart" class="secondary-button danger">Begin again</button>
         </div>
         <div id="pause-map-panel" class="hidden">
@@ -216,6 +227,14 @@
           <canvas id="map-canvas"></canvas>
           <button id="pause-resume-2" class="primary-button">Back to the march</button>
         </div>
+        <div id="pause-settings-panel" class="hidden">
+          <span class="page-mark">Marginalia</span>
+          <h2>Settings</h2>
+          <p class="pause-sub">How the wilderness is shown and heard.</p>
+          <div id="settings-list"></div>
+          <button id="pause-resume-4" class="primary-button">Back to the march</button>
+        </div>
+
         <div id="pause-satchel-panel" class="hidden">
           <span class="page-mark">Goods</span>
           <h2>The Satchel</h2>

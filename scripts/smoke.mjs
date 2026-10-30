@@ -37,6 +37,10 @@ class FakeElement {
   set innerHTML(v) { this._innerHTML = v; if (v === '') this.children = []; }
   get innerHTML() { return this._innerHTML; }
   appendChild(c) { this.children.push(c); return c; }
+  replaceChildren(...c) { this.children = c; }
+  setAttribute(k, v) { this._attrs = this._attrs || {}; this._attrs[k] = String(v); }
+  getAttribute(k) { return (this._attrs || {})[k] ?? null; }
+  removeAttribute(k) { if (this._attrs) delete this._attrs[k]; }
   addEventListener() {}
   removeEventListener() {}
 }
@@ -66,6 +70,15 @@ globalThis.document = {
   },
   addEventListener() {},
   exitPointerLock() {},
+  body: new FakeElement('body'),
+};
+
+// a persistence shim so the settings store can be exercised as it ships
+const store = new Map();
+globalThis.localStorage = {
+  getItem: (k) => (store.has(k) ? store.get(k) : null),
+  setItem: (k, v) => store.set(k, String(v)),
+  removeItem: (k) => store.delete(k),
 };
 globalThis.window = globalThis;
 globalThis.addEventListener = () => {};
@@ -73,6 +86,7 @@ globalThis.requestAnimationFrame = (fn) => setTimeout(fn, 0);
 
 // ------------------------------------------------------------- bootstrap
 const { Input } = await import('../src/core/Input.js');
+const { postFX } = await import('../src/core/PostFX.js');
 const { Game } = await import('../src/core/Game.js');
 const { STATES, NARRATIVE } = await import('../src/constants.js');
 const { ZIKLAG } = await import('../src/world/zones/ZiklagZone.js');
@@ -368,5 +382,48 @@ const tileCount = (() => {
 })();
 ok(tileCount >= 18, `the satchel lays out every item (${tileCount} tiles)`);
 game.pause.close(false);
+
+// ------------------------------------------------- pass 10: the settings leaf
+const { settings, DEFAULTS } = await import('../src/core/settings.js');
+ok(DEFAULTS.sensitivity === 1 && DEFAULTS.volume === 0.55, 'settings defaults are sane');
+settings.set({ sensitivity: 1.4, godRays: false, cameraDistance: 6 });
+ok(settings.get('sensitivity') === 1.4, 'settings take a written value');
+ok(settings.get('godRays') === false, 'and a wax seal can be pressed off');
+const persisted = JSON.parse(localStorage.getItem('pursue.settings.v1'));
+ok(persisted && persisted.sensitivity === 1.4, 'preferences persist to storage');
+let notified = null;
+const off = settings.onChange((snap) => { notified = snap; });
+settings.set({ filmGrain: false });
+ok(notified && notified.filmGrain === false, 'listeners hear the change');
+off();
+settings.reset();
+ok(settings.get('sensitivity') === 1 && settings.get('filmGrain') === true,
+  'restore defaults returns every leaf to the factory setting');
+
+// the settings page of the codex is built from real rows, all wired
+game.pause.showPage('settings');
+const list = document.getElementById('settings-list');
+ok(list.children.length >= 11, `the settings leaf lays out every row (${list.children.length})`);
+ok(!document.getElementById('pause-settings-panel').classList.contains('hidden'),
+  'the settings leaf is the visible page');
+ok(game.pause.settings.controls.size === 10, 'ten preferences are reachable from the UI, including the clean frame');
+game.pause.showPage('menu');
+ok(document.getElementById('pause-settings-panel').classList.contains('hidden'),
+  'and it yields back to the menu');
+game.pause.close(false);
+
+// post-processing leaves can be switched without a restart
+const fx = postFX;
+fx.setFeatures({ godRays: false, filmGrain: false, depthOfField: false });
+ok(fx._features.godRays === false && fx._features.filmGrain === false,
+  'post-processing leaves switch off at runtime');
+fx.setFeatures({ godRays: true, filmGrain: true, depthOfField: true });
+ok(fx._features.godRays === true, 'and switch back on');
+
+// the frame closes in when the lamp runs low
+game.hud.setHealth(0.1);
+ok(document.body.classList.contains('critical'), 'a failing lamp marks the frame critical');
+game.hud.setHealth(1);
+ok(!document.body.classList.contains('critical'), 'and recovers when the lamp is fed');
 
 console.log(`\nAll ${passed} checks passed.\n`);

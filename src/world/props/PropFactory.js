@@ -35,13 +35,23 @@ function bakeStatic(root) {
   const byMat = new Map();
   root.traverse((o) => {
     if (!o.isMesh || o.isInstancedMesh) return;
-    const geo = o.geometry.clone();
+    // normalise indexing: mergeGeometries refuses mixed indexed/non-indexed sets,
+    // so everything is flattened to the same (non-indexed) form before merging
+    const geo = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
     geo.applyMatrix4(o.matrixWorld);
     // normalise attribute sets so mixed primitives can merge
     for (const name of Object.keys(geo.attributes)) {
       if (name !== 'position' && name !== 'normal' && name !== 'uv') {
         geo.deleteAttribute(name);
       }
+    }
+    if (geo.index) {
+      // e.g. a cloned geometry that still carried its index — flatten it too
+      const flat = geo.toNonIndexed();
+      geo.dispose();
+      if (!byMat.has(o.material)) byMat.set(o.material, []);
+      byMat.get(o.material).push(flat);
+      return;
     }
     if (!byMat.has(o.material)) byMat.set(o.material, []);
     byMat.get(o.material).push(geo);
@@ -999,9 +1009,9 @@ export function createGrassField(count, area, seed = 1, groundHeight = () => 0, 
 export function createWheatField(count, area, seed = 1, groundHeight = () => 0) {
   count = qualityCount(count, 40);
   // blade + grain head merged into one instance geometry
-  const blade = new THREE.ConeGeometry(0.045, 1, 3);
+  const blade = new THREE.ConeGeometry(0.045, 1, 3).toNonIndexed();
   blade.translate(0, 0.55, 0);
-  const head = new THREE.CylinderGeometry(0.035, 0.055, 0.22, 4);
+  const head = new THREE.CylinderGeometry(0.035, 0.055, 0.22, 4).toNonIndexed();
   head.translate(0, 1.12, 0);
   const geo = mergeGeometries([blade, head], false);
 
@@ -1036,9 +1046,10 @@ export function createWheatField(count, area, seed = 1, groundHeight = () => 0) 
 /** Wildflower sprinkle — colored bloom + stem, instanced. */
 export function createWildflowers(count, area, seed = 1, groundHeight = () => 0) {
   count = qualityCount(count, 18);
-  const stem = new THREE.CylinderGeometry(0.012, 0.018, 0.34, 3);
+  // the cylinder is indexed and the icosahedron is not — flatten both first
+  const stem = new THREE.CylinderGeometry(0.012, 0.018, 0.34, 3).toNonIndexed();
   stem.translate(0, 0.17, 0);
-  const bloom = new THREE.IcosahedronGeometry(0.05, 0);
+  const bloom = new THREE.IcosahedronGeometry(0.05, 0); // already non-indexed
   bloom.translate(0, 0.38, 0);
   const geo = mergeGeometries([stem, bloom], false);
 

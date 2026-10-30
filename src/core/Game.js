@@ -326,6 +326,17 @@ export class Game {
     this.cameraRig.reset(this.player.position, zone.spawn.yaw + Math.PI);
     this._setPrompt(null);
     this._detectionCooldown = 0;
+
+    // first-arrival guidance, once per run per moment
+    this._tips = this._tips || new Set();
+    if (stateName === STATES.CAMP && !this._tips.has('camp')) {
+      this._tips.add('camp');
+      setTimeout(() => this.hud.showTip('Hold C to crouch — a low man is seen at half the distance.', 6), 1400);
+    }
+    if (stateName === STATES.DESERT && !this._tips.has('desert')) {
+      this._tips.add('desert');
+      setTimeout(() => this.hud.showTip('The wheel sets your distance; Shift spends your breath.', 5.5), 1200);
+    }
   }
 
   /** Keep the radar mission blip on the same point the arrow tracks. */

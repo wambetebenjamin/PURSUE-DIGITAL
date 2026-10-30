@@ -9,11 +9,12 @@
  * DOM ids are created when missing so the module is headless-safe (smoke).
  */
 import { renderSatchel } from './Inventory.js';
+import { SettingsPanel } from './SettingsPanel.js';
 export class PauseMenu {
   /**
    * @param {{ onResume: () => void, onRestart: () => void, radar: import('./Radar.js').Radar }} opts
    */
-  constructor({ onResume, onRestart, radar }) {
+  constructor({ onResume, onRestart, radar, onSettings } = {}) {
     this.onResume = onResume;
     this.onRestart = onRestart;
     this.radar = radar;
@@ -30,6 +31,9 @@ export class PauseMenu {
     this.satchelPanel = document.getElementById('pause-satchel-panel');
     this.btnSatchel = document.getElementById('pause-satchel');
     this.satchelHost = document.getElementById('satchel-grid');
+    this.settingsPanel = document.getElementById('pause-settings-panel');
+    this.btnSettings = document.getElementById('pause-settings');
+    this.settings = new SettingsPanel({ host: document.getElementById('settings-list'), onChange: onSettings });
     // headless fakes may lack getContext — renderFullMap guards and no-ops
     this.mapCanvas = document.getElementById('map-canvas');
 
@@ -45,6 +49,11 @@ export class PauseMenu {
     if (this.btnSatchel) {
       this.btnSatchel.addEventListener('click', () => this.showPage('satchel'));
     }
+    if (this.btnSettings) {
+      this.btnSettings.addEventListener('click', () => this.showPage('settings'));
+    }
+    const back4 = document.getElementById('pause-resume-4');
+    if (back4) back4.addEventListener('click', () => this.close());
     const back3 = document.getElementById('pause-resume-3');
     if (back3) back3.addEventListener('click', () => this.close());
     if (this.btnRestart) {
@@ -80,6 +89,8 @@ export class PauseMenu {
     if (this.menuPanel) this.menuPanel.classList.toggle('hidden', page !== 'menu');
     if (this.mapPanel) this.mapPanel.classList.toggle('hidden', page !== 'map');
     if (this.satchelPanel) this.satchelPanel.classList.toggle('hidden', page !== 'satchel');
+    if (this.settingsPanel) this.settingsPanel.classList.toggle('hidden', page !== 'settings');
+    if (page === 'settings' && this.settings) this.settings.open();
     if (page === 'map') {
       this._sizeMap();
       this.render();

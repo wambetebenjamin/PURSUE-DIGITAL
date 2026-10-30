@@ -271,6 +271,15 @@ class PostFX {
     this._sunDir.copy(v).normalize();
   }
 
+  /**
+   * Quality features, driven by the settings leaf.
+   * @param {{godRays?:boolean, depthOfField?:boolean, filmGrain?:boolean}} f
+   */
+  setFeatures(f = {}) {
+    this._features = { ...(this._features || {}), ...f };
+    if (this._bokeh) this._bokeh.enabled = this._features.depthOfField !== false;
+  }
+
   /** Depth-of-field focus distance in world units (camera → player). */
   setFocus(distance) {
     if (Number.isFinite(distance)) this._focusTarget = Math.max(1.2, distance);
@@ -351,9 +360,11 @@ class PostFX {
     u.uVignette.value = c.vignette;
     u.uGrain.value = c.grain;
     u.uChroma.value = c.chroma;
-    u.uRays.value = c.rays;
+    const feat = this._features || {};
+    u.uRays.value = feat.godRays === false ? 0 : c.rays;
     u.uHaze.value = c.haze;
     u.uDust.value = c.dust;
+    u.uGrain.value = feat.filmGrain === false ? 0 : c.grain;
     u.uTime.value = this._time;
 
     this._updateCameraFx(dt);

@@ -13,6 +13,7 @@ export class AudioEngine {
   constructor() {
     this.ready = false;
     this.muted = false;
+    this.volume = 0.55;
     this._ctx = null;
     this._master = null;
     this._layers = {};
@@ -102,13 +103,27 @@ export class AudioEngine {
   }
 
   // ---------------------------------------------------------- control
-  toggleMuted() {
-    this.muted = !this.muted;
+  /** Master volume 0–1 (the settings leaf writes here). */
+  setVolume(v) {
+    this.volume = Math.max(0, Math.min(1, v));
     if (this.ready) {
       const t = this._ctx.currentTime;
-      this._master.gain.setTargetAtTime(this.muted ? 0 : 0.55, t, 0.08);
+      this._master.gain.setTargetAtTime(this.muted ? 0 : this.volume, t, 0.08);
+    }
+  }
+
+  /** Explicit mute (settings and the speaker leaf both route through here). */
+  setMuted(muted) {
+    this.muted = Boolean(muted);
+    if (this.ready) {
+      const t = this._ctx.currentTime;
+      this._master.gain.setTargetAtTime(this.muted ? 0 : this.volume, t, 0.08);
     }
     return this.muted;
+  }
+
+  toggleMuted() {
+    return this.setMuted(!this.muted);
   }
 
   resume() {

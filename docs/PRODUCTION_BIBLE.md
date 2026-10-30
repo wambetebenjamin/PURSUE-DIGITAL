@@ -465,3 +465,93 @@ touching any layout code:
 
 Our icons stay in place as the fallback, so a partially-supplied pack degrades
 gracefully instead of leaving holes.
+
+## 11. Shipping both retrievals (Pass 10)
+
+Pass 9 proved two external systems could be rebuilt in our own idiom. Pass 10
+is the shipping pass: it takes the controller grammar and the icon system from
+"demonstrated" to "in the product", and closes the gap where a system existed
+but the player had no way to reach it.
+
+### 11a. One store for every preference
+
+`core/settings.js` is a 130-line store with no dependencies:
+
+```js
+settings.get()            // whole snapshot
+settings.get('volume')    // one leaf
+settings.set({ volume: 0.4 })
+settings.onChange((snap) => applySettings(snap))  // returns an unsubscribe
+settings.reset()
+```
+
+Ten leaves live under the storage key `pursue.settings.v1`:
+`sensitivity, invertY, cameraDistance, godRays, depthOfField, filmGrain,
+handheld, sound, volume, cinematicKey`. Values are type-checked on read, so a
+corrupt or hand-edited record falls back to the default per leaf instead of
+poisoning the object. When `localStorage` throws (private mode, `file://`), the
+store silently runs in memory: **the game must never fail to boot because a
+preference could not be read.**
+
+### 11b. The codex leaf
+
+`ui/SettingsPanel.js` builds the page into `#settings-list` on first open. Two
+widget grammars only, both physical:
+
+- **Incised groove** — `<input type="range">` with a dark carved track and a
+  bronze hilt, a tabular readout at its right. Used for sensitivity, camera
+  distance and volume.
+- **Wax seal** — a `<button role="switch">` whose radial gradient fills crimson
+  and gains an inner glow when pressed. Used for every boolean.
+
+Design rules the page obeys: one column, serif labels in the body face, the
+readout always legible, and a single "Restore defaults" line at the foot voiced
+as marginalia (*"Written in pencil, forgotten gladly."*). Nothing is applied
+only on close — each input writes through the store immediately, so a toggle
+proves itself on the live frame behind the pause card.
+
+### 11c. What the leaves drive
+
+| Leaf | Consumer | Implementation |
+|---|---|---|
+| `sensitivity` | `ThirdPersonCamera.look()` | multiplies `CAMERA.sensitivity` before damping |
+| `invertY` | `ThirdPersonCamera.look()` | negates the pitch delta |
+| `cameraDistance` | `ThirdPersonCamera.baseDistance` | the wheel still moves the resting distance in play |
+| `handheld` | `ThirdPersonCamera` sway | scales the organic motion + trauma amplitude |
+| `godRays` / `depthOfField` / `filmGrain` | `PostFX.setFeatures()` | zeroes the uniform and skips the pass — no shader rebuild |
+| `sound` / `volume` | `AudioEngine.setMuted / setVolume` | mute and gain are independent leaves, so silencing never destroys a stored volume |
+| `cinematicKey` | `main.js` key handler | binds or frees the P key |
+
+The speaker button in the HUD now writes `{ sound }` through the same store
+rather than toggling engine state directly, so the button, the seal and the
+engine can never disagree.
+
+### 11d. Cinematic frame and low vitality
+
+Both are frame-level effects that live in CSS and are driven by one class each.
+
+- **Cinematic (`P`)** — `body.cinematic` fades the HUD, radar, prompts, banners
+  and touch controls to zero and `#letterbox.on` slides two 7.5 vh bars in. The
+  HUD is not destroyed, only veiled, so leaving the mode restores it exactly.
+- **Low vitality** — `HUD.setHealth` writes `#vitality-veil`'s opacity on a
+  curve that begins at 42 % health and toggles `body.critical` below 34 %, which
+  starts a 2.6 s pulse. The lamp on the HUD gutters at the same threshold, so
+  the two read as one event.
+
+### 11e. Clean console
+
+Pass 10 removed the last Three.js warnings. All static props are merged, and
+`BufferGeometryUtils.mergeGeometries` rejects mixed indexed/non-indexed input,
+so `PropFactory.bakeStatic()` normalises every geometry with
+`geo.index ? geo.toNonIndexed() : geo.clone()` before merging (the same guard
+in the wheat and wildflower fields). The smoke run and the production build are
+now completely silent.
+
+### 11f. Verification
+
+`scripts/smoke.mjs` grew from 67 to 81 checks in pass 10: the store's defaults,
+round-trip, persistence, listener notification and reset; the settings page's
+row count, visibility transitions and reachable-control count; live
+`PostFX.setFeatures` toggling; and the low-vitality class flipping the frame and
+recovering. Everything runs headless in Node against a stub DOM, so the build
+cannot regress without the test saying so.

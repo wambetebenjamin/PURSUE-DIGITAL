@@ -16,6 +16,7 @@ export class HUD {
     this.lamp = document.getElementById('lamp-wrap');
     this.flame = document.getElementById('lamp-flame');
     this.stanceChip = document.getElementById('stance-chip');
+    this.veil = document.getElementById('vitality-veil');
     this.prompt = document.getElementById('prompt');
     this.promptText = document.getElementById('prompt-text');
     this.alertBanner = document.getElementById('alert-banner');
@@ -118,6 +119,13 @@ export class HUD {
       this.flame.style.opacity = String(0.35 + r * 0.65);
       this.flame.classList.toggle('low', r < 0.3);
     }
+    // the frame itself starts to close in when the lamp runs low
+    if (this.veil && this.veil.style) {
+      this.veil.style.opacity = String(Math.max(0, (0.42 - r) / 0.42) * 0.85);
+    }
+    if (typeof document !== 'undefined' && document.body && document.body.classList) {
+      document.body.classList.toggle('critical', r < 0.34);
+    }
     if (this.lamp && this.lamp.style) {
       this.lamp.classList.toggle('guttering', r < 0.3);
       if (this.lamp.style.setProperty) this.lamp.style.setProperty('--oil', String(r));
@@ -140,7 +148,23 @@ export class HUD {
     }
   }
 
+  /**
+   * A one-time instruction in the teacher's voice — parchment, not warning wax.
+   * Shares the alert banner so it never stacks with a detection warning.
+   */
+  showTip(text, duration = 5) {
+    if (!this.alertBanner || !this.alertText) return;
+    const display = IS_TOUCH
+      ? text.replace('Press E', 'Tap Use').replace('Hold C', 'Tap Low').replace('C / Ctrl', 'Low')
+      : text;
+    this.alertText.textContent = display;
+    this.alertBanner.classList.remove('hidden');
+    this.alertBanner.classList.add('tip', 'pop');
+    this._alertTimer = duration;
+  }
+
   showAlert(text, duration = 2.4) {
+    if (this.alertBanner) this.alertBanner.classList.remove('tip');
     this.alertText.textContent = text;
     this.alertBanner.classList.remove('hidden');
     this.alertBanner.classList.remove('pop');
