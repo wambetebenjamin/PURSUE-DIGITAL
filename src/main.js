@@ -105,8 +105,13 @@ startButton.addEventListener('click', () => {
 
 // the screen may sleep over a paused march, and must not over a running one
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) shell.end();
-  else if (game.started && !game.paused && !game.finished) shell.begin();
+  if (document.hidden) {
+    shell.end();
+    // an app that loses focus must stop the march, not run it in a pocket
+    if (game.started && !game.finished && !game.pause.isOpen) game.pause.open('menu');
+  } else if (game.started && !game.paused && !game.finished) {
+    shell.begin();
+  }
 });
 
 // pause overlay, dialogue and victory all stop the clock: no wake lock there

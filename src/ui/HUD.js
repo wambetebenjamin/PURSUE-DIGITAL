@@ -164,6 +164,10 @@ export class HUD {
   }
 
   showAlert(text, duration = 2.4) {
+    // a short tick in the hand: the one channel a phone has and a page does not
+    try {
+      navigator.vibrate?.(text.length > 46 ? 42 : 24);
+    } catch (_e) { /* unsupported */ }
     if (this.alertBanner) this.alertBanner.classList.remove('tip');
     this.alertText.textContent = text;
     this.alertBanner.classList.remove('hidden');
