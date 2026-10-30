@@ -19,7 +19,9 @@ import {
 } from '../props/PropFactory.js';
 import { smokeSpriteMap } from '../../utils/surfaces.js';
 import { ParticleEmitter } from '../effects/Particles.js';
-import { SkyDome } from '../effects/SkyDome.js';
+import { ATMOSPHERE } from '../atmospheres.js';
+import { createLightingRig, attachRig } from '../effects/LightingRig.js';
+import { createHorizon } from '../effects/Horizon.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { VISION } from '../../constants.js';
 import { seededRandom, randRange, wrapAngle } from '../../utils/math.js';
@@ -101,45 +103,13 @@ export function createCampZone() {
   const guards = [];
 
   // ------------------------------------------------------------- sky
-  // PHASE 3 spec: cool dark-blue starlight, low crescent moon, 3200K night
-  const sky = new SkyDome(0x140b46, 0xc22e88, 0.75, 0x5c2a9e); // Starfish Island night
-  group.add(sky.mesh);
-
-  // ---------------------------------------------------------- lights
-  // ambient starlight: cool blue over warm firelight bounce
-  const hemi = new THREE.HemisphereLight(0x2c3a5c, 0x241818, 0.75);
-  group.add(hemi);
-
-  // low-hanging crescent moon (the "3200K starlight" key)
-  const moon = new THREE.Mesh(
-    new THREE.CircleGeometry(9, 24),
-    new THREE.MeshBasicMaterial({ color: 0xd8e2f2 }),
-  );
-  moon.position.set(70, 95, -140);
-  moon.lookAt(0, 10, 0);
-  group.add(moon);
-  const moonShadow = new THREE.Mesh(
-    new THREE.CircleGeometry(8.2, 24),
-    new THREE.MeshBasicMaterial({ color: 0x10162c }),
-  );
-  moonShadow.position.copy(moon.position).add(new THREE.Vector3(-3.2, 1.6, 0));
-  moonShadow.quaternion.copy(moon.quaternion);
-  group.add(moonShadow);
-
-  const sun = new THREE.DirectionalLight(0x7e8fe0, 0.6); // neon moonlight
-  sun.position.set(-30, 52, -18);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
-  sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 170;
-  sun.shadow.camera.left = -44;
-  sun.shadow.camera.right = 44;
-  sun.shadow.camera.top = 44;
-  sun.shadow.camera.bottom = -44;
-  sun.shadow.bias = -0.0012;
-  sun.userData.offset = new THREE.Vector3(-28, 50, -16);
-  group.add(sun, sun.target);
-  sky.setSun(new THREE.Vector3(70, 95, -140), 0xc8d8ff, 0.5); // the crescent
+  // moonlit night in the Amalekite camp
+  const atmo = ATMOSPHERE.camp;
+  const rig = createLightingRig(atmo, { shadowExtent: 46, shadowFar: 180 });
+  attachRig(group, rig);
+  const { sky, hemi, sun } = rig;
+  // layered ranges dissolve into this phase's haze — no fog wall at the edge
+  group.add(createHorizon(atmo));
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(150, 160, 52, 56);
@@ -152,8 +122,8 @@ export function createCampZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0x6a5c8a), colorB: new THREE.Color(0x4a3c6a),
-    colorC: new THREE.Color(0x2c2048), scale: 0.05, strength: 0.55, seed: 43,
+    colorA: new THREE.Color(0x5b4f3f), colorB: new THREE.Color(0x3d3529),
+    colorC: new THREE.Color(0x241f19), scale: 0.05, strength: 0.55, seed: 43,
   });
   const groundMat = Mat.rockDark().clone();
   groundMat.color.set(0x8a7058); // trodden dark earth × vertex colors
@@ -410,7 +380,8 @@ export function createCampZone() {
     spawn: CAMP.spawn,
     bounds: CAMP.bounds,
     colliders,
-    fog: { color: 0x2a1454, density: 0.013 },
+    fog: { color: atmo.fog.color, density: atmo.fog.density },
+    atmosphere: atmo,
     sun,
     sky,
     groundHeight: campHeight,

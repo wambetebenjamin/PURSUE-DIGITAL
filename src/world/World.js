@@ -66,6 +66,9 @@ export class World {
     zone.update(dt, time);
     zone.sky?.update?.(time);
 
+    // the dome rides with the player, so it can never be walked out of
+    if (zone.sky?.mesh) zone.sky.mesh.position.copy(playerPos);
+
     if (zone.sun) {
       zone.sun.position.copy(playerPos).add(zone.sun.userData.offset);
       zone.sun.target.position.copy(playerPos);

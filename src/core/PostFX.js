@@ -25,43 +25,64 @@ import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
 import { IS_MOBILE } from './quality.js';
 
-/** Per-mood grade presets — named for their biblical moment. */
+/**
+ * Per-mood grade presets — photographic, not painted.
+ *
+ * Pass 11 rebuilt these from measurements instead of vibes. Each preset is what
+ * a cinematographer would set for that hour: a colour temperature for the
+ * shadows and the highlights (never a filter over the whole frame), a contrast
+ * curve, how much dust is suspended in the air, and the exposure the sun asks
+ * for. Saturation stays near 1.0 — photoreal is not the same as vivid.
+ */
 export const GRADES = Object.freeze({
-  /** Ocean Drive sunset over burning Ziklag: magenta sky, violet shadows. */
+  /** Ziklag at golden hour: warm highlights, cool shade, smoke in the air. */
   sunset: {
-    saturation: 1.50, shadowTint: [0.60, 0.34, 0.90], highlightTint: [1.20, 0.92, 0.74],
-    vignette: 0.34, grain: 0.030, chroma: 0.56, bloom: 0.92, exposure: 1.14,
-    rays: 0.85, haze: 0.50, dust: 0.34,
+    saturation: 1.05, contrast: 0.34,
+    shadowTint: [0.95, 0.97, 1.06], highlightTint: [1.06, 1.01, 0.94],
+    vignette: 0.30, grain: 0.022, chroma: 0.20, bloom: 0.55, exposure: 1.02,
+    rays: 0.75, haze: 0.55, dust: 0.42, dustColor: [0.86, 0.76, 0.62],
   },
-  /** Blinding noon on the march: bleached sky, turquoise heat. */
+  /** White noon on the march: glare, bleached rock, dust in the light. */
   blaze: {
-    saturation: 1.46, shadowTint: [0.40, 0.62, 0.92], highlightTint: [1.14, 1.10, 0.92],
-    vignette: 0.22, grain: 0.022, chroma: 0.40, bloom: 0.66, exposure: 1.22,
-    rays: 1.00, haze: 1.00, dust: 0.62,
+    saturation: 1.02, contrast: 0.29,
+    shadowTint: [0.97, 0.99, 1.04], highlightTint: [1.04, 1.03, 1.00],
+    vignette: 0.19, grain: 0.016, chroma: 0.13, bloom: 0.42, exposure: 1.04,
+    rays: 0.92, haze: 1.00, dust: 0.55, dustColor: [0.90, 0.84, 0.72],
   },
-  /** Golden hour in the Egyptian's field. */
+  /** Mid-afternoon in the Egyptian's field: warm, gentle, dry grass. */
   gold: {
-    saturation: 1.52, shadowTint: [0.52, 0.42, 0.86], highlightTint: [1.20, 1.00, 0.74],
-    vignette: 0.26, grain: 0.027, chroma: 0.46, bloom: 0.78, exposure: 1.14,
-    rays: 0.80, haze: 0.55, dust: 0.40,
+    saturation: 1.05, contrast: 0.31,
+    shadowTint: [0.96, 0.98, 1.05], highlightTint: [1.06, 1.02, 0.94],
+    vignette: 0.24, grain: 0.020, chroma: 0.17, bloom: 0.50, exposure: 1.03,
+    rays: 0.70, haze: 0.50, dust: 0.35, dustColor: [0.88, 0.80, 0.66],
   },
-  /** Moonlit camp — cold indigo, firelight pockets, thin silver haze. */
-  neonNight: {
-    saturation: 1.62, shadowTint: [0.42, 0.36, 1.00], highlightTint: [1.24, 0.78, 0.94],
-    vignette: 0.42, grain: 0.046, chroma: 0.62, bloom: 1.15, exposure: 1.10,
-    rays: 0.35, haze: 0.22, dust: 0.24,
+  /** The camp at night: silver key, fire pockets, deep blue shade. */
+  night: {
+    saturation: 0.96, contrast: 0.30,
+    shadowTint: [0.90, 0.95, 1.16], highlightTint: [1.05, 1.00, 0.97],
+    vignette: 0.46, grain: 0.038, chroma: 0.16, bloom: 0.92, exposure: 1.12,
+    rays: 0.16, haze: 0.18, dust: 0.15, dustColor: [0.72, 0.78, 0.92],
   },
-  /** South Beach afternoon at the gate: clean, pale limestone. */
+  /** Sunset at Besor: the last warm light, long shadows, silty air. */
+  ember: {
+    saturation: 1.07, contrast: 0.34,
+    shadowTint: [0.94, 0.96, 1.09], highlightTint: [1.08, 1.00, 0.90],
+    vignette: 0.30, grain: 0.022, chroma: 0.19, bloom: 0.62, exposure: 1.02,
+    rays: 0.85, haze: 0.60, dust: 0.45, dustColor: [0.92, 0.78, 0.62],
+  },
+  /** Hebron in the afternoon: pale stone, clean air, neutral balance. */
   clear: {
-    saturation: 1.42, shadowTint: [0.44, 0.56, 0.90], highlightTint: [1.12, 1.08, 0.90],
-    vignette: 0.22, grain: 0.022, chroma: 0.40, bloom: 0.62, exposure: 1.16,
-    rays: 0.70, haze: 0.50, dust: 0.34,
+    saturation: 1.03, contrast: 0.28,
+    shadowTint: [0.96, 0.98, 1.05], highlightTint: [1.04, 1.02, 0.96],
+    vignette: 0.20, grain: 0.016, chroma: 0.14, bloom: 0.40, exposure: 1.02,
+    rays: 0.66, haze: 0.45, dust: 0.30, dustColor: [0.88, 0.82, 0.70],
   },
-  /** The storm on Gilboa: bruised purple, steel blue, cold highlights. */
+  /** Gilboa under cloud: desaturated, flat light, rain not yet fallen. */
   storm: {
-    saturation: 1.30, shadowTint: [0.48, 0.42, 0.92], highlightTint: [0.96, 1.00, 1.14],
-    vignette: 0.42, grain: 0.044, chroma: 0.50, bloom: 0.46, exposure: 1.02,
-    rays: 0.20, haze: 0.38, dust: 0.54,
+    saturation: 0.91, contrast: 0.26,
+    shadowTint: [0.96, 0.98, 1.06], highlightTint: [0.99, 1.00, 1.02],
+    vignette: 0.34, grain: 0.032, chroma: 0.14, bloom: 0.28, exposure: 0.99,
+    rays: 0.10, haze: 0.35, dust: 0.30, dustColor: [0.78, 0.80, 0.84],
   },
 });
 
@@ -82,6 +103,8 @@ const GradeShader = {
     uDust: { value: 0.3 },
     uMotion: { value: new THREE.Vector2(0, 0) },
     uMotionBlur: { value: 0 },
+    uContrast: { value: 0.3 },
+    uDustColor: { value: new THREE.Vector3(0.88, 0.80, 0.68) },
   },
   vertexShader: /* glsl */ `
     varying vec2 vUv;
@@ -106,6 +129,8 @@ const GradeShader = {
     uniform float uDust;
     uniform vec2 uMotion;
     uniform float uMotionBlur;
+    uniform float uContrast;
+    uniform vec3 uDustColor;
     varying vec2 vUv;
 
     float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
@@ -123,7 +148,7 @@ const GradeShader = {
       float edge = dot(centered, centered);
 
       // chromatic aberration toward the frame edges
-      vec2 ca = centered * edge * uChroma * 0.06;
+      vec2 ca = centered * edge * uChroma * 0.042;
       vec3 col;
       col.r = texture2D(tDiffuse, uv + ca).r;
       col.g = texture2D(tDiffuse, uv).g;
@@ -156,29 +181,27 @@ const GradeShader = {
         col = blurred / 5.0;
       }
 
-      // Miami split toning: violet shadows, hot cream-pink highlights
+      // split toning: the colour of the shade vs. the colour of the light
       float l = luma(col);
       float shadowW = 1.0 - smoothstep(0.0, 0.55, l);
       float highW = smoothstep(0.40, 1.0, l);
-      col = mix(col, col * uShadowTint * 1.55, shadowW * 0.55);
-      col = mix(col, col * uHighlightTint * 1.14, highW * 0.50);
+      col = mix(col, col * uShadowTint * 1.30, shadowW * 0.40);
+      col = mix(col, col * uHighlightTint * 1.10, highW * 0.38);
 
-      // vibrance: push muted colors harder than already-vivid ones
+      // a little vibrance — enough to keep Mie-washed noon from going grey
       float mx = max(col.r, max(col.g, col.b));
       float mn = min(col.r, min(col.g, col.b));
-      float vib = 1.0 + (1.0 - (mx - mn)) * 0.34;
-      col *= vib;
+      col *= 1.0 + (1.0 - (mx - mn)) * 0.10;
 
-      // saturation punch
+      // saturation: nearly neutral by design
       l = luma(col);
       col = mix(vec3(l), col, uSaturation);
 
-      // filmic S-curve — contrast with the color still alive
-      col = mix(col, smoothstep(0.0, 1.0, col), 0.26);
+      // filmic S-curve — contrast with the colour still alive
+      col = mix(col, smoothstep(0.0, 1.0, col), uContrast);
 
-      // suspended dust: warm veil strongest low in the frame
-      vec3 dustCol = vec3(0.86, 0.72, 0.52);
-      col = mix(col, col * dustCol + dustCol * 0.04, uDust * (0.18 + band * 0.32));
+      // suspended dust: the phase's own particulate, strongest low in frame
+      col = mix(col, col * uDustColor + uDustColor * 0.04, uDust * (0.18 + band * 0.32));
 
       // gentle highlight rolloff
       col = col / (1.0 + max(0.0, mx - 1.0) * 0.25);
@@ -212,6 +235,7 @@ class PostFX {
       ...GRADES.sunset,
       shadowTint: [...GRADES.sunset.shadowTint],
       highlightTint: [...GRADES.sunset.highlightTint],
+      dustColor: [...GRADES.sunset.dustColor],
     };
     this._target = this._current;
   }
@@ -340,9 +364,11 @@ class PostFX {
     c.rays += (t.rays - c.rays) * k;
     c.haze += (t.haze - c.haze) * k;
     c.dust += (t.dust - c.dust) * k;
+    c.contrast += (t.contrast - c.contrast) * k;
     for (let i = 0; i < 3; i++) {
       c.shadowTint[i] += (t.shadowTint[i] - c.shadowTint[i]) * k;
       c.highlightTint[i] += (t.highlightTint[i] - c.highlightTint[i]) * k;
+      c.dustColor[i] += (t.dustColor[i] - c.dustColor[i]) * k;
     }
 
     // focus pull toward the player
@@ -364,6 +390,8 @@ class PostFX {
     u.uRays.value = feat.godRays === false ? 0 : c.rays;
     u.uHaze.value = c.haze;
     u.uDust.value = c.dust;
+    u.uContrast.value = c.contrast;
+    u.uDustColor.value.set(c.dustColor[0], c.dustColor[1], c.dustColor[2]);
     u.uGrain.value = feat.filmGrain === false ? 0 : c.grain;
     u.uTime.value = this._time;
 

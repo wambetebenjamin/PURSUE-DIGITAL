@@ -16,7 +16,9 @@ import {
 } from '../props/PropFactory.js';
 import { rippleBumpMap, smokeSpriteMap } from '../../utils/surfaces.js';
 import { ParticleEmitter } from '../effects/Particles.js';
-import { SkyDome } from '../effects/SkyDome.js';
+import { ATMOSPHERE } from '../atmospheres.js';
+import { createLightingRig, attachRig } from '../effects/LightingRig.js';
+import { createHorizon } from '../effects/Horizon.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
 import { applyTerrainColors } from '../../utils/terrain.js';
@@ -50,29 +52,13 @@ export function createDesertZone() {
   const updaters = [];
 
   // ------------------------------------------------------------- sky
-  // PHASE 2 spec: brutal, overexposed midday desert sun at 6500K
-  const sky = new SkyDome(0x1e9dff, 0xb8f2ff, 0.85, 0x5fd0ff); // Malibu noon
-  group.add(sky.mesh);
-
-  // ---------------------------------------------------------- lights
-  // strong sky/ground bounce: pale sand throws warm light into every shadow
-  const hemi = new THREE.HemisphereLight(0xbcd4f0, 0xf0d4a0, 1.28);
-  group.add(hemi);
-
-  const sun = new THREE.DirectionalLight(0xfff2d0, 1.8); // blazing Miami noon
-  sun.position.set(46, 70, 26);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
-  sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 190;
-  sun.shadow.camera.left = -44;
-  sun.shadow.camera.right = 44;
-  sun.shadow.camera.top = 44;
-  sun.shadow.camera.bottom = -44;
-  sun.shadow.bias = -0.0012;
-  sun.userData.offset = new THREE.Vector3(42, 68, 24);
-  group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xfff6d8, 0.7);
+  // white noon on the march — dust and glare
+  const atmo = ATMOSPHERE.desert;
+  const rig = createLightingRig(atmo, { shadowExtent: 46, shadowFar: 200 });
+  attachRig(group, rig);
+  const { sky, hemi, sun } = rig;
+  // layered ranges dissolve into this phase's haze — no fog wall at the edge
+  group.add(createHorizon(atmo));
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(150, 300, 64, 110);
@@ -85,8 +71,8 @@ export function createDesertZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xffe6c2), colorB: new THREE.Color(0xf0b98e),
-    colorC: new THREE.Color(0xc98a6e), scale: 0.03, strength: 0.4, seed: 11,
+    colorA: new THREE.Color(0xe9d5b0), colorB: new THREE.Color(0xc9a877),
+    colorC: new THREE.Color(0x9a8058), scale: 0.03, strength: 0.4, seed: 11,
   });
   const groundMat = Mat.sand().clone();
   groundMat.vertexColors = true;
@@ -95,12 +81,13 @@ export function createDesertZone() {
   group.add(ground);
 
   // ---------------------------------------------------- Besor Brook
-  // "thick brown sediment water" with blinding white speculars at 6500K
+  // The wadi in June: thick, silty water the colour of wet clay, carrying a
+  // blinding specular where the noon sun lands on it. Not turquoise.
   const waterMat = Mat.water().clone();
-  waterMat.color.set(0x2ec8d8); // Vice City turquoise
-  waterMat.specular.set(0xffffff);
-  waterMat.shininess = 180;
-  waterMat.opacity = 0.9;
+  waterMat.color.set(0x6b5a3c); // suspended sediment
+  waterMat.specular.set(0xfff4dc);
+  waterMat.shininess = 120;
+  waterMat.opacity = 0.94;
   // flowing ripple field, scrolled continuously by the zone update
   const ripple = rippleBumpMap([7, 2]);
   waterMat.bumpMap = ripple;
@@ -377,7 +364,8 @@ export function createDesertZone() {
     spawn: DESERT.spawn,
     bounds: DESERT.bounds,
     colliders,
-    fog: { color: 0xa8ecff, density: 0.007 },
+    fog: { color: atmo.fog.color, density: atmo.fog.density },
+    atmosphere: atmo,
     sun,
     sky,
     groundHeight: desertHeight,
