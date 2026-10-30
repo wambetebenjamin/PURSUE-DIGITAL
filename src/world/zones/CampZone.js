@@ -19,6 +19,7 @@ import {
 } from '../props/PropFactory.js';
 import { smokeSpriteMap } from '../../utils/surfaces.js';
 import { ParticleEmitter } from '../effects/Particles.js';
+import { createPalisade, createBrazier, createRubbleHeap } from '../props/MedievalKit.js';
 import { ATMOSPHERE } from '../atmospheres.js';
 import { createLightingRig, attachRig } from '../effects/LightingRig.js';
 import { createHorizon } from '../effects/Horizon.js';
@@ -158,6 +159,44 @@ export function createCampZone() {
     tent.rotation.y = seededRandom(i * 4.4) * Math.PI * 2;
     group.add(tent);
     colliders.push({ x, z, r: 2.5 });
+  });
+
+  // --------------------------------------- the raiders' field works
+  // The Amalekites are not camped in the open: they have thrown a palisade
+  // across the approaches and ringed the fires with iron. Four runs, with
+  // gates left where the tents breathe.
+  const pSpots = [
+    { x: -44, z: 4, ry: Math.PI / 2, len: 40 },
+    { x: 44, z: 0, ry: Math.PI / 2, len: 40 },
+    { x: 0, z: 50, ry: 0, len: 46 },
+    { x: -8, z: -52, ry: 0, len: 34 },
+  ];
+  pSpots.forEach((p, i) => {
+    const fence = createPalisade({ length: p.len, height: 2.5, seed: 90 + i });
+    fence.position.set(p.x, campHeight(p.x, p.z), p.z);
+    fence.rotation.y = p.ry;
+    group.add(fence);
+    for (let t = -1; t <= 1; t++) {
+      const dx = Math.cos(p.ry) * p.len / 3 * t;
+      const dz = -Math.sin(p.ry) * p.len / 3 * t;
+      colliders.push({ x: p.x + dx, z: p.z + dz, r: 1.8 });
+    }
+  });
+
+  // braziers at the gaps: the only warm thing that is not a bonfire
+  [[-40, 26], [40, 25], [-4, 47], [30, -30]].forEach(([x, z], i) => {
+    const brazier = createBrazier({ withLight: i === 0, height: 1.55 });
+    brazier.position.set(x, campHeight(x, z), z);
+    group.add(brazier);
+    colliders.push({ x, z, r: 0.6 });
+    timeUpdaters.push((t) => brazier.userData.update?.(t));
+  });
+
+  // heaps of broken stone where the raiders tore the old wall down
+  [[-34, -18], [28, 12], [-20, 40]].forEach(([x, z], i) => {
+    const heap = createRubbleHeap({ radius: 1.5 + seededRandom(i * 3.1), count: 8, seed: 95 + i });
+    heap.position.set(x, campHeight(x, z), z);
+    group.add(heap);
   });
 
   // ------------------------------------------- raider gear & plunder

@@ -107,6 +107,27 @@ only, no copyrighted assets:
   all seven districts and your objective
 - A "**MISSION PASSED**" flourish when the story completes
 
+## The stronghold language
+
+Pass 14 gives the world the environment grammar of the strategy reference —
+monumental stone — built from primitives with our own materials
+(`src/world/props/MedievalKit.js`). The grammar is public architectural
+vocabulary, not its art: ashlar courses, buttresses, arrow slits, crenellations,
+drum towers, a gatehouse that is the strongest thing on screen, banners, braziers
+and the rubble of what used to stand.
+
+| Piece | Where it stands now |
+| --- | --- |
+| Ruined curtain wall (seeded gaps, ragged merlons) | Ziklag — four runs, the town the Amalekites burned |
+| Drum towers (crenellated or conical slate) | Ziklag's two survivors, Hebron's pair at the curtain's ends |
+| Gatehouse: segmental arch, corbels, raised portcullis | Hebron, intact and lit; Ziklag's, broken open |
+| Palisade of sharpened stakes | the Amalekite camp's four runs, and Gilboa's rampart |
+| Banners, braziers, siege ladders, stone steps, rubble | the gate approach, the ridge, the camp gaps |
+
+Every piece bakes to one mesh per material, so a thirty-metre curtain wall costs
+a handful of draw calls — and each one registers colliders, so the stone stops
+the camera and the player rather than being scenery.
+
 ## The environments
 
 Pass 11 is an environment pass: the ground, the air and the light of the seven
@@ -380,6 +401,8 @@ PURSUE-DIGITAL/
     │   │   ├── GateZone.js     # PHASE 6 city gate, elders, tribute, mule train
     │   │   └── GilboaZone.js   # PHASE 7 ridge, Saul, chariot wreck, philistines
     │   ├── props/
+    │   │   ├── MedievalKit.js  # stronghold kit: curtain walls, towers, gatehouse,
+    │   │   │                   # palisades, banners, braziers, rubble, ladders
     │   │   └── PropFactory.js  # houses, tents, fires, cage, rocks, beacons, humanoids,
     │   │                       # herds (instanced), wagons, chests, mules, camels, gate
     │   └── effects/

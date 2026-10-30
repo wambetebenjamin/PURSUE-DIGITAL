@@ -611,4 +611,61 @@ ok(document.getElementById('hud-task').classList.contains('hidden'), 'and hides 
 ok(JSON.parse(localStorage.getItem('pursue.progress.v1')).stars[PHASE_ORDER[3]] === 3,
   'the campaign persists to storage');
 
+// --------------------------- pass 14: the stronghold kit (medieval stone)
+const kit = await import('../src/world/props/MedievalKit.js');
+
+// every piece is baked to one mesh per material, so a wall is not 60 draws
+const wall = kit.createCurtainWall({ length: 24, height: 6.5, ruined: true, seed: 5 });
+ok(wall.children.length >= 1, 'a curtain wall bakes into merged meshes');
+ok(wall.name === 'MEDIEVAL_WALL', 'and names itself');
+let wallTris = 0;
+wall.traverse((o) => { if (o.isMesh) wallTris += o.geometry.attributes.position.count / 3; });
+ok(wallTris > 100, `the wall carries real masonry (${Math.round(wallTris)} triangles)`);
+
+const intact = kit.createCurtainWall({ length: 30, height: 7.4, seed: 6 });
+ok(intact.children.length >= 1, 'an intact wall builds too');
+let intactTris = 0;
+intact.traverse((o) => { if (o.isMesh) intactTris += o.geometry.attributes.position.count / 3; });
+ok(intactTris > wallTris, `an intact wall has more stone than a ruined one (${Math.round(intactTris)} > ${Math.round(wallTris)})`);
+
+const tower = kit.createDrumTower({ radius: 3.2, height: 10, top: 'cone' });
+ok(tower.children.length >= 1, 'a drum tower builds');
+const crenellated = kit.createDrumTower({ radius: 3.2, height: 10, top: 'crenel' });
+ok(crenellated.children.length >= 1, 'with either a roof or a battlement');
+
+const gatehouse = kit.createGatehouse({ span: 8.5, height: 10.5 });
+ok(gatehouse.children.length >= 1, 'the gatehouse builds');
+const fence = kit.createPalisade({ length: 20 });
+ok(fence.children.length >= 1, 'a palisade builds');
+const banner = kit.createBanner({ color: 0x7a1c18, height: 8 });
+ok(banner.children.length >= 1 && typeof banner.userData.sway === 'function',
+  'a banner builds and can sway');
+const brazier = kit.createBrazier({ withLight: true });
+ok(brazier.children.length >= 1, 'a brazier builds');
+brazier.userData.update(1.2); // drives the flame and the light
+ok(true, 'and updates without a renderer');
+const heap = kit.createRubbleHeap({ radius: 2, seed: 2 });
+ok(heap.children.length >= 1, 'rubble builds');
+const ladder = kit.createSiegeLadder({ height: 7 });
+ok(ladder.children.length >= 1, 'a siege ladder builds');
+const steps = kit.createStoneSteps({ width: 8 });
+ok(steps.children.length >= 1, 'stone steps build');
+
+// the kit is actually in the world, and it is what stops the player
+const findWalls = (zone) => {
+  let n = 0;
+  zone.group.traverse((o) => { if (o.name === 'MEDIEVAL_WALL') n++; });
+  return n;
+};
+game.world.activate(STATES.ZIKLAG);
+ok(findWalls(game.world.activeZone) >= 4, 'Ziklag stands inside four ruined wall runs');
+ok(game.world.activeZone.colliders.length > 20, 'and the stone is solid');
+game.world.activate(STATES.GATE);
+ok(findWalls(game.world.activeZone) >= 3, 'Hebron has a curtain either side of its gate');
+game.world.activate(STATES.GILBOA);
+ok(findWalls(game.world.activeZone) >= 1, 'Gilboa keeps a fought-over rampart');
+game.world.activate(STATES.CAMP);
+ok(findWalls(game.world.activeZone) >= 1 || game.world.activeZone.colliders.length > 20,
+  'the Amalekite camp is a fortified enclosure');
+
 console.log(`\nAll ${passed} checks passed.\n`);
