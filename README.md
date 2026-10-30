@@ -218,7 +218,27 @@ darkens at the edges (`#vitality-veil`) and begins to pulse, then recovers as
 the lamp is fed. Cinematic mode (`P`) letterboxes the frame to 7.5 vh bars and
 drops the HUD, radar, prompts and touch controls for a clean still.
 
-## Playing on a phone
+## Playing on a phone — and installing it like an app
+
+The build is an installable app, not just a page: open the Vercel link on a
+phone and the browser offers **Install** / **Add to Home Screen**. Installed, it
+launches fullscreen, locks landscape, keeps the screen awake while David is
+marching, and runs with **no network at all** after the first visit.
+
+| Piece | File | What it does |
+| --- | --- | --- |
+| Manifest | emitted by `vite.config.js` (`pursue-pwa`) | name, icons, `display: fullscreen`, `orientation: landscape`, theme colour — written at build time with the real hashed assets |
+| Service worker | `public/sw.js` + build injection | precaches every emitted file; navigations are network-first (a new deploy is picked up), assets cache-first (instant, offline) |
+| Icons | `scripts/make-icons.mjs` → `public/icons/` | 192, 512, maskable 512 and a 180 iOS icon, drawn procedurally in Node (sunset, ridgeline, wheat) — no image assets in the repo |
+| Install shell | `src/core/install.js` | `beforeinstallprompt` captured into a vellum slip, iOS "Share ▸ Add to Home Screen" hint, standalone class, landscape lock, wake lock tied to the live march |
+| Adaptive resolution | `src/core/Engine.js` | watches real frame time and steps render resolution down on weak GPUs (never the content), two slow windows at a time |
+| Build gate | `scripts/verify-build.mjs` | `npm run build` fails unless the manifest's icons, every precached file and every URL work from a sub-path |
+
+On a phone: **left half of the screen** is the movement joystick, **right side**
+drags the camera, and the buttons are *Use*, *Run*, *Low* (crouch) and *Map*.
+Portrait shows a rotate hint; the game is authored for landscape.
+
+### Playing on a phone (controls detail)
 
 The game detects touch devices and adapts automatically:
 

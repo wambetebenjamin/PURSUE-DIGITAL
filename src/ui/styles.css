@@ -3519,3 +3519,88 @@ body.critical #vitality-veil {
     font-size: 13px;
   }
 }
+
+/* ============================================================
+   INSTALLED-APP SHELL (pass 12)
+   The build must behave like the APK once it is on a home screen.
+   ============================================================ */
+
+/* launch from the home screen: no browser affordances, no safe-area bleed */
+body.standalone #install-pill {
+  display: none;
+}
+
+body.standalone #rotate-hint {
+  top: max(20px, calc(env(safe-area-inset-top) + 12px));
+}
+
+/* the install invitation: a wax-sealed slip of vellum, bottom-right */
+#install-pill {
+  position: fixed;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, calc(env(safe-area-inset-bottom) + 12px));
+  z-index: 24;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 15px 9px 12px;
+  border-radius: 3px;
+  border: 1px solid rgba(96, 66, 26, 0.75);
+  background:
+    linear-gradient(178deg, #efe0bd 0%, #dcc191 62%, #c9a86e 100%);
+  color: #3c2714;
+  font-family: var(--body, Georgia, serif);
+  font-size: 13.5px;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow:
+    0 6px 20px rgba(20, 10, 4, 0.5),
+    inset 0 1px 0 rgba(255, 250, 232, 0.7);
+  animation: install-in 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+#install-pill .install-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  color: #f2dcc0;
+  background: radial-gradient(circle at 36% 30%, #c9543a 0%, #8c2a18 48%, #4e120a 100%);
+  box-shadow: inset 0 1px 1px rgba(255, 190, 150, 0.5);
+}
+
+#install-pill:active {
+  transform: translateY(1px);
+}
+
+@keyframes install-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* phones: keep the pill clear of the touch buttons and the radar */
+@media (max-width: 900px) {
+  body.touch-mode #install-pill {
+    right: max(12px, env(safe-area-inset-right));
+    bottom: max(96px, calc(env(safe-area-inset-bottom) + 92px));
+    font-size: 12.5px;
+    padding: 8px 12px 8px 10px;
+  }
+}
+
+/* installed on a phone: the frame can bleed into the notch and bar */
+body.standalone.touch-mode #ui-root,
+body.standalone #ui-root {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* no text selection or callout on a game surface */
+body.touch-mode,
+body.standalone {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}

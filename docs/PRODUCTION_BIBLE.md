@@ -670,3 +670,82 @@ horizon, draws or hides the disc, and ends in two hazed ridges plus a haze
 plain; the dome follows the player; the scene fog matches the active phase; and
 every phase's grade exists with saturation between 0.85 and 1.10 and a sane
 contrast curve.
+
+## 13. The installed-app shell (Pass 12)
+
+The brief was "ship it like the APK". The APK's advantage is not the package
+format — it is that the app owns the screen, the wake state, the orientation and
+the storage. All four are available to a web build; pass 12 takes them.
+
+### 13a. What "installable" requires
+
+| Requirement | Where it is satisfied |
+|---|---|
+| HTTPS + a registered service worker with a fetch handler | `public/sw.js` |
+| A manifest with `name`, `start_url`, `display`, `theme_color` | `vite.config.js` → `dist/manifest.webmanifest` |
+| 192 px and 512 px icons, PNG | `scripts/make-icons.mjs` |
+| A maskable icon for Android's adaptive shape | `icon-maskable-512.png` |
+| An Apple touch icon and `apple-mobile-web-app-capable` | `index.html` head |
+| Offline capability | full precache of the emitted bundle |
+
+The manifest is generated *after* the bundle so its icon paths can never point
+at a stale hashed chunk, and every path is relative (`./icons/...`) so the same
+artifact installs correctly from a domain root (Vercel) and from the Pages
+sub-path.
+
+### 13b. The icons
+
+`scripts/make-icons.mjs` rasterises and encodes PNGs in pure Node — an RGBA
+buffer plus IHDR/IDAT/IEND chunks with real CRCs and zlib deflate. The drawing
+is the title card reduced to a mark: a low sun with a warm halo, a smoke band
+over a two-step ridgeline (aerial perspective, far ridge pale, near ridge
+near-black), and one wheat stalk with five swept grains and three awns. Authored
+in a 0..1 unit square, so all four sizes are the same drawing; the maskable
+variant is re-framed at 16 % inset so a circular crop cannot clip the stalk.
+
+### 13c. Offline
+
+`sw.js` is a template (`__VERSION__`, `__PRECACHE__`) filled at build time:
+
+- **install** — `cache.add` every emitted file, one failure at a time so a
+  missing optional asset cannot abort the install, then `skipWaiting`.
+- **activate** — delete every cache that is not this build's.
+- **navigate** — network first, falling back to the cached `index.html`. A
+  player in a tunnel still gets the game; a player online gets the new deploy.
+- **assets** — cache first. Hashed names are immutable by definition.
+
+Roughly 2 MB total, dominated by the Three.js chunk and the four OFL serifs.
+
+### 13d. Owning the screen
+
+`src/core/install.js`:
+
+- `beforeinstallprompt` is captured and surfaced as a vellum slip (bottom-right,
+  clear of the touch buttons) instead of the browser's own banner.
+- iOS has no such event: the slip appears after ~24 s of play and reads
+  *Share ▸ Add to Home Screen*.
+- `body.standalone` is set when launched from a home screen — the shell can then
+  drop browser-only affordances and pad for the notch.
+- Landscape lock is attempted in standalone mode (Android honours it, iOS
+  ignores it; the CSS already handles portrait).
+- A **wake lock** is taken when the march starts and released on pause,
+  dialogue, victory or a hidden tab — a phone must not dim mid-pursuit, and must
+  not stay lit on a pause screen.
+
+### 13e. Device tiers
+
+An APK is compiled for a device profile. A web build meets unknown hardware, so
+`Engine._adapt()` watches the real frame time in two-second windows and steps the
+render resolution through `[1, 0.82, 0.68, 0.56]` (mobile) when a device cannot
+hold 40 fps. It only steps down, only after two consecutive slow windows, and it
+never touches content — particle density, shadows and post-FX are already tiered
+by `core/quality.js`.
+
+### 13f. Verification
+
+`npm run build` now ends in `scripts/verify-build.mjs`, which fails the build if
+the manifest names a missing icon, if any precached file is absent, if a
+placeholder survived, or if any URL is root-absolute (the Pages sub-path test).
+The smoke suite grew to **167 checks**, adding the shell's headless boot, the
+optional-API guards (no wake lock, no service worker, no fullscreen must all be
+survivable), the service-worker template and the four icons as real 512 px PNGs.
