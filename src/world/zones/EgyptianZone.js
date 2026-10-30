@@ -15,7 +15,9 @@ import {
 } from '../props/PropFactory.js';
 import { createServant } from '../../entities/EgyptianServant.js';
 import { ParticleEmitter } from '../effects/Particles.js';
-import { SkyDome } from '../effects/SkyDome.js';
+import { ATMOSPHERE } from '../atmospheres.js';
+import { createLightingRig, attachRig } from '../effects/LightingRig.js';
+import { createHorizon } from '../effects/Horizon.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
 import { applyTerrainColors } from '../../utils/terrain.js';
@@ -38,27 +40,13 @@ export function createEgyptianZone() {
   const updaters = [];
 
   // ------------------------------------------------------------- sky
-  const sky = new SkyDome(0x2f7ae8, 0xffb86a, 0.8, 0x64a0f0); // Little Havana gold hour
-  group.add(sky.mesh);
-
-  // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0x8fc0f0, 0xc9a86c, 0.9);
-  group.add(hemi);
-
-  const sun = new THREE.DirectionalLight(0xffd89a, 1.4);
-  sun.position.set(-34, 62, 30);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
-  sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 170;
-  sun.shadow.camera.left = -40;
-  sun.shadow.camera.right = 40;
-  sun.shadow.camera.top = 40;
-  sun.shadow.camera.bottom = -40;
-  sun.shadow.bias = -0.0012;
-  sun.userData.offset = new THREE.Vector3(-32, 60, 28);
-  group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xffe0a0, 0.75);
+  // mid-afternoon in the Egyptian's field — warm and clear
+  const atmo = ATMOSPHERE.egyptian;
+  const rig = createLightingRig(atmo, { shadowExtent: 42, shadowFar: 180 });
+  attachRig(group, rig);
+  const { sky, hemi, sun } = rig;
+  // layered ranges dissolve into this phase's haze — no fog wall at the edge
+  group.add(createHorizon(atmo));
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(120, 110, 46, 42);
@@ -71,8 +59,8 @@ export function createEgyptianZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xffe9b0), colorB: new THREE.Color(0xd8c070),
-    colorC: new THREE.Color(0x88b060), scale: 0.05, strength: 0.55, seed: 19,
+    colorA: new THREE.Color(0xe6d59e), colorB: new THREE.Color(0xc2b273),
+    colorC: new THREE.Color(0x6f8a4e), scale: 0.05, strength: 0.55, seed: 19,
   });
   const groundMat = Mat.sandLight().clone();
   groundMat.vertexColors = true;
@@ -255,7 +243,8 @@ export function createEgyptianZone() {
     spawn: EGYPT.spawn,
     bounds: EGYPT.bounds,
     colliders,
-    fog: { color: 0xffc98e, density: 0.0065 },
+    fog: { color: atmo.fog.color, density: atmo.fog.density },
+    atmosphere: atmo,
     sun,
     sky,
     groundHeight: egyptHeight,

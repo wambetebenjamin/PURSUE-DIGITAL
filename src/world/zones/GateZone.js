@@ -21,7 +21,9 @@ import {
   createBirdFlock, createButterflies, createJar,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
-import { SkyDome } from '../effects/SkyDome.js';
+import { ATMOSPHERE } from '../atmospheres.js';
+import { createLightingRig, attachRig } from '../effects/LightingRig.js';
+import { createHorizon } from '../effects/Horizon.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
 import { applyTerrainColors } from '../../utils/terrain.js';
@@ -45,28 +47,13 @@ export function createGateZone() {
   const updaters = [];
 
   // ------------------------------------------------------------- sky
-  // 4800K warm morning, clear
-  const sky = new SkyDome(0x1f8fe8, 0xffd9b0, 0.8, 0x64b8f8); // South Beach afternoon
-  group.add(sky.mesh);
-
-  // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0xa8c4e0, 0xd9b98c, 1.0);
-  group.add(hemi);
-
-  const sun = new THREE.DirectionalLight(0xffd8a0, 1.5);
-  sun.position.set(-46, 34, 30); // low-east: long angled shadows on the flagstones
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
-  sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 170;
-  sun.shadow.camera.left = -42;
-  sun.shadow.camera.right = 42;
-  sun.shadow.camera.top = 42;
-  sun.shadow.camera.bottom = -42;
-  sun.shadow.bias = -0.0012;
-  sun.userData.offset = new THREE.Vector3(-44, 32, 28);
-  group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xfff0c8, 0.6);
+  // afternoon at the gate of Hebron — pale limestone light
+  const atmo = ATMOSPHERE.gate;
+  const rig = createLightingRig(atmo, { shadowExtent: 44, shadowFar: 180 });
+  attachRig(group, rig);
+  const { sky, hemi, sun } = rig;
+  // layered ranges dissolve into this phase's haze — no fog wall at the edge
+  group.add(createHorizon(atmo));
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(110, 90, 30, 26);
@@ -77,8 +64,8 @@ export function createGateZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xf2e0c8), colorB: new THREE.Color(0xd4b898),
-    colorC: new THREE.Color(0xa88868), scale: 0.08, strength: 0.35, seed: 29,
+    colorA: new THREE.Color(0xe6dcc6), colorB: new THREE.Color(0xc9b795),
+    colorC: new THREE.Color(0x9a8668), scale: 0.08, strength: 0.35, seed: 29,
   });
   const groundMat = Mat.flagstone().clone();
   groundMat.vertexColors = true;
@@ -311,7 +298,8 @@ export function createGateZone() {
     spawn: GATE.spawn,
     bounds: GATE.bounds,
     colliders,
-    fog: { color: 0xffd2a8, density: 0.006 },
+    fog: { color: atmo.fog.color, density: atmo.fog.density },
+    atmosphere: atmo,
     sun,
     sky,
     groundHeight: gateHeight,

@@ -88,7 +88,9 @@ globalThis.requestAnimationFrame = (fn) => setTimeout(fn, 0);
 const { Input } = await import('../src/core/Input.js');
 const { postFX } = await import('../src/core/PostFX.js');
 const { Game } = await import('../src/core/Game.js');
-const { STATES, NARRATIVE } = await import('../src/constants.js');
+const { STATES, NARRATIVE, PHASE_GRADES } = await import('../src/constants.js');
+const { ATMOSPHERE, ATMOSPHERE_KEYS, atmosphereFor } = await import('../src/world/atmospheres.js');
+const { GRADES } = await import('../src/core/PostFX.js');
 const { ZIKLAG } = await import('../src/world/zones/ZiklagZone.js');
 const { DESERT } = await import('../src/world/zones/DesertZone.js');
 const { EGYPT } = await import('../src/world/zones/EgyptianZone.js');
@@ -425,5 +427,67 @@ game.hud.setHealth(0.1);
 ok(document.body.classList.contains('critical'), 'a failing lamp marks the frame critical');
 game.hud.setHealth(1);
 ok(!document.body.classList.contains('critical'), 'and recovers when the lamp is fed');
+
+// ------------------------------------------- pass 11: the air of each phase
+ok(ATMOSPHERE_KEYS.length === 7, `seven phases, seven atmospheres (${ATMOSPHERE_KEYS.length})`);
+ok(atmosphereFor(STATES.ZIKLAG) === ATMOSPHERE.ziklag, 'a state name resolves to its atmosphere');
+
+const sunElevation = (a) => {
+  const [x, y, z] = a.sun.dir;
+  return y / Math.hypot(x, y, z);
+};
+const daylight = ATMOSPHERE_KEYS.filter((k) => sunElevation(ATMOSPHERE[k]) > 0.2);
+ok(daylight.length === 6, `six phases stand in daylight (${daylight.join(', ')})`);
+ok(ATMOSPHERE.camp.sky.stars > 0.5, 'the camp is the one phase under stars');
+ok(ATMOSPHERE.gilboa.sky.cloud > 0.8 && ATMOSPHERE.gilboa.sun.disc === 0,
+  'the storm has a cloud deck and no visible disc');
+ok(ATMOSPHERE.desert.fog.density < ATMOSPHERE.ziklag.fog.density,
+  'noon air is clearer than smoke-choked air');
+ok(ATMOSPHERE.ziklag.sky.turbidity > ATMOSPHERE.desert.sky.turbidity * 0.9,
+  'smoke loads the air with aerosols');
+
+// each zone carries its phase's sky, haze and ridge lines
+const zoneStates = [STATES.ZIKLAG, STATES.DESERT, STATES.EGYPTIAN, STATES.CAMP,
+  STATES.SPOILS, STATES.GATE, STATES.GILBOA];
+const zoneKeys = ['ziklag', 'desert', 'egyptian', 'camp', 'spoils', 'gate', 'gilboa'];
+let ridgeRings = 0;
+for (let i = 0; i < zoneStates.length; i++) {
+  const zone = game.world.zones.get(zoneStates[i]);
+  const atmo = ATMOSPHERE[zoneKeys[i]];
+  ok(zone.atmosphere === atmo, `${zoneKeys[i]} carries its atmosphere`);
+  ok(zone.fog.color === atmo.fog.color && zone.fog.density === atmo.fog.density,
+    `${zoneKeys[i]} fogs to its own horizon`);
+  ok(zone.sky && zone.sky.material.uniforms.uSunDisc.value === atmo.sun.disc,
+    `${zoneKeys[i]} sky draws (or hides) the disc`);
+  const horizon = zone.group.children.find((c) => c.name === 'HORIZON');
+  const ridges = horizon ? horizon.children.filter((m) => m.name === 'HORIZON_RIDGE') : [];
+  ok(ridges.length === 2, `${zoneKeys[i]} ends in two ridge lines`);
+  ok(ridges.every((m) => m.geometry.attributes.color),
+    `${zoneKeys[i]} ridges are pre-hazed, not fogged`);
+  ok(horizon.children.some((m) => m.name === 'HAZE_PLAIN'),
+    `${zoneKeys[i]} has a haze plain under its terrain`);
+  ridgeRings += ridges.length;
+}
+ok(ridgeRings === 14, `fourteen hazed ridges across the march (${ridgeRings})`);
+
+// the dome rides with the player, so it can never be walked out of
+game.world.activate(STATES.DESERT);
+game.player.group.position.set(12, 0, -20);
+game.world.update(1 / 60, 1, game.player.group.position);
+const domePos = game.world.activeZone.sky.mesh.position;
+ok(Math.abs(domePos.x - 12) < 0.001 && Math.abs(domePos.z + 20) < 0.001,
+  'the sky follows the player');
+ok(scene.fog.color.getHex() === ATMOSPHERE.desert.fog.color,
+  'the scene fogs to the desert horizon');
+
+// photographic grades: every phase has one, and none is a neon filter
+for (const state of zoneStates) {
+  const name = PHASE_GRADES[state];
+  ok(GRADES[name], `${state} has a grade (${name})`);
+  ok(GRADES[name].saturation <= 1.10 && GRADES[name].saturation >= 0.85,
+    `${name} grades photoreal, not vivid (${GRADES[name].saturation})`);
+  ok(GRADES[name].contrast > 0.15 && GRADES[name].contrast < 0.5,
+    `${name} has a sane contrast curve`);
+}
 
 console.log(`\nAll ${passed} checks passed.\n`);

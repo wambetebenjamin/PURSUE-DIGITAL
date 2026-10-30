@@ -20,7 +20,9 @@ import {
   createHumanoid, createCrown, createBeacon, createMountainRidge,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
-import { SkyDome } from '../effects/SkyDome.js';
+import { ATMOSPHERE } from '../atmospheres.js';
+import { createLightingRig, attachRig } from '../effects/LightingRig.js';
+import { createHorizon } from '../effects/Horizon.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
 import { applyTerrainColors } from '../../utils/terrain.js';
@@ -49,28 +51,13 @@ export function createGilboaZone() {
   const updaters = [];
 
   // ------------------------------------------------------------- sky
-  // heavy, oppressive overcast at 7000K — flat and cold
-  const sky = new SkyDome(0x221a5c, 0x8a4ab8, 0.9, 0x4a2a9e); // the Vice storm
-  group.add(sky.mesh);
-
-  // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0x8a97a8, 0x4a4e54, 1.05);
-  group.add(hemi);
-
-  const sun = new THREE.DirectionalLight(0xc9d4e2, 0.8); // diffused, near-shadowless
-  sun.position.set(10, 70, 20);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
-  sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 190;
-  sun.shadow.camera.left = -42;
-  sun.shadow.camera.right = 42;
-  sun.shadow.camera.top = 42;
-  sun.shadow.camera.bottom = -42;
-  sun.shadow.bias = -0.0012;
-  sun.userData.offset = new THREE.Vector3(8, 68, 18);
-  group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xb0c0ff, 0.25);
+  // overcast on the ridge of Gilboa — the storm not yet broken
+  const atmo = ATMOSPHERE.gilboa;
+  const rig = createLightingRig(atmo, { shadowExtent: 44, shadowFar: 200 });
+  attachRig(group, rig);
+  const { sky, hemi, sun } = rig;
+  // layered ranges dissolve into this phase's haze — no fog wall at the edge
+  group.add(createHorizon(atmo));
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(120, 130, 48, 52);
@@ -81,8 +68,8 @@ export function createGilboaZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0x8a86a8), colorB: new THREE.Color(0x5a5478),
-    colorC: new THREE.Color(0x38304e), scale: 0.05, strength: 0.5, seed: 37,
+    colorA: new THREE.Color(0x8d8c86), colorB: new THREE.Color(0x5f6058),
+    colorC: new THREE.Color(0x3a3c38), scale: 0.05, strength: 0.5, seed: 37,
   });
   const groundMat = Mat.basalt().clone();
   groundMat.vertexColors = true;
@@ -278,7 +265,8 @@ export function createGilboaZone() {
     spawn: GILBOA.spawn,
     bounds: GILBOA.bounds,
     colliders,
-    fog: { color: 0x4a3a78, density: 0.016 },
+    fog: { color: atmo.fog.color, density: atmo.fog.density },
+    atmosphere: atmo,
     sun,
     sky,
     groundHeight: gilboaHeight,

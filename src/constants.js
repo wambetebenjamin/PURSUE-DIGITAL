@@ -42,8 +42,8 @@ export const PHASE_GRADES = Object.freeze({
   [STATES.ZIKLAG]: 'sunset',
   [STATES.DESERT]: 'blaze',
   [STATES.EGYPTIAN]: 'gold',
-  [STATES.CAMP]: 'neonNight',
-  [STATES.SPOILS]: 'gold',
+  [STATES.CAMP]: 'night',
+  [STATES.SPOILS]: 'ember',
   [STATES.GATE]: 'clear',
   [STATES.GILBOA]: 'storm',
 });

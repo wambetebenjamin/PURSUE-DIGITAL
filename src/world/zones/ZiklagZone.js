@@ -14,7 +14,9 @@ import {
 } from '../props/PropFactory.js';
 import { smokeSpriteMap } from '../../utils/surfaces.js';
 import { ParticleEmitter } from '../effects/Particles.js';
-import { SkyDome } from '../effects/SkyDome.js';
+import { ATMOSPHERE } from '../atmospheres.js';
+import { createLightingRig, attachRig } from '../effects/LightingRig.js';
+import { createHorizon } from '../effects/Horizon.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
 import { applyTerrainColors } from '../../utils/terrain.js';
@@ -37,29 +39,13 @@ export function createZiklagZone() {
   const updaters = [];
 
   // ------------------------------------------------------------- sky
-  // PHASE 1 spec: late-afternoon golden hour, 5600K, low-angle sun
-  const sky = new SkyDome(0x3b1a8e, 0xff5e4d, 0.55, 0xd94a8c); // Ocean Drive sunset
-  group.add(sky.mesh);
-
-  // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0x7a6a90, 0xd09a68, 1.15);
-  group.add(hemi);
-
-  // 5600K golden-hour key light held LOW on the horizon — long raking shadows
-  const sun = new THREE.DirectionalLight(0xffb060, 1.1);
-  sun.position.set(-38, 20, 26);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
-  sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 160;
-  sun.shadow.camera.left = -42;
-  sun.shadow.camera.right = 42;
-  sun.shadow.camera.top = 42;
-  sun.shadow.camera.bottom = -42;
-  sun.shadow.bias = -0.0012;
-  sun.userData.offset = new THREE.Vector3(-36, 18, 24);
-  group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xffb060, 0.85);
+  // late afternoon over the burning town — smoke still in the air
+  const atmo = ATMOSPHERE.ziklag;
+  const rig = createLightingRig(atmo, { shadowExtent: 44, shadowFar: 180 });
+  attachRig(group, rig);
+  const { sky, hemi, sun } = rig;
+  // layered ranges dissolve into this phase's haze — no fog wall at the edge
+  group.add(createHorizon(atmo));
 
   // flickering fires at two ruined houses
   const fireA = new THREE.PointLight(0xff6a2a, 30, 24, 2);
@@ -79,8 +65,8 @@ export function createZiklagZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xc9987a), colorB: new THREE.Color(0x8a5c52),
-    colorC: new THREE.Color(0x4a2c3c), scale: 0.045, strength: 0.5, seed: 3,
+    colorA: new THREE.Color(0xbfa084), colorB: new THREE.Color(0x87695a),
+    colorC: new THREE.Color(0x453528), scale: 0.045, strength: 0.5, seed: 3,
   });
   const groundMat = Mat.ashGround().clone();
   groundMat.vertexColors = true;
@@ -367,7 +353,8 @@ export function createZiklagZone() {
     spawn: ZIKLAG.spawn,
     bounds: ZIKLAG.bounds,
     colliders,
-    fog: { color: 0xff6a52, density: 0.012 },
+    fog: { color: atmo.fog.color, density: atmo.fog.density },
+    atmosphere: atmo,
     sun,
     sky,
     groundHeight: ziklagHeight,

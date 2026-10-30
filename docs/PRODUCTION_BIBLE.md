@@ -157,6 +157,10 @@ ash, stone, basalt, woven cloth, wood grain, and flesh pore maps painted on
 
 ## 7aa. The Vice City grade (core/PostFX.js)
 
+> *Historical. Superseded by §9 (cinematic overhaul) and §12 (environments,
+> Pass 11), which rebuilt these presets as cinematography. Kept because the
+> pass order matters: the chain architecture below is still the one shipping.*
+
 The look is built in three layers tuned to 1986 Miami, not desert realism:
 
 1. **Tone mapping** — Khronos PBR Neutral (`THREE.NeutralToneMapping`),
@@ -555,3 +559,114 @@ row count, visibility transitions and reachable-control count; live
 `PostFX.setFeatures` toggling; and the low-vitality class flipping the frame and
 recovering. Everything runs headless in Node against a stub DOM, so the build
 cannot regress without the test saying so.
+
+## 12. The environments (Pass 11)
+
+Pass 8 lit the world. Pass 11 gave it *weather*: the last hand-picked colours
+in the project were the sky stops, and they were still 1986 Miami. Everything
+in the air is now a lighting decision derived from a preset, in one place.
+
+### 12a. One preset per phase
+
+`src/world/atmospheres.js` is the single source of truth for the look of an
+hour. A preset carries:
+
+| Field | Meaning |
+|---|---|
+| `sun.dir` | true elevation and azimuth, normalised then scaled to 62 m for the shadow rig |
+| `sun.color`, `sun.intensity` | the key: warm and weak when low, cool and stronger overcast |
+| `sun.disc` | 0 when the deck hides the disc — a sun can be present and unseen |
+| `hemi.sky`, `hemi.ground`, `hemi.intensity` | sky fill from above, ground bounce from below |
+| `sky.zenith`, `sky.horizon`, `sky.ground` | the three radiances the dome interpolates |
+| `sky.turbidity` | aerosol load driving the Mie term: smoke 9.5, dusk 10.5, clean noon 7 |
+| `sky.rayleigh` | clean-air blue depth |
+| `sky.cloud`, `sky.cloudTint` | deck coverage and the colour the deck reflects |
+| `sky.stars`, `sky.moon`, `sky.moonDir`, `sky.moonSize` | the night |
+| `fog.color`, `fog.density` | aerial perspective; the colour is *derived from the horizon* so nothing can drift |
+| `grade` | the PostFX preset the frame is handed to |
+
+The seven:
+
+| Phase | Sun elevation | Turbidity | Fog density | Grade |
+|---|---|---|---|---|
+| Ziklag | 16° | 9.5 | 0.0105 | `sunset` |
+| Desert | 68° | 7.0 | 0.0062 | `blaze` |
+| Egyptian | 34° | 5.5 | 0.0068 | `gold` |
+| Camp | −34° (moon +0.56) | 2.2 | 0.0125 | `night` |
+| Spoils | 6° | 10.5 | 0.0072 | `ember` |
+| Gate | 41° | 6.0 | 0.0060 | `clear` |
+| Gilboa | 48° (no disc) | 4.0 | 0.0165 | `storm` |
+
+### 12b. The sky shader
+
+`effects/SkyDome.js`, one inverted sphere at r = 420, `depthWrite: false`,
+`renderOrder −10`, riding with the player each frame. Per fragment:
+
+1. **Gradient.** `mix(horizon, zenith, pow(clamp(d.y,0,1), 0.42))` — the
+   exponent stands in for the exponential falloff of air mass.
+2. **Rayleigh lobe** `0.75(1+cos²θ)` scaled by `sky.rayleigh` — the blue that
+   returns overhead and thickens toward the horizon.
+3. **Mie lobe** with anisotropy `g = 0.78`, scaled by `turbidity` — the white
+   shoulder around the sun and the papery wash of a dusty noon.
+4. **Horizon haze band** `pow(1 − d.y, 9) · 0.9` to the horizon colour, so the
+   land has something to meet.
+5. **Cirrus deck.** Two octaves of value-noise fbm on the planar projection
+   `d.xz / max(d.y, 0.075)`, drifting, masked to the upper hemisphere, tinted
+   by `cloudTint` and lit from below when the sun is low.
+6. **Discs.** Limb-darkened sun (`smoothstep(0.99955, 0.99986, cos θ)`), a
+   tight and a wide halo, plus a moon whose angular size is authored.
+7. **Night.** A hash-grid star field in 260³ cells with twinkle, a faint milky
+   band along a fixed galactic plane, gated by `sky.stars`.
+8. **Below the horizon** the dome fades to `sky.ground` so no seam can ever
+   appear under the terrain.
+
+The GLSL is validated by parsing the emitted shader sources in CI-shaped
+tooling (`@shaderfrog/glsl-parser` in a throwaway run during the pass), and by
+the smoke suite asserting the uniforms the zones depend on.
+
+### 12c. Distance
+
+Three devices, in order from the camera outward:
+
+- **FogExp2**, colour taken from the preset's horizon. Density varies eightfold
+  between a clear Hebron afternoon and a clouded ridge.
+- **Haze plain.** A 560 m disc at y = −2.6 in the haze colour, under every
+  zone. Without it the finite terrain planes read as floating islands.
+- **Ridge rings.** Two unlit rings (300 m, 385 m) whose silhouettes come from
+  a seeded, wrapping two-octave profile, and whose vertex colours are pre-mixed
+  with haze — 40–60 % dissolved by day, 55–72 % at night. Unlit on purpose:
+  aerial perspective is not a lighting decision.
+
+### 12d. Photographic grading
+
+`core/PostFX.js` grades were rebuilt from measurement. Saturation moved from
+1.3–1.6 to 0.91–1.07; chromatic aberration from 0.5 to 0.14–0.20; the fixed
++34 % vibrance to +10 %. Each preset now also carries `contrast` and
+`dustColor`, and both interpolate across a phase transition like everything
+else:
+
+- `shadowTint` / `highlightTint` — the colour of the shade and the colour of
+  the light (never a filter over the whole frame)
+- `contrast` — the S-curve mix, 0.26 for overcast, 0.34 for a burning sunset
+- `dustColor` — particulate in the air: warm silt by day, silver at night,
+  grey under rain
+
+### 12e. What the pass removed
+
+- the seven neon `SkyDome(top, bottom, …)` calls and their comments
+  ("Ocean Drive sunset", "Malibu noon")
+- per-zone hand-tuned hemisphere and key lights (six different ideas of 4000 K)
+- violet and pink terrain vertex palettes in four zones
+- the turquoise brook — the Besor now runs the colour of suspended clay
+- the camp's two flat `CircleGeometry` moon quads, replaced by the dome's moon
+
+### 12f. Verification
+
+Smoke grew from 81 to 154 checks. The environment set asserts: seven presets
+exist; a state name resolves to its preset; six phases stand in daylight and
+the camp is the one under stars; the storm has a deck and no disc; noon air is
+clearer than smoke-choked air; every zone carries its preset, fogs to its own
+horizon, draws or hides the disc, and ends in two hazed ridges plus a haze
+plain; the dome follows the player; the scene fog matches the active phase; and
+every phase's grade exists with saturation between 0.85 and 1.10 and a sane
+contrast curve.

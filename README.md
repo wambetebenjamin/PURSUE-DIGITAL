@@ -71,20 +71,20 @@ No server, database, or environment variables are required. Everything is client
 | **P** | Clean frame — letterbox and hide the HUD for a still shot |
 | **Enter** | Begin the pursuit from the title card |
 
-### The Vice City look
+### The look
 
-> *Superseded in Pass 8 by the cinematic grade (§The cinematic overhaul), which
-> keeps the same palette logic — saturated skies, split-toned shadows, bloom —
-> but aims it at a photoreal desert rather than neon Miami. The history below is
-> kept because the grade architecture is unchanged.*
+> *Pass 11 replaced the last of the P7 "Miami" palette — the sky stops — with a
+> physically motivated atmosphere per phase. The history is kept below because
+> the grade architecture (bloom → grade → output) is unchanged.*
 
-The Pass 7 graphics were graded to 1986 Miami rather than desert realism:
+The P7 graphics were graded to 1986 Miami; passes 8–11 pushed the same
+machinery toward photoreal biblical realism:
 
-- **Neutral tone mapping** (Khronos PBR Neutral) so saturated pinks and cyans survive to the grade
-- **Three-stop skies** — saturated zenith, electric mid band, hot pastel horizon haze, fat sun disc with wide halo
-- Each phase carries its Miami moment: Ocean Drive sunset, Malibu noon, Little Havana gold hour, Starfish Island night, South Beach afternoon, the Vice storm
-- **Miami grade** — violet shadows, cream-pink highlights, vibrance + saturation punch, S-curve, chromatic edges, bloom
-- **Palm avenues** flank the travel corridors; the brook runs Vice City turquoise
+- **Neutral tone mapping** (Khronos PBR Neutral) so nothing clips to white when the noon sun lands on limestone
+- **Analytic skies** — Rayleigh + Mie scattering, a limb-darkened solar disc, cirrus lit from below, moon and star field after dark
+- **Seven atmospheres**, one per phase: smoke-choked golden hour, bleached noon, warm mid-afternoon, moonlit night, sunset at the brook, pale Hebron afternoon, overcast Gilboa
+- **Photographic grade** — split-toned shade and light, a filmic S-curve, per-phase dust and exposure, near-neutral saturation
+- **Layered horizons** — two pre-hazed ridge lines and a haze plain so the ground meets the sky instead of ending in fog
 
 ## The Vice City interface
 
@@ -106,6 +106,45 @@ only, no copyrighted assets:
 - **Esc** pauses into the march menu; **M** charts the **Map of Judah** with
   all seven districts and your objective
 - A "**MISSION PASSED**" flourish when the story completes
+
+## The environments
+
+Pass 11 is an environment pass: the ground, the air and the light of the seven
+phases. Nothing is painted any more — every sky is solved from the sun's real
+elevation and the turbidity of the air above that place.
+
+| Phase | Hour | Sky | Ground |
+| --- | --- | --- | --- |
+| Ziklag | late afternoon, sun 16° | smoke-loaded air (turbidity 9.5), heavy horizon haze | ash and char over pale loess, soot scars, ember beds |
+| Desert march | white noon, sun 68° | high Rayleigh blue over a bleached horizon, violent glare | pale Negev sand and gravel, silty brook water |
+| Egyptian servant | mid-afternoon | warm, clear, a thin cirrus deck | dry wheat and field green under sand |
+| Amalekite camp | night | stars, milky band, silver moon, no disc | trodden dark earth, firelight pockets |
+| Besor at dusk | sunset, sun 6° | 10.5 turbidity, the whole western sky lit | warm sand, silt banks, long shadows |
+| Gate of Hebron | afternoon | pale, clean, high cloud | limestone flagstone, pale stone dust |
+| Gilboa | overcast | 92 % cloud deck, no sun disc, flat grey light | cold basalt, wet gravel |
+
+What is behind the look, in `src/world/`:
+
+- **`atmospheres.js`** — one preset per phase: the sun's elevation and azimuth,
+  the colour temperature of its light, turbidity (aerosols: smoke, dust,
+  sea haze), zenith and horizon radiance, moon and star levels, fog colour and
+  density, and which grade to hand the frame to. Add a phase by adding a preset.
+- **`effects/SkyDome.js`** — a single-draw-call analytic sky. Rayleigh and Mie
+  lobes decide the gradient and the glow around the sun; a horizon haze band
+  physically joins sky to ground; a limb-darkened disc, a two-scale cirrus deck
+  lit from underneath, a moon, and a hash-based star field with a faint milky
+  band carry the rest. The dome rides with the player and never clips.
+- **`effects/LightingRig.js`** — derives the hemisphere fill and the shadow-
+  casting key from the same preset, so the visible sun and the light that casts
+  the shadows are the same sun. Shadow bias tightens as the sun rises.
+- **`effects/Horizon.js`** — a 560 m haze plain under every zone plus two
+  ridge rings (300 m and 385 m) whose silhouettes are seeded noise and whose
+  vertex colours are pre-mixed with the phase's haze. Distance is drawn, not
+  fogged.
+- **`core/PostFX.js`** — the grade chain rebuilt as cinematography: split toning
+  between the colour of the shade and the colour of the light, a filmic S-curve,
+  a per-phase suspended-particulate veil, and saturation between 0.91 and 1.07
+  instead of the old 1.5.
 
 ## The cinematic overhaul
 
@@ -282,6 +321,7 @@ PURSUE-DIGITAL/
     │   └── DirectionalArrow.js # 3D chevron pointing at the active target zone
     ├── world/
     │   ├── World.js            # zone manager: visibility, fog/sky per phase, sun follow
+    │   ├── atmospheres.js      # the seven phase atmospheres — sun, sky, haze, fog, grade
     │   ├── zones/
     │   │   ├── ZiklagZone.js   # PHASE 1 environment + waypoint
     │   │   ├── DesertZone.js   # PHASE 2 terrain (dunes/wadi/brook) + march beacon
@@ -295,7 +335,9 @@ PURSUE-DIGITAL/
     │   │                       # herds (instanced), wagons, chests, mules, camels, gate
     │   └── effects/
     │       ├── Particles.js    # pooled soft-disc particle emitters (smoke, embers, dust, sparks)
-    │       └── SkyDome.js      # two-color gradient sky shader
+    │       ├── SkyDome.js      # analytic Rayleigh/Mie sky: sun, moon, stars, cirrus
+    │       ├── LightingRig.js  # sky + hemisphere fill + shadow-casting sun, from a preset
+    │       └── Horizon.js      # haze plain + two pre-hazed ridge rings (aerial perspective)
     ├── ui/
     │   ├── HUD.js              # objective, stamina bar, compass, prompts, alerts
     │   ├── PauseMenu.js        # codex pages: quit / map / satchel / settings

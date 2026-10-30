@@ -22,7 +22,9 @@ import {
   createJar,
 } from '../props/PropFactory.js';
 import { ParticleEmitter } from '../effects/Particles.js';
-import { SkyDome } from '../effects/SkyDome.js';
+import { ATMOSPHERE } from '../atmospheres.js';
+import { createLightingRig, attachRig } from '../effects/LightingRig.js';
+import { createHorizon } from '../effects/Horizon.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { seededRandom } from '../../utils/math.js';
 import { applyTerrainColors } from '../../utils/terrain.js';
@@ -49,28 +51,13 @@ export function createSpoilsZone() {
   const updaters = [];
 
   // ------------------------------------------------------------- sky
-  // 5200K clear late afternoon — bright, direct, revealing
-  const sky = new SkyDome(0x4a2aa0, 0xff8a5c, 0.82, 0xb85aa8); // ocean sunset
-  group.add(sky.mesh);
-
-  // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0xbfd4e8, 0xd9be86, 1.1);
-  group.add(hemi);
-
-  const sun = new THREE.DirectionalLight(0xffe2a8, 1.6);
-  sun.position.set(30, 52, -38); // low-north-west: backlights the herd dust
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
-  sun.shadow.camera.near = 1;
-  sun.shadow.camera.far = 180;
-  sun.shadow.camera.left = -46;
-  sun.shadow.camera.right = 46;
-  sun.shadow.camera.top = 46;
-  sun.shadow.camera.bottom = -46;
-  sun.shadow.bias = -0.0012;
-  sun.userData.offset = new THREE.Vector3(28, 50, -36);
-  group.add(sun, sun.target);
-  sky.setSun(sun.userData.offset, 0xffd08a, 0.8);
+  // sunset at the brook Besor — the sun on the horizon
+  const atmo = ATMOSPHERE.spoils;
+  const rig = createLightingRig(atmo, { shadowExtent: 48, shadowFar: 190 });
+  attachRig(group, rig);
+  const { sky, hemi, sun } = rig;
+  // layered ranges dissolve into this phase's haze — no fog wall at the edge
+  group.add(createHorizon(atmo));
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(130, 120, 48, 44);
@@ -81,8 +68,8 @@ export function createSpoilsZone() {
   }
   groundGeo.computeVertexNormals();
   applyTerrainColors(groundGeo, {
-    colorA: new THREE.Color(0xffc9a0), colorB: new THREE.Color(0xe09a70),
-    colorC: new THREE.Color(0xa86858), scale: 0.055, strength: 0.6, seed: 23,
+    colorA: new THREE.Color(0xe8c39a), colorB: new THREE.Color(0xc79a72),
+    colorC: new THREE.Color(0x8e6a52), scale: 0.055, strength: 0.6, seed: 23,
   });
   const groundMat = Mat.sandLight().clone();
   groundMat.vertexColors = true;
@@ -337,7 +324,8 @@ export function createSpoilsZone() {
     spawn: SPOILS.spawn,
     bounds: SPOILS.bounds,
     colliders,
-    fog: { color: 0xe8906a, density: 0.006 },
+    fog: { color: atmo.fog.color, density: atmo.fog.density },
+    atmosphere: atmo,
     sun,
     sky,
     groundHeight: spoilsHeight,
