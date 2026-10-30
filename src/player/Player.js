@@ -10,6 +10,9 @@ import { Mat, Geo } from '../utils/materials.js';
 import { CONTROLS, PLAYER } from '../constants.js';
 import { Stamina } from './Stamina.js';
 import { dampFactor, lerpAngle } from '../utils/math.js';
+import { createDetailedHuman } from '../entities/CharacterRig.js';
+import { Locomotion } from './Locomotion.js';
+import { audio } from '../audio/AudioEngine.js';
 
 const _dir = new THREE.Vector3();
 const _forward = new THREE.Vector3();
@@ -23,6 +26,10 @@ export class Player {
 
     this.velocity = new THREE.Vector3();
     this.groundHeight = 0; // set by the active zone each frame
+    this.health = 1; // vitality — the oil in the lamp (HUD), regenerates slowly
+    this.crouched = false;   // sneaking: half speed, half silhouette
+    this.crouch01 = 0;       // smoothed crouch weight for the pose
+    this.locomotion = new Locomotion();
     this.running = false;
     this.moving = false;
     this.interactRequested = false;
@@ -33,50 +40,59 @@ export class Player {
 
   // ---------------------------------------------------------------- rig
   _buildRig() {
-    const g = this.group;
+    // David: hardened Levantine warrior — sun-bronzed, bearded, lamellar
+    // leather over a faded earth-tone tunic, red sash, sandals caked in dust.
+    const rig = createDetailedHuman({
+      palette: {
+        skin: Mat.skinPbr(),
+        cloth: Mat.clothPbr(),
+        cloth2: Mat.leatherPbrWarm(),
+        hair: Mat.hairPbr(),
+        hairCard: Mat.hairCard(),
+        leather: Mat.leatherPbr(),
+        metal: Mat.bronzePbr(),
+        accent: Mat.clothPbrMadder(),
+      },
+      pose: 'standing',
+      beard: 'full',
+      hairStyle: 'short',
+      armor: 'leather',
+      detail: 'full',
+      seed: 7,
+    });
+    this.rig = rig;
+    this.group.add(rig);
 
-    // --- legs (pivot at the hip) ---
-    this.legL = pivotLimb(0.16, 0.78, Mat.tunicDavid(), Mat.skinDark(), -0.17);
-    this.legR = pivotLimb(0.16, 0.78, Mat.tunicDavid(), Mat.skinDark(), 0.17);
-    g.add(this.legL, this.legR);
+    const parts = rig.userData.parts;
+    this.armL = parts.armL;
+    this.armR = parts.armR;
+    this.legL = parts.legL;
+    this.legR = parts.legR;
+    this.head = parts.head;
+    this.torso = parts.torso;
 
-    // --- torso + sash ---
-    const torso = new THREE.Mesh(Geo.box(), Mat.tunicDavid());
-    torso.scale.set(0.62, 0.78, 0.36);
-    torso.position.y = 1.12;
-    torso.castShadow = true;
-
-    const sash = new THREE.Mesh(Geo.box(), Mat.sashDavid());
-    sash.scale.set(0.66, 0.16, 0.4);
-    sash.position.y = 0.82;
-
-    // --- head, hair, beard ---
-    const head = new THREE.Mesh(Geo.sphere(), Mat.skin());
-    head.scale.setScalar(0.42);
-    head.position.y = 1.78;
-    head.castShadow = true;
-
-    const hair = new THREE.Mesh(Geo.sphere(), Mat.hair());
-    hair.scale.set(0.46, 0.3, 0.46);
-    hair.position.set(0, 1.94, 0.02);
-
-    const beard = new THREE.Mesh(Geo.sphere(), Mat.hair());
-    beard.scale.set(0.3, 0.22, 0.18);
-    beard.position.set(0, 1.62, 0.18);
-
-    // --- arms (pivot at the shoulder) ---
-    this.armL = pivotArm(Mat.tunicDavid(), Mat.skin(), -0.42);
-    this.armR = pivotArm(Mat.tunicDavid(), Mat.skin(), 0.42);
-    this.armR.rotation.x = -0.35; // shepherd's ready stance
-
-    // --- shepherd bag ---
+    // shepherd's bag at the hip
     const bag = new THREE.Mesh(Geo.box(), Mat.sashDavid());
     bag.scale.set(0.22, 0.3, 0.14);
     bag.position.set(-0.36, 1.0, -0.24);
     bag.rotation.z = 0.18;
+    bag.castShadow = true;
 
-    g.add(torso, sash, head, hair, beard, this.armL, this.armR, bag);
-    g.traverse((o) => {
+    // the king's sword at his thigh
+    const scabbard = new THREE.Mesh(Geo.cyl(), Mat.leatherDark());
+    scabbard.scale.set(0.075, 0.85, 0.14);
+    scabbard.position.set(0.34, 0.72, -0.1);
+    scabbard.rotation.x = 0.28;
+    scabbard.rotation.z = -0.12;
+    scabbard.castShadow = true;
+    const hilt = new THREE.Mesh(Geo.box(), Mat.brass());
+    hilt.scale.set(0.05, 0.22, 0.05);
+    hilt.position.set(0.38, 1.18, -0.14);
+    hilt.rotation.x = 0.28;
+    hilt.castShadow = true;
+
+    this.group.add(bag, scabbard, hilt);
+    this.group.traverse((o) => {
       if (o.isMesh) {
         o.castShadow = true;
         o.receiveShadow = false;
@@ -90,9 +106,11 @@ export class Player {
     this.group.rotation.y = yaw;
     this.velocity.set(0, 0, 0);
     this.stamina.reset();
+    this.health = 1;
+    this.crouched = false;
+    this.crouch01 = 0;
     this.running = false;
     this.moving = false;
-    this._gait = 0;
     this._armIdle = 0;
   }
 
@@ -109,13 +127,20 @@ export class Player {
    * @param {{x:number,z:number,r:number}[]} colliders
    */
   update(dt, cameraYaw, elapsed, bounds, colliders) {
-    // --- movement input in camera space ---
+    // --- movement input in camera space (keyboard or touch joystick) ---
     let ix = 0;
     let iz = 0;
-    if (this.input.isDown(CONTROLS.forward)) iz += 1;
-    if (this.input.isDown(CONTROLS.back)) iz -= 1;
-    if (this.input.isDown(CONTROLS.right)) ix += 1;
-    if (this.input.isDown(CONTROLS.left)) ix -= 1;
+    const joy = this.input.moveAxis;
+    const joyMagnitude = joy ? Math.hypot(joy.x, joy.y) : 0;
+    if (joyMagnitude > 0.08) {
+      ix = joy.x;
+      iz = joy.y;
+    } else {
+      if (this.input.isDown(CONTROLS.forward)) iz += 1;
+      if (this.input.isDown(CONTROLS.back)) iz -= 1;
+      if (this.input.isDown(CONTROLS.right)) ix += 1;
+      if (this.input.isDown(CONTROLS.left)) ix -= 1;
+    }
 
     _forward.set(-Math.sin(cameraYaw), 0, -Math.cos(cameraYaw));
     _right.set(Math.cos(cameraYaw), 0, -Math.sin(cameraYaw));
@@ -125,12 +150,18 @@ export class Player {
       .addScaledVector(_right, ix);
 
     const hasInput = _dir.lengthSq() > 0.0001;
+    const analogScale = Math.min(1, joyMagnitude > 0.08 ? joyMagnitude : 1);
     if (hasInput) _dir.normalize();
 
-    // --- stamina gate ---
-    const wantsRun = this.input.isDown(CONTROLS.run);
+    // --- crouch toggle (KeyC / Ctrl): the sneak of the night camp ---
+    if (this.input.wasPressed(CONTROLS.crouch)) this.crouched = !this.crouched;
+    this.crouch01 += ((this.crouched ? 1 : 0) - this.crouch01) * Math.min(1, dt * 8);
+
+    // --- stamina gate (you cannot sprint while hunched) ---
+    const wantsRun = this.input.isDown(CONTROLS.run) && !this.crouched;
     this.running = this.stamina.update(dt, wantsRun, hasInput);
-    const targetSpeed = this.running ? PLAYER.runSpeed : PLAYER.walkSpeed;
+    const baseWalk = this.crouched ? PLAYER.crouchSpeed : PLAYER.walkSpeed;
+    const targetSpeed = (this.running ? PLAYER.runSpeed : baseWalk) * analogScale;
 
     // --- accelerate / friction ---
     const targetVX = _dir.x * targetSpeed;
@@ -180,25 +211,48 @@ export class Player {
       );
     }
 
-    // --- gait animation ---
+    // --- gait: resolved by the locomotion state machine ---
     const speed = Math.sqrt(speed2);
-    const gaitSpeed = this.running ? 12.5 : 7.2;
-    if (this.moving) this._gait += dt * gaitSpeed * Math.min(1, speed / PLAYER.walkSpeed);
-    const swing = Math.sin(this._gait) * (this.running ? 0.85 : 0.55) * (this.moving ? 1 : 0);
-    this.legL.rotation.x = swing;
-    this.legR.rotation.x = -swing;
-    this.armL.rotation.x = -swing * 0.8;
-    this.armR.rotation.x = swing * 0.6 - 0.35;
+    const eventsBefore = this.locomotion.strideEvents;
+    const pose = this.locomotion.update(dt, {
+      speed,
+      walkSpeed: PLAYER.walkSpeed,
+      runSpeed: PLAYER.runSpeed,
+      sprinting: this.running,
+      crouched: this.crouched,
+      grounded: true,
+    });
 
-    // subtle idle breathing
+    const swing = this.locomotion.swing * pose.stride;
+    const crouch = this.crouch01;
+    // knees bend under a crouch; the arms tuck in with a slight forward bias
+    this.legL.rotation.x = swing + crouch * 0.62;
+    this.legR.rotation.x = -swing + crouch * 0.62;
+    this.armL.rotation.x = -swing * 0.8 - crouch * 0.35;
+    this.armR.rotation.x = swing * 0.6 - 0.35 - crouch * 0.35;
+    this.legL.rotation.z = crouch * 0.12;
+    this.legR.rotation.z = -crouch * 0.12;
+
+    // hip drop + forward lean: the whole rig settles into the sneak
+    this.rig.position.y = -pose.drop;
+    this.rig.rotation.x = pose.lean;
+
+    // footsteps: one per stride plant (the animator's step event)
+    if (this.locomotion.strideEvents !== eventsBefore && this.moving) {
+      audio.step(this.running);
+    }
+
+    // subtle idle breathing (chest rises, shoulders follow)
     this._armIdle = (this._armIdle ?? 0) + dt;
+    const breathe = Math.sin(this._armIdle * 1.6) * 0.035;
+    this.torso.position.y = 1.14 + Math.sin(this._armIdle * 1.5) * 0.014 - pose.drop * 0.55;
+    const armRest = 0.08 + pose.armBias + crouch * 0.1;
     if (!this.moving) {
-      const breathe = Math.sin(this._armIdle * 1.6) * 0.035;
-      this.armL.rotation.z = 0.08 + breathe;
-      this.armR.rotation.z = -0.08 - breathe;
+      this.armL.rotation.z = armRest + breathe;
+      this.armR.rotation.z = -armRest - breathe;
     } else {
-      this.armL.rotation.z = 0.08;
-      this.armR.rotation.z = -0.08;
+      this.armL.rotation.z = armRest;
+      this.armR.rotation.z = -armRest;
     }
 
     // --- interact edge ---

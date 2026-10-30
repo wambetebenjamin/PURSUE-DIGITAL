@@ -3,7 +3,9 @@
  *
  * Boots the game modules in Node with a minimal DOM stub, then walks the
  * full state machine: Ziklag → desert → brook → servant dialogue → camp
- * detection → rescue → victory → restart. Any thrown error fails the run.
+ * detection → rescue → the battle sequence → the spoil divided at Besor →
+ * gifts to Judah → the fall of Saul → victory → restart. Any thrown error
+ * fails the run.
  *
  * Usage: `npm run smoke`
  */
@@ -35,6 +37,10 @@ class FakeElement {
   set innerHTML(v) { this._innerHTML = v; if (v === '') this.children = []; }
   get innerHTML() { return this._innerHTML; }
   appendChild(c) { this.children.push(c); return c; }
+  replaceChildren(...c) { this.children = c; }
+  setAttribute(k, v) { this._attrs = this._attrs || {}; this._attrs[k] = String(v); }
+  getAttribute(k) { return (this._attrs || {})[k] ?? null; }
+  removeAttribute(k) { if (this._attrs) delete this._attrs[k]; }
   addEventListener() {}
   removeEventListener() {}
 }
@@ -64,6 +70,15 @@ globalThis.document = {
   },
   addEventListener() {},
   exitPointerLock() {},
+  body: new FakeElement('body'),
+};
+
+// a persistence shim so the settings store can be exercised as it ships
+const store = new Map();
+globalThis.localStorage = {
+  getItem: (k) => (store.has(k) ? store.get(k) : null),
+  setItem: (k, v) => store.set(k, String(v)),
+  removeItem: (k) => store.delete(k),
 };
 globalThis.window = globalThis;
 globalThis.addEventListener = () => {};
@@ -71,12 +86,16 @@ globalThis.requestAnimationFrame = (fn) => setTimeout(fn, 0);
 
 // ------------------------------------------------------------- bootstrap
 const { Input } = await import('../src/core/Input.js');
+const { postFX } = await import('../src/core/PostFX.js');
 const { Game } = await import('../src/core/Game.js');
 const { STATES, NARRATIVE } = await import('../src/constants.js');
 const { ZIKLAG } = await import('../src/world/zones/ZiklagZone.js');
 const { DESERT } = await import('../src/world/zones/DesertZone.js');
 const { EGYPT } = await import('../src/world/zones/EgyptianZone.js');
 const { CAMP } = await import('../src/world/zones/CampZone.js');
+const { SPOILS } = await import('../src/world/zones/SpoilsZone.js');
+const { GATE } = await import('../src/world/zones/GateZone.js');
+const { GILBOA } = await import('../src/world/zones/GilboaZone.js');
 
 const input = new Input();
 const scene = new THREE.Scene();
@@ -113,6 +132,13 @@ game.start();
 frames(10);
 ok(game.fsm.currentName === STATES.ZIKLAG, 'boots into STATE_0_ZIKLAG');
 ok(game.world.activeZone.name === STATES.ZIKLAG, 'ziklag zone is active');
+
+// --- Vice City interface layer ---
+ok(game.radar && game.radar.enabled, 'radar canvas initialised');
+ok(game.radar._objective !== null, 'radar carries the mission blip');
+ok(document.getElementById('zone-name').textContent === 'Ziklag', 'zone banner names the district');
+ok(/^\d+:\d\d$/.test(document.getElementById('hud-timer').textContent), 'mission timer is formatted');
+ok(game._runTime > 0, 'run clock is ticking');
 
 // ------------------------------------------- STATE 0: reach waypoint
 game.player.group.position.set(ZIKLAG.waypoint.x, 0, ZIKLAG.waypoint.z + 2);
@@ -190,7 +216,72 @@ ok(
 game._detectionCooldown = 3;
 game.player.group.position.set(CAMP.captives.x + 1, 0, CAMP.captives.z + 1);
 frames(2);
-ok(game.finished, 'colliding with the captives triggers victory');
+ok(game.modal.isOpen, 'reaching the captives opens the 24-hour battle sequence');
+ok(game.battleShown, 'battle sequence is latched');
+ok(!game.finished, 'the game is not over yet — the story continues');
+ok(game.modal._steps.length === NARRATIVE.battleSequence.length, 'battle sequence has 2 scripted cards');
+ok(game.modal.citeEl.textContent.includes('30:17'), 'cards carry scripture citations');
+
+for (let i = 0; i < NARRATIVE.battleSequence.length; i++) {
+  press('KeyE');
+  frames(1);
+  release('KeyE');
+  frames(1);
+}
+ok(game.fsm.currentName === STATES.SPOILS, 'battle cards advance to STATE_4_SPOILS_DIVISION');
+
+// ------------------------------------------- STATE 4: the spoil divided
+game.player.group.position.set(SPOILS.outcrop.x + 1.5, 0, SPOILS.outcrop.z);
+frames(2);
+ok(game._prompt === NARRATIVE.promptOutcrop, 'the outcrop offers the dividing-line prompt');
+press('KeyE');
+frames(1);
+release('KeyE');
+ok(game.modal.isOpen, 'interaction opens the spoil-dispute dialogue');
+ok(game.modal.card.classList.contains('theme-spoils'), 'spoils card carries the spoils theme');
+ok(game.modal._steps.length === NARRATIVE.spoilsDialogue.length, 'dispute dialogue has 3 scripted steps');
+for (let i = 0; i < NARRATIVE.spoilsDialogue.length; i++) {
+  press('KeyE');
+  frames(1);
+  release('KeyE');
+  frames(1);
+}
+ok(game.fsm.currentName === STATES.GATE, 'the statute advances to STATE_5_DISTRIBUTION');
+
+// ------------------------------------------- STATE 5: gifts to Judah
+game.player.group.position.set(GATE.elders.x + 1.5, 0, GATE.elders.z);
+frames(2);
+ok(game._prompt === NARRATIVE.promptElders, 'the elders offer the tribute prompt');
+press('KeyE');
+frames(1);
+release('KeyE');
+ok(game.modal.isOpen, 'interaction opens the distribution dialogue');
+ok(game.modal._steps.length === NARRATIVE.gateDialogue.length, 'distribution dialogue has 3 scripted steps');
+for (let i = 0; i < NARRATIVE.gateDialogue.length; i++) {
+  press('KeyE');
+  frames(1);
+  release('KeyE');
+  frames(1);
+}
+ok(game.fsm.currentName === STATES.GILBOA, 'the gifts advance to STATE_6_GILBOA_EPILOGUE');
+
+// ------------------------------------------- STATE 6: the fall of Saul
+game.player.group.position.set(GILBOA.saul.x + 1.5, 0, GILBOA.saul.z);
+frames(2);
+ok(game._prompt === NARRATIVE.promptSaul, 'Saul offers the final approach prompt');
+press('KeyE');
+frames(1);
+release('KeyE');
+ok(game.modal.isOpen, 'interaction opens the Gilboa epilogue');
+ok(game.modal.card.classList.contains('theme-gilboa'), 'epilogue card carries the gilboa theme');
+ok(game.modal._steps.length === NARRATIVE.gilboaDialogue.length, 'epilogue has 3 scripted steps');
+for (let i = 0; i < NARRATIVE.gilboaDialogue.length; i++) {
+  press('KeyE');
+  frames(1);
+  release('KeyE');
+  frames(1);
+}
+ok(game.finished, 'the epilogue completes the run');
 ok(game.victory.visible, 'victory overlay is visible');
 ok(document.getElementById('hud').classList.contains('hidden'), 'HUD is cleared on victory');
 
@@ -198,9 +289,28 @@ ok(document.getElementById('hud').classList.contains('hidden'), 'HUD is cleared 
 game.resetAll();
 frames(5);
 ok(game.fsm.currentName === STATES.ZIKLAG, 'Play Again resets to STATE_0_ZIKLAG');
-ok(!game.finished && !game.servantServed && !game.brookTriggered, 'all run flags are cleared');
+ok(
+  !game.finished && !game.servantServed && !game.brookTriggered
+  && !game.battleShown && !game.spoilsDone && !game.gateDone,
+  'all run flags are cleared',
+);
 ok(!game.victory.visible, 'victory overlay is hidden');
 ok(!game.arrow.group.visible, 'directional arrow is hidden again');
+
+// ------------------------------------------------------ pause & map screen
+press('Escape');
+frames(1);
+ok(game.paused && game.pause.isOpen, 'Escape pauses the march');
+ok(!document.getElementById('pause-screen').classList.contains('hidden'), 'pause overlay is shown');
+press('Escape');
+frames(1);
+ok(!game.paused, 'Escape resumes the march');
+press('KeyM');
+frames(1);
+ok(game.paused && game.pause.page === 'map', 'M opens the Map of Judah');
+press('Escape');
+frames(1);
+ok(!game.paused, 'the map closes back to play');
 
 // stamina sanity: sprinting drains, forced walk at zero
 const st = game.player.stamina;
@@ -217,5 +327,103 @@ ok(st.value < 100, 'running drains stamina');
 ok(st.exhausted || st.value < 50, 'sustained sprint exhausts the player');
 frames(240); // walk idle → regen
 ok(st.value > 20, 'stamina regenerates while resting');
+
+// ---------------------------------------------------- pass 9: stance & zoom
+// crouch (the sneak parameter of a third-person controller) halves the speed
+// and the silhouette, and it must survive a zone change.
+press('KeyC');
+frames(2);
+ok(game.player.crouched === true, 'C drops the player into a crouch');
+ok(game.cameraRig.eyeDrop > 0, 'the camera ducks with the crouch');
+
+const beforeZoom = game.cameraRig.baseDistance;
+game.input.wheelDelta = 2;
+frames(1);
+ok(game.cameraRig.baseDistance > beforeZoom, 'the wheel pulls the camera back');
+game.input.wheelDelta = -20;
+frames(1);
+ok(game.cameraRig.baseDistance <= 3.6, 'the wheel clamps at the near limit');
+
+press('KeyC');
+frames(2);
+ok(game.player.crouched === false, 'C stands the player back up');
+
+// camera obstruction probe: obstacles are registered on every zone enter
+ok(Array.isArray(game.cameraRig.obstacles) && game.cameraRig.obstacles.length > 0,
+  'the camera probes the zone rubble');
+
+// locomotion state machine: the animator parameters resolve to a real state
+game.player.group.position.set(0, 0, 10);
+press('ShiftLeft');
+press('KeyW');
+frames(60);
+ok(['run', 'sprint'].includes(game.player.locomotion.state),
+  'the locomotion machine reports a moving state');
+release('KeyW');
+release('ShiftLeft');
+frames(60);
+ok(game.player.locomotion.state === 'idle' || game.player.locomotion.state === 'walk',
+  'and settles back toward idle');
+
+// ------------------------------------------------------- pass 9: the satchel
+game.pause.showPage('satchel');
+const satchel = document.getElementById('satchel-grid');
+ok(satchel.children.length >= 4, 'the satchel builds its sections');
+const tileCount = (() => {
+  let n = 0;
+  const walk = (node) => {
+    for (const c of node.children) {
+      if (c.classList && c.classList.contains && c.classList.contains('satchel-tile')) n++;
+      walk(c);
+    }
+  };
+  walk(satchel);
+  return n;
+})();
+ok(tileCount >= 18, `the satchel lays out every item (${tileCount} tiles)`);
+game.pause.close(false);
+
+// ------------------------------------------------- pass 10: the settings leaf
+const { settings, DEFAULTS } = await import('../src/core/settings.js');
+ok(DEFAULTS.sensitivity === 1 && DEFAULTS.volume === 0.55, 'settings defaults are sane');
+settings.set({ sensitivity: 1.4, godRays: false, cameraDistance: 6 });
+ok(settings.get('sensitivity') === 1.4, 'settings take a written value');
+ok(settings.get('godRays') === false, 'and a wax seal can be pressed off');
+const persisted = JSON.parse(localStorage.getItem('pursue.settings.v1'));
+ok(persisted && persisted.sensitivity === 1.4, 'preferences persist to storage');
+let notified = null;
+const off = settings.onChange((snap) => { notified = snap; });
+settings.set({ filmGrain: false });
+ok(notified && notified.filmGrain === false, 'listeners hear the change');
+off();
+settings.reset();
+ok(settings.get('sensitivity') === 1 && settings.get('filmGrain') === true,
+  'restore defaults returns every leaf to the factory setting');
+
+// the settings page of the codex is built from real rows, all wired
+game.pause.showPage('settings');
+const list = document.getElementById('settings-list');
+ok(list.children.length >= 11, `the settings leaf lays out every row (${list.children.length})`);
+ok(!document.getElementById('pause-settings-panel').classList.contains('hidden'),
+  'the settings leaf is the visible page');
+ok(game.pause.settings.controls.size === 10, 'ten preferences are reachable from the UI, including the clean frame');
+game.pause.showPage('menu');
+ok(document.getElementById('pause-settings-panel').classList.contains('hidden'),
+  'and it yields back to the menu');
+game.pause.close(false);
+
+// post-processing leaves can be switched without a restart
+const fx = postFX;
+fx.setFeatures({ godRays: false, filmGrain: false, depthOfField: false });
+ok(fx._features.godRays === false && fx._features.filmGrain === false,
+  'post-processing leaves switch off at runtime');
+fx.setFeatures({ godRays: true, filmGrain: true, depthOfField: true });
+ok(fx._features.godRays === true, 'and switch back on');
+
+// the frame closes in when the lamp runs low
+game.hud.setHealth(0.1);
+ok(document.body.classList.contains('critical'), 'a failing lamp marks the frame critical');
+game.hud.setHealth(1);
+ok(!document.body.classList.contains('critical'), 'and recovers when the lamp is fed');
 
 console.log(`\nAll ${passed} checks passed.\n`);

@@ -5,6 +5,9 @@
  * Game logic lives in Game.js; the engine just drives `update(dt)`.
  */
 import * as THREE from 'three';
+import { postFX } from './PostFX.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { QUALITY } from './quality.js';
 
 export class Engine {
   /**
@@ -16,15 +19,17 @@ export class Engine {
     this.game = game;
 
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: QUALITY.antialias,
       powerPreference: 'high-performance',
       stencil: false,
     });
     // Cap pixel ratio: keeps 60 FPS on high-DPI laptops without visible loss.
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, QUALITY.pixelRatio));
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    // Khronos PBR Neutral: keeps saturated Miami pinks/cyans alive
+    // (ACES greys out exactly the colors the Vice City grade lives on)
+    this.renderer.toneMapping = THREE.NeutralToneMapping;
     this.renderer.toneMappingExposure = 1.12;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -32,12 +37,23 @@ export class Engine {
     mountEl.appendChild(this.renderer.domElement);
 
     this.scene = new THREE.Scene();
+
+    // image-based fill light: soft studio env keeps skin, metal and cloth
+    // from reading as plastic under pure Lambert shading
+    const pmrem = new THREE.PMREMGenerator(this.renderer);
+    this.scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.06).texture;
+    this.scene.environmentIntensity = 0.52;
+    pmrem.dispose();
+
     this.camera = new THREE.PerspectiveCamera(
       62,
       window.innerWidth / window.innerHeight,
       0.1,
       600,
     );
+
+    // Vice City-style post chain: bloom + retro-Miami grade
+    postFX.init(this.renderer, this.scene, this.camera);
 
     this.clock = new THREE.Clock();
     this.elapsed = 0;
@@ -64,8 +80,11 @@ export class Engine {
     const w = window.innerWidth;
     const h = window.innerHeight;
     this.camera.aspect = w / h;
+    // FOV (portrait widening + sprint kick) is owned by ThirdPersonCamera
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h);
+    postFX.setSize(w, h);
+    if (this.onResize) this.onResize();
   }
 
   _loop() {
@@ -76,6 +95,6 @@ export class Engine {
     this.elapsed += dt;
 
     this.game.update(dt, this.elapsed);
-    this.renderer.render(this.scene, this.camera);
+    postFX.render(dt);
   }
 }

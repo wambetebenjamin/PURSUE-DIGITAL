@@ -1,21 +1,29 @@
 /**
- * CampZone.js — PHASE 4: "The Camp and Rescue"
+ * CampZone.js — PHASES 3–4: "The Night Ambush" & "The 24-Hour War"
+ * (1 Samuel 30:16–19)
  *
- * A dusk-lit valley of tents and bonfires with celebrating Amalekites.
- * Each guard carries a ground-projected vision cone (distance + facing check).
- * Reaching the central cage triggers the victory sequence.
+ * A moonlit valley of tents and bonfires at 3200K starlight: celebrating,
+ * intoxicated Amalekites among spilled wine, rugs, and piles of pillaged
+ * gold and silver. Each guard carries a ground-projected vision cone
+ * (distance + facing check). Reaching the central cage triggers the battle
+ * sequence — the rout of the raiders and the 400 fleeing on camels.
  */
 import * as THREE from 'three';
-import { Mat } from '../../utils/materials.js';
+import { QUALITY } from '../../core/quality.js';
+import { Mat, Geo } from '../../utils/materials.js';
 import {
   createTent, createBonfire, createCage, createHumanoid,
-  createRockField, createBeacon,
+  createRockField, createBeacon, createTreasurePile, createSpilledAmphora,
+  createRug, createCamel, createMountainRidge,
+  createWeaponRack, createPotteryCluster, createSootPatch, createCrackedPatch,
 } from '../props/PropFactory.js';
+import { smokeSpriteMap } from '../../utils/surfaces.js';
 import { ParticleEmitter } from '../effects/Particles.js';
 import { SkyDome } from '../effects/SkyDome.js';
 import { makeTextSprite } from '../../utils/canvasText.js';
 import { VISION } from '../../constants.js';
 import { seededRandom, randRange, wrapAngle } from '../../utils/math.js';
+import { applyTerrainColors } from '../../utils/terrain.js';
 
 export const CAMP = {
   spawn: { x: 0, z: 56, yaw: 0 },
@@ -63,7 +71,7 @@ function createGuard(seed) {
     cloth2: Mat.tunicAmalekiteAlt(),
     hair: Mat.hair(),
   };
-  const human = createHumanoid(palette, 'celebrating');
+  const human = createHumanoid(palette, 'celebrating', { armor: 'leather', beard: 'full', detail: 'full' });
   group.add(human);
 
   const cone = createVisionCone();
@@ -93,17 +101,35 @@ export function createCampZone() {
   const guards = [];
 
   // ------------------------------------------------------------- sky
-  const sky = new SkyDome(0x241a3a, 0xc86a3a, 0.7);
+  // PHASE 3 spec: cool dark-blue starlight, low crescent moon, 3200K night
+  const sky = new SkyDome(0x140b46, 0xc22e88, 0.75, 0x5c2a9e); // Starfish Island night
   group.add(sky.mesh);
 
   // ---------------------------------------------------------- lights
-  const hemi = new THREE.HemisphereLight(0x53406b, 0x7a4a30, 0.95);
+  // ambient starlight: cool blue over warm firelight bounce
+  const hemi = new THREE.HemisphereLight(0x2c3a5c, 0x241818, 0.75);
   group.add(hemi);
 
-  const sun = new THREE.DirectionalLight(0xffb070, 1.05);
+  // low-hanging crescent moon (the "3200K starlight" key)
+  const moon = new THREE.Mesh(
+    new THREE.CircleGeometry(9, 24),
+    new THREE.MeshBasicMaterial({ color: 0xd8e2f2 }),
+  );
+  moon.position.set(70, 95, -140);
+  moon.lookAt(0, 10, 0);
+  group.add(moon);
+  const moonShadow = new THREE.Mesh(
+    new THREE.CircleGeometry(8.2, 24),
+    new THREE.MeshBasicMaterial({ color: 0x10162c }),
+  );
+  moonShadow.position.copy(moon.position).add(new THREE.Vector3(-3.2, 1.6, 0));
+  moonShadow.quaternion.copy(moon.quaternion);
+  group.add(moonShadow);
+
+  const sun = new THREE.DirectionalLight(0x7e8fe0, 0.6); // neon moonlight
   sun.position.set(-30, 52, -18);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(1024, 1024);
+  sun.shadow.mapSize.set(QUALITY.shadowMap, QUALITY.shadowMap);
   sun.shadow.camera.near = 1;
   sun.shadow.camera.far = 170;
   sun.shadow.camera.left = -44;
@@ -113,6 +139,7 @@ export function createCampZone() {
   sun.shadow.bias = -0.0012;
   sun.userData.offset = new THREE.Vector3(-28, 50, -16);
   group.add(sun, sun.target);
+  sky.setSun(new THREE.Vector3(70, 95, -140), 0xc8d8ff, 0.5); // the crescent
 
   // --------------------------------------------------------- terrain
   const groundGeo = new THREE.PlaneGeometry(150, 160, 52, 56);
@@ -124,11 +151,27 @@ export function createCampZone() {
     pos.setY(i, campHeight(x, z));
   }
   groundGeo.computeVertexNormals();
+  applyTerrainColors(groundGeo, {
+    colorA: new THREE.Color(0x6a5c8a), colorB: new THREE.Color(0x4a3c6a),
+    colorC: new THREE.Color(0x2c2048), scale: 0.05, strength: 0.55, seed: 43,
+  });
   const groundMat = Mat.rockDark().clone();
-  groundMat.color.set(0x6e5238);
+  groundMat.color.set(0x8a7058); // trodden dark earth × vertex colors
+  groundMat.vertexColors = true;
   const ground = new THREE.Mesh(groundGeo, groundMat);
   ground.receiveShadow = true;
   group.add(ground);
+
+  // moonlit ridge silhouettes closing the valley
+  const rim1 = createMountainRidge(73, { width: 520, height: 62, depth: 30, color: 0x241c3a });
+  rim1.position.set(0, -10, -175);
+  const rim2 = createMountainRidge(79, { width: 420, height: 48, depth: 26, color: 0x2a2244 });
+  rim2.position.set(-150, -8, -110);
+  rim2.rotation.y = 0.5;
+  const rim3 = createMountainRidge(83, { width: 420, height: 50, depth: 26, color: 0x2a2244 });
+  rim3.position.set(160, -8, -100);
+  rim3.rotation.y = -0.55;
+  group.add(rim1, rim2, rim3);
 
   // valley rim rocks
   const rim = createRockField(40, { minX: -80, maxX: 80, minZ: -85, maxZ: 88 }, 55);
@@ -147,15 +190,49 @@ export function createCampZone() {
     colliders.push({ x, z, r: 2.5 });
   });
 
+  // ------------------------------------------- raider gear & plunder
+  const rackSpots = [[-14, 22], [22, 4], [-24, -28]];
+  rackSpots.forEach(([x, z], i) => {
+    const rack = createWeaponRack(i + 2);
+    rack.position.set(x, campHeight(x, z), z);
+    rack.rotation.y = seededRandom(i * 5.5) * Math.PI;
+    group.add(rack);
+    colliders.push({ x, z, r: 1.2 });
+  });
+  for (let i = 0; i < 7; i++) {
+    const x = (seededRandom(i * 8.3) - 0.5) * 76;
+    const z = (seededRandom(i * 6.1) - 0.5) * 90;
+    const pottery = createPotteryCluster(i + 11);
+    pottery.position.set(x, campHeight(x, z), z);
+    pottery.rotation.y = seededRandom(i * 3.7) * Math.PI * 2;
+    group.add(pottery);
+  }
+
   // ------------------------------------------------------- bonfires
   const fireSpots = [[-8, 18], [20, 18], [-22, -12], [10, -22]];
   fireSpots.forEach(([x, z], i) => {
-    const fire = createBonfire(i < 3); // max 3 dynamic point lights
+    const fire = createBonfire(i < 3, i === 0); // max 3 lights; the first casts shadows
     fire.position.set(x, campHeight(x, z), z);
     group.add(fire);
     colliders.push({ x, z, r: 1.1 });
     timeUpdaters.push((t) => fire.userData.update(t));
+
+    // scorched ground and glowing ash ring beneath each fire
+    const soot = createSootPatch(i + 31, 2.4 + seededRandom(i) * 1.1);
+    soot.position.set(x, campHeight(x, z) + 0.02, z);
+    group.add(soot);
+    const bed = new THREE.Mesh(Geo.sphere(), Mat.emberBed());
+    bed.scale.set(1.2, 0.12, 1.2);
+    bed.position.set(x, campHeight(x, z) + 0.07, z);
+    group.add(bed);
   });
+  for (let i = 0; i < 5; i++) {
+    const x = (seededRandom(i * 7.7) - 0.5) * 70;
+    const z = (seededRandom(i * 9.1) - 0.5) * 90;
+    const crack = createCrackedPatch(i + 50, 5 + seededRandom(i) * 3);
+    crack.position.set(x, campHeight(x, z) + 0.02, z);
+    group.add(crack);
+  }
 
   // fire particles on two of them
   fireSpots.slice(0, 2).forEach(([x, z]) => {
@@ -179,6 +256,71 @@ export function createCampZone() {
     group.add(sparks.points);
     dtUpdaters.push((dt) => sparks.update(dt));
   });
+
+  // ------------------------------ scattered plunder & disarray (PBR spec)
+  // rugs, overturned wine amphorae (zero-roughness spills), pillaged metal
+  const disarray = [
+    { kind: 'rug', x: -6, z: 22 }, { kind: 'rug', x: 14, z: 12 },
+    { kind: 'rug', x: -18, z: -8 }, { kind: 'rug', x: 6, z: -24 },
+    { kind: 'amphora', x: -3, z: 26 }, { kind: 'amphora', x: 11, z: 16 },
+    { kind: 'amphora', x: -13, z: -2 }, { kind: 'amphora', x: 20, z: -12 },
+    { kind: 'amphora', x: -24, z: -18 }, { kind: 'amphora', x: 4, z: -32 },
+    { kind: 'treasure', x: -9, z: 14 }, { kind: 'treasure', x: 17, z: 22 },
+    { kind: 'treasure', x: -21, z: -14 }, { kind: 'treasure', x: 8, z: -10 },
+    { kind: 'treasure', x: -4, z: -36 },
+  ];
+  for (const d of disarray) {
+    const y = campHeight(d.x, d.z);
+    let prop = null;
+    if (d.kind === 'rug') prop = createRug(d.x + d.z);
+    else if (d.kind === 'amphora') prop = createSpilledAmphora(d.x * d.z + 3);
+    else prop = createTreasurePile(d.x - d.z + 8);
+    prop.position.set(d.x, y, d.z);
+    prop.rotation.y = seededRandom(d.x * 3.1 + d.z) * Math.PI * 2;
+    group.add(prop);
+  }
+
+  // intoxicated Amalekites slumped over the rugs
+  const drunkPalette = {
+    skin: Mat.skinDark(),
+    cloth: Mat.tunicAmalekite(),
+    cloth2: Mat.tunicAmalekiteAlt(),
+    hair: Mat.hair(),
+  };
+  [[-6, 22], [14, 12], [-18, -8], [6, -24]].forEach(([x, z], i) => {
+    const drunk = createHumanoid(drunkPalette, 'reclining', { beard: 'full', detail: 'low' });
+    drunk.position.set(x, campHeight(x, z), z);
+    drunk.rotation.y = seededRandom(i * 9.2) * Math.PI * 2;
+    group.add(drunk);
+  });
+
+  // ------------------------------------ the 400 escape on camels (v. 17)
+  for (let i = 0; i < 3; i++) {
+    const x = -22 + i * 20;
+    const z = -50 - (i % 2) * 5;
+    const camel = createCamel(i + 1);
+    camel.position.set(x, campHeight(x, z), z);
+    camel.rotation.y = Math.PI + (seededRandom(i * 4.7) - 0.5) * 0.6;
+    group.add(camel);
+  }
+  const camelDust = new ParticleEmitter({
+    count: 70,
+    origin: new THREE.Vector3(0, 1.4, -52),
+    spread: 22,
+    rise: 1.1,
+    riseJitter: 0.7,
+    drift: 1.4,
+    life: 4.5,
+    lifeJitter: 0.45,
+    size: 12,
+    sizeGrow: 10,
+    alpha: 0.24,
+    rate: 0,
+    color: 0x8a7358,
+    colorEnd: 0x4a3c30,
+  });
+  group.add(camelDust.points);
+  dtUpdaters.push((dt) => camelDust.update(dt));
 
   // --------------------------------------------------------- guards
   const guardSpots = [
@@ -217,7 +359,7 @@ export function createCampZone() {
   };
   const captivePositions = [[-1.1, 0.2], [1.0, -0.5], [0.1, 1.1], [-0.4, -1.2]];
   captivePositions.forEach(([dx, dz], i) => {
-    const c = createHumanoid(captivePalette, 'seatedCaptive');
+    const c = createHumanoid(captivePalette, 'seatedCaptive', { detail: 'low', beard: 'none' });
     c.position.set(
       CAMP.captives.x + dx,
       campHeight(CAMP.captives.x + dx, CAMP.captives.z + dz) - 0.05,
@@ -244,6 +386,7 @@ export function createCampZone() {
 
   // --------------------------------------------------- campfire smoke
   const smoke = new ParticleEmitter({
+    map: smokeSpriteMap(),
     count: 70,
     origin: new THREE.Vector3(-8, campHeight(-8, 18) + 2, 18),
     spread: 1.2,
@@ -267,8 +410,9 @@ export function createCampZone() {
     spawn: CAMP.spawn,
     bounds: CAMP.bounds,
     colliders,
-    fog: { color: 0x6b4a3a, density: 0.0095 },
+    fog: { color: 0x2a1454, density: 0.013 },
     sun,
+    sky,
     groundHeight: campHeight,
     guards,
     captives: CAMP.captives,
@@ -279,9 +423,13 @@ export function createCampZone() {
      * Guards slowly scan, so the cone breathes like an attention arc.
      * @returns {{detected:boolean, alert:number}} alert = 0..1 glow intensity
      */
-    checkDetection(playerPos) {
+    checkDetection(playerPos, crouched = false) {
       let detected = false;
       let maxProx = 0;
+      // a man on his belly in the dark is seen at half the distance and only
+      // when he is squarely inside the cone
+      const range = crouched ? VISION.range * VISION.crouchRange : VISION.range;
+      const halfAngle = crouched ? VISION.halfAngle * VISION.crouchPeripheral : VISION.halfAngle;
 
       for (const guard of guards) {
         const gx = guard.group.position.x;
@@ -290,21 +438,21 @@ export function createCampZone() {
         const dz = playerPos.z - gz;
         const dist = Math.sqrt(dx * dx + dz * dz);
 
-        const prox = 1 - Math.min(1, dist / VISION.range);
-        if (dist < VISION.range) {
+        const prox = 1 - Math.min(1, dist / range);
+        if (dist < range) {
           const angleToPlayer = Math.atan2(dx, dz);
           const diff = Math.abs(wrapAngle(angleToPlayer - guard.facing));
-          const inCone = diff < VISION.halfAngle;
+          const inCone = diff < halfAngle;
           if (inCone) {
             detected = true;
-            maxProx = Math.max(maxProx, prox * (1 - diff / VISION.halfAngle) + 0.35);
+            maxProx = Math.max(maxProx, prox * (1 - diff / halfAngle) + 0.35);
           }
         }
 
         // visual feedback on the cone
         const mat = guard.cone.material;
-        const alertness = dist < VISION.range
-          ? Math.max(0, 1 - Math.abs(wrapAngle(Math.atan2(dx, dz) - guard.facing)) / VISION.halfAngle)
+        const alertness = dist < range
+          ? Math.max(0, 1 - Math.abs(wrapAngle(Math.atan2(dx, dz) - guard.facing)) / halfAngle)
           : 0;
         mat.color.setHex(alertness > 0.55 ? 0xff4444 : 0xffd25e);
         mat.opacity = 0.12 + alertness * 0.28;
