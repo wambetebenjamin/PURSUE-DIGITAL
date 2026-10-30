@@ -27,6 +27,7 @@ export class Player {
     this.velocity = new THREE.Vector3();
     this.groundHeight = 0; // set by the active zone each frame
     this.health = 1; // vitality — the oil in the lamp (HUD), regenerates slowly
+    this.maxHealth = 1; // raised by the wall at Ziklag (core/progression.js)
     this.crouched = false;   // sneaking: half speed, half silhouette
     this.crouch01 = 0;       // smoothed crouch weight for the pose
     this.locomotion = new Locomotion();
@@ -106,7 +107,7 @@ export class Player {
     this.group.rotation.y = yaw;
     this.velocity.set(0, 0, 0);
     this.stamina.reset();
-    this.health = 1;
+    this.health = Math.min(1, this.maxHealth || 1);
     this.crouched = false;
     this.crouch01 = 0;
     this.running = false;

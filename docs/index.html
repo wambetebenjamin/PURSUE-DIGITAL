@@ -20,9 +20,9 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="color-scheme" content="dark" />
     <title>PURSUE — 1 Samuel 30</title>
-    <script type="module" crossorigin src="./assets/index-Cpwre95B.js"></script>
+    <script type="module" crossorigin src="./assets/index-Dca9qb-c.js"></script>
     <link rel="modulepreload" crossorigin href="./assets/three-CXh9M2zY.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-D7Ab0eKe.css">
+    <link rel="stylesheet" crossorigin href="./assets/index-TUuD7a9z.css">
   </head>
   <body>
     <!-- WebGL canvas is injected here by the engine -->
@@ -87,6 +87,13 @@
         <div id="hud-objective">
           <span class="hud-label">The Charge</span>
           <span id="objective-text">Reach the Desert Edge</span>
+        </div>
+
+        <!-- the charge, step by step: the task the campaign is on -->
+        <div id="hud-task" class="hidden">
+          <span class="hud-label">The Charge</span>
+          <span id="task-text"></span>
+          <span id="task-progress"></span>
         </div>
 
         <!-- heading: a hammered-bronze astrolabe -->
@@ -235,6 +242,7 @@
           <button id="pause-resume" class="primary-button">Resume the march</button>
           <button id="pause-map" class="secondary-button">Map of Judah</button>
           <button id="pause-satchel" class="secondary-button">The Satchel</button>
+          <button id="pause-war" class="secondary-button">The War Table</button>
           <button id="pause-settings" class="secondary-button">Settings</button>
           <button id="pause-restart" class="secondary-button danger">Begin again</button>
         </div>
@@ -250,6 +258,14 @@
           <p class="pause-sub">How the wilderness is shown and heard.</p>
           <div id="settings-list"></div>
           <button id="pause-resume-4" class="primary-button">Back to the march</button>
+        </div>
+
+        <div id="pause-war-panel" class="hidden">
+          <span class="page-mark">The Campaign</span>
+          <h2>The War Table</h2>
+          <p class="pause-sub">What is owed, who rides, and what has been rebuilt.</p>
+          <div id="war-table"></div>
+          <button id="pause-resume-5" class="primary-button">Back to the march</button>
         </div>
 
         <div id="pause-satchel-panel" class="hidden">

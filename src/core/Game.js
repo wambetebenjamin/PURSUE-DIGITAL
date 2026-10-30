@@ -34,6 +34,9 @@ import {
   PHASE_GRADES,
 } from '../constants.js';
 import { audio } from '../audio/AudioEngine.js';
+import {
+  progression, modifiers as progressModifiers, currentTask, TASKS, PHASE_ORDER,
+} from './progression.js';
 import { postFX } from './PostFX.js';
 import { distanceXZ } from '../utils/math.js';
 import { ZIKLAG } from '../world/zones/ZiklagZone.js';
@@ -72,6 +75,20 @@ export class Game {
     });
     this.paused = false;
     this._runTime = 0;
+
+    // ---- the campaign (persisted): modifiers tilt the margins of a run
+    this.progress = progression;
+    this.mods = progressModifiers();
+    this._phase = { name: null, t: 0, alerts: 0, crouched: 0, stealth: false };
+    this.hud.setTask?.(currentTask());
+    // the charge chip follows the campaign, wherever it changes
+    progression.onChange(() => {
+      const snap = progression.get();
+      this.hud.setTask?.(currentTask(snap), {
+        done: snap.tasksDone.length,
+        total: TASKS.length,
+      });
+    });
     this.pursuit = 0; // 0–5, the wanted-stars analog
 
     // -------- run flags --------
@@ -198,6 +215,7 @@ export class Game {
           audio.ui('alert');
           this.pursuit = 5; // wanted-stars spike: the raiders have seen you
           this.hud.showAlert(NARRATIVE.detectionAlert, VISION.alertDuration);
+          this._phase.alerts += 1;
           // a blade in the dark: the lamp dims, the camera takes the hit
           this.player.health = Math.max(0.2, this.player.health - 0.14);
           this.cameraRig.shake(0.6);
@@ -303,6 +321,7 @@ export class Game {
 
   // ============================================================ helpers
   _enterZone(stateName) {
+    this._closePhase(stateName);
     const zone = this.world.activate(stateName);
     const tag = ZONE_TAGS[stateName];
     if (tag) this.hud.showZone(tag[0], tag[1]);
@@ -339,6 +358,28 @@ export class Game {
     }
   }
 
+  /**
+   * Retire the phase we are leaving: score it (swift / silent / unseen), bank
+   * the stars and the resources, and mark its charge kept.
+   */
+  _closePhase(nextName) {
+    const prev = this._phase;
+    if (prev.name && prev.name !== nextName && PHASE_ORDER.includes(prev.name)) {
+      const result = progression.recordPhase(prev.name, {
+        time: Math.round(prev.t),
+        alerts: prev.alerts,
+        stealth: prev.crouched > 12,
+      });
+      const task = TASKS.find((t) => t.phase === prev.name);
+      if (task) progression.completeTask(task.id);
+      const stars = '✦'.repeat(result.stars);
+      this.hud.showAlert(`${stars} · ${result.stars === 3 ? 'swift, silent, unseen' : result.stars === 2 ? 'well walked' : 'endured'}`, 2.4);
+    }
+    // open the new phase
+    this._phase = { name: nextName, t: 0, alerts: 0, crouched: 0, stealth: false };
+    this.hud.setTask?.(currentTask());
+  }
+
   /** Keep the radar mission blip on the same point the arrow tracks. */
   _setObjectiveTarget(x, z) {
     this.arrow.setTarget(x, z);
@@ -366,6 +407,11 @@ export class Game {
   start() {
     this.started = true;
     this.finished = false;
+    this.mods = progressModifiers();
+    progression.beginRun();
+    // the wall raises the lamp; the cistern quickens the breath
+    this.player.maxHealth = Math.min(1.5, this.mods.maxHealth);
+    if (this.player.stamina) this.player.stamina.regenScale = this.mods.staminaRegen;
     audio.init();
     audio.resume();
     this.fsm.set(STATES.ZIKLAG);
@@ -473,7 +519,7 @@ export class Game {
       this.cameraRig.update(dt, this.player.position, this.player.running);
       postFX.setFocus(this.cameraRig.focusDistance);
       // vitality recovers in the shade between skirmishes
-      this.player.health = Math.min(1, this.player.health + dt * 0.018);
+      this.player.health = Math.min(this.player.maxHealth || 1, this.player.health + dt * 0.018 * (this.mods?.staminaRegen || 1));
 
       // --- radar (heading-up, speed zoom) ---
       const speedRatio = Math.min(1, this.player.velocity.length() / PLAYER.runSpeed);
@@ -482,6 +528,10 @@ export class Game {
       // --- FSM phase logic ---
       this.fsm.update(dt);
       this.player.interactRequested = false;
+
+      // --- the campaign clock for this phase
+      this._phase.t += dt;
+      if (this.player.crouched) this._phase.crouched += dt;
 
       // --- HUD ---
       this.hud.setStamina(this.player.stamina.ratio, this.player.stamina.exhausted);

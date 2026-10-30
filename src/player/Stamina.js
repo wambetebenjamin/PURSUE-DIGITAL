@@ -34,7 +34,7 @@ export class Stamina {
     } else {
       this._sinceDrain += dt;
       if (this._sinceDrain > STAMINA.regenDelay) {
-        this.value = Math.min(STAMINA.max, this.value + STAMINA.regenPerSecond * dt);
+        this.value = Math.min(STAMINA.max, this.value + STAMINA.regenPerSecond * dt * (this.regenScale || 1));
       }
       if (this.exhausted && this.value >= STAMINA.exhaustedResetAt) {
         this.exhausted = false;
