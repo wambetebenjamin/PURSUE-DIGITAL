@@ -107,6 +107,25 @@ only, no copyrighted assets:
   all seven districts and your objective
 - A "**MISSION PASSED**" flourish when the story completes
 
+## The city, from above (pass 16)
+
+The game now opens on Ziklag as a strategy player sees a city: an isometric
+diorama on a walled plateau, with the works standing in it and every level of
+every work showing in the stone.
+
+| The reference does | PURSUE does | Where |
+| --- | --- | --- |
+| A city screen you return to | The citadel: eight works on a walled plateau, roads, people on the roads, smoke over the smelter | `src/world/city/CitadelScene.js` |
+| Buildings that visibly level up | Each work is rebuilt at the level the campaign has it — storeys, wings, annexes, taller chimneys, more tents | `setLevel()` / `sync()` |
+| A resource bar and a "collect" tap | Four resources plus men under arms; the works gather for eight hours and are emptied from the bar | `src/ui/Citadel.js` |
+| A dock of destinations | Citadel · Charge · Band · Host · Field · Chart | `DOCK` |
+| A world map with stage nodes | A vellum chart of the road south, every field on it, held fields marked | `renderChart()` |
+
+Governing is not walking: in the citadel the pointer is a cursor (no pointer
+lock), the march HUD is put away, and the streets carry people. The pursuit
+itself is one button — **Take the road** — and the march's pause page carries
+**The Citadel** to come back.
+
 ## The muster and the field
 
 Pass 15 finishes the strategy loop the reference game is built on, in our own

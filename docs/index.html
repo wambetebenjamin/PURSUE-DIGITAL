@@ -20,9 +20,9 @@
     <meta name="format-detection" content="telephone=no" />
     <meta name="color-scheme" content="dark" />
     <title>PURSUE — 1 Samuel 30</title>
-    <script type="module" crossorigin src="./assets/index-D9ddGbqm.js"></script>
-    <link rel="modulepreload" crossorigin href="./assets/three-CXh9M2zY.js">
-    <link rel="stylesheet" crossorigin href="./assets/index-BC8cSi_H.css">
+    <script type="module" crossorigin src="./assets/index-_0EE1b2P.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/three-CD4OaecE.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-Btsec9bp.css">
   </head>
   <body>
     <!-- WebGL canvas is injected here by the engine -->
@@ -30,6 +30,8 @@
 
     <!-- ===================== HTML/CSS UI OVERLAY ===================== -->
     <div id="ui-root">
+      <!-- the strategy front end: the city from above, and its dock -->
+      <div id="citadel-ui" class="hidden"></div>
       <!-- Sound toggle (procedural audio on/off) -->
       <button id="audio-toggle" title="Toggle sound" aria-label="Toggle sound">♪</button>
 
@@ -201,11 +203,12 @@
       <div class="start-card-wrap">
       <div id="start-card">
         <h1>PURSUE</h1>
-        <p class="subtitle">A retelling of 1 Samuel 30–31</p>
+        <p class="subtitle">Ziklag, rebuilt from ash — 1 Samuel 30–31</p>
         <p class="story">
-          Ziklag is ash. The families are gone, driven south into the wilderness.
-          Two hundred of your men are too spent to cross the brook — you go on with four hundred.
-          Find the one who knows the road. Fall upon the camp. Bring every soul home.
+          The town is burned and the families are gone south with the raiders.
+          Raise the works, muster the six hundred, and hold the road.
+          Then take the pursuit itself: cross the Besor, find the one who knows
+          the way, fall upon the camp, and bring every soul home.
           <em>Recover all.</em>
         </p>
         <div class="controls-grid controls-desktop">
@@ -226,7 +229,7 @@
           <div><b>Low</b><span>Sneak (halves your silhouette)</span></div>
           <div><b>Map</b><span>Chart of the march</span></div>
         </div>
-        <button id="start-button" class="primary-button">Begin the Pursuit</button>
+        <button id="start-button" class="primary-button">Enter Ziklag</button>
       </div>
       </div>
     </div>

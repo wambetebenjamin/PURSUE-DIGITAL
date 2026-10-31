@@ -33,6 +33,10 @@ class FakeElement {
     this.textContent = '';
     this.offsetWidth = 0;
     this._innerHTML = '';
+    this.clientWidth = 800;
+    this.clientHeight = 600;
+    this.width = 800;
+    this.height = 600;
   }
   set innerHTML(v) { this._innerHTML = v; if (v === '') this.children = []; }
   get innerHTML() { return this._innerHTML; }
@@ -41,12 +45,21 @@ class FakeElement {
   setAttribute(k, v) { this._attrs = this._attrs || {}; this._attrs[k] = String(v); }
   getAttribute(k) { return (this._attrs || {})[k] ?? null; }
   removeAttribute(k) { if (this._attrs) delete this._attrs[k]; }
+  getBoundingClientRect() { return { left: 0, top: 0, width: 800, height: 600, right: 800, bottom: 600 }; }
+  setPointerCapture() {}
+  releasePointerCapture() {}
   addEventListener() {}
   removeEventListener() {}
 }
 
 function fake2dContext() {
-  return new Proxy({ measureText: () => ({ width: 120 }) }, {
+  const gradient = { addColorStop() {} };
+  const target = {
+    measureText: () => ({ width: 120 }),
+    createLinearGradient: () => gradient,
+    createRadialGradient: () => gradient,
+  };
+  return new Proxy(target, {
     get: (t, k) => (k in t ? t[k] : () => {}),
     set: () => true,
   });
@@ -83,6 +96,10 @@ globalThis.localStorage = {
 globalThis.window = globalThis;
 globalThis.addEventListener = () => {};
 globalThis.requestAnimationFrame = (fn) => setTimeout(fn, 0);
+if (typeof globalThis.window === 'undefined') globalThis.window = globalThis;
+if (typeof globalThis.window.addEventListener !== 'function') globalThis.window.addEventListener = () => {};
+if (typeof globalThis.window.removeEventListener !== 'function') globalThis.window.removeEventListener = () => {};
+if (typeof globalThis.window.devicePixelRatio !== 'number') globalThis.window.devicePixelRatio = 1;
 
 // ------------------------------------------------------------- bootstrap
 const { Input } = await import('../src/core/Input.js');
@@ -856,5 +873,108 @@ ok(board.bout.status === 'lost', 'withdrawing yields the field');
 board.close();
 ok(board.isOpen === false, 'and closing puts the board away');
 game.pause.showPage('menu');
+
+
+// ------------------------------- pass 16: the citadel (the strategy front end)
+const citadelMod = await import('../src/world/city/CitadelScene.js');
+const { CitadelScene, SITES } = citadelMod;
+const { Citadel } = await import('../src/ui/Citadel.js');
+
+const levels = { hall: 2, barracks: 3, cistern: 1, wall: 2, threshing: 4, quarry: 1, smelter: 2, hospital: 1 };
+const city = new CitadelScene(levels);
+ok(city.group.children.length > 10, 'the citadel builds: ground, wall, roads, works, people');
+ok(SITES.length === 7, 'seven works stand inside the walls');
+ok(city.pickables.length === 7, 'every work can be touched');
+ok(SITES.every((s) => city.sites.get(s.id)?.level === (levels[s.id] || 1)),
+  'each work is built at the level the campaign has it');
+ok(city.wallGroup && city.wallGroup.children.length >= 8, 'the wall rings the city with towers and a gate');
+ok(city.people.length >= 10, 'the streets are inhabited');
+ok(city.camera.dist > 0 && city.camera.pitch > 0, 'the isometric rig starts above the city');
+
+// ---- a work grows when the campaign does
+const hallLevel0 = city.sites.get('hall').level;
+ok(city.setLevel('hall', 5) === true, 'a work can be rebuilt at a higher level');
+ok(city.sites.get('hall').level === 5, 'and the city records it');
+ok(city.setLevel('hall', 5) === false, 'rebuilding at the same level is a no-op');
+city.setLevel('hall', hallLevel0);
+const syncChanged = city.sync({ ...levels, barracks: 5 });
+ok(syncChanged === true, 'a snapshot of levels moves the city');
+ok(city.sites.get('barracks').level === 5, 'including the barracks');
+city.sync(levels);
+
+// ---- the camera rig obeys its limits
+const cam = new THREE.PerspectiveCamera(45, 1.6, 0.1, 900);
+city.applyCamera(cam);
+ok(Number.isFinite(cam.position.x) && cam.position.y > 10, 'the camera stands above and behind the city');
+const y0 = city.camera.yaw;
+city.orbit(100, 0);
+ok(city.camera.yaw !== y0, 'dragging turns the city');
+city.orbit(0, 99999);
+ok(city.camera.pitch <= 1.321, 'the pitch never tips past the horizon');
+city.zoom(100);
+ok(city.camera.dist >= 26, 'zooming in stops at the closest the city allows');
+city.zoom(0.0001);
+ok(city.camera.dist <= 105, 'and pulling back stops at the farthest');
+city.pan(9999, 9999);
+ok(Math.abs(city.camera.target.x) <= 26.001 && Math.abs(city.camera.target.y) <= 30.001,
+  'panning stays inside the walls');
+
+// ---- the city animates without a renderer
+city.update(0.1, 1.2);
+city.update(0.1, 1.3);
+ok(true, 'the citadel ticks headless');
+ok(city.smoke.length >= 0, 'and its smoke is cleaned up as it ages');
+
+// ---- the strategy HUD
+document.body.classList.remove('citadel-mode');
+progression.reset();
+const citadelCanvas = document.createElement('canvas');
+const cit = new Citadel({ scene: new THREE.Scene(), camera: cam, canvas: citadelCanvas, onMarch: () => {} });
+cit.build();
+ok(cit.built === true, 'the citadel HUD builds');
+ok(cit.dockButtons.length === 6, 'six leaves on the dock: citadel, charge, band, host, field, chart');
+ok(cit.resBar.children.length === 5, 'the top bar shows four resources and the men under arms');
+
+// ---- picking a work opens its card, at the level the stores say
+cit.select('hall');
+ok(cit.selected === 'hall', 'a work can be selected');
+ok(cit.siteCard.children.length >= 4, 'and its card is drawn');
+ok(!cit.siteCard.classList.contains('hidden'), 'the card is visible');
+cit.select(null);
+ok(cit.siteCard.classList.contains('hidden'), 'and hides when the city is tapped again');
+
+// ---- raising a work spends the stores and moves the city
+progression.get().resources.timber = 4000;
+progression.get().resources.bronze = 4000;
+const lv0 = progression.get().buildings.barracks;
+cit.select('barracks');
+cit.city.setLevel('barracks', lv0);
+const raised = progression.upgrade('barracks');
+ok(raised === lv0 + 1, 'a work can be raised from the card');
+ok(cit.city.setLevel('barracks', raised) === true, 'and the city follows the campaign');
+
+// ---- the sheets open on their leaves
+cit.openDock('muster');
+ok(cit.sheetId === 'muster', 'the host sheet opens');
+ok(!cit.sheet.classList.contains('hidden'), 'and is visible');
+cit.openDock('chart');
+ok(cit.sheetId === 'chart', 'the chart opens');
+ok(cit.chartLedger && cit.chartLedger.textContent.includes('fields held'), 'the chart keeps a ledger');
+cit.closeSheet();
+ok(cit.sheet.classList.contains('hidden'), 'and every sheet can be closed');
+
+// ---- entering and leaving the city
+const citScene = new THREE.Scene();
+const cit2 = new Citadel({ scene: citScene, camera: cam, canvas: citadelCanvas, onMarch: () => {} });
+cit2.enter();
+ok(cit2.active === true, 'the citadel can be entered');
+ok(document.body.classList.contains('citadel-mode'), 'and the march HUD steps aside');
+ok(citScene.children.includes(cit2.city.group), 'the city stands in the scene');
+cit2.update(0.016, 2.0);
+ok(true, 'and renders a frame without throwing');
+cit2.exit();
+ok(cit2.active === false, 'it can be left for the march');
+ok(!document.body.classList.contains('citadel-mode'), 'and the march gets its HUD back');
+ok(!citScene.children.includes(cit2.city.group), 'the city comes out of the scene');
 
 console.log(`\nAll ${passed} checks passed.\n`);

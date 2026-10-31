@@ -14,6 +14,7 @@ import { Game } from './core/Game.js';
 import { settings } from './core/settings.js';
 import { postFX } from './core/PostFX.js';
 import { initInstallShell } from './core/install.js';
+import { Citadel } from './ui/Citadel.js';
 
 // ---------------------------------------------------------------- engine
 const mount = document.getElementById('app');
@@ -24,7 +25,10 @@ const input = new Input();
 const gameHolder = { current: null };
 
 const engine = new Engine(mount, {
-  update: (dt, elapsed) => gameHolder.current?.update(dt, elapsed),
+  update: (dt, elapsed) => {
+    if (citadel.active) citadel.update(dt, elapsed);
+    else gameHolder.current?.update(dt, elapsed);
+  },
 });
 
 input.attach(engine.canvas);
@@ -42,6 +46,37 @@ const game = new Game({
   input,
 });
 gameHolder.current = game;
+
+// ------------------------------------------------ the strategy front end
+// The game opens on the city from above — the works, the host, the charge —
+// and the pursuit is one button away. Everything the citadel shows is read
+// from the same stores the march uses.
+const citadel = new Citadel({
+  scene: engine.scene,
+  camera: engine.camera,
+  canvas: engine.canvas,
+  input,
+  onMarch: () => {
+    citadel.exit();
+    game.hud.setVisible(true);
+    game.start();
+    shell.begin();
+    if (IS_TOUCH) shell.requestFullscreen();
+  },
+});
+
+/** Put the camera back over Ziklag, with every other zone dark. */
+function enterCitadel() {
+  game.pause.close(false);
+  game.started = false;
+  game.hud.setVisible(false);
+  for (const zone of game.world.zones.values()) zone.group.visible = false;
+  engine.scene.fog.color.set(0xd6c2a0);
+  engine.scene.fog.density = 0.0032;
+  postFX.setGrade('clear');
+  citadel.enter();
+}
+window.PURSUE_CITADEL = { citadel, enterCitadel };
 
 // ------------------------------------------------------------- audio
 const audioToggle = document.getElementById('audio-toggle');
@@ -97,11 +132,23 @@ startButton.addEventListener('click', () => {
   startScreen.classList.add('hidden');
   audio.init();
   audio.resume();
-  game.start();
+  enterCitadel();
   shell.begin();
-  // on a phone the browser chrome is the only thing the APK has and we do not
-  if (IS_TOUCH) shell.requestFullscreen();
 });
+
+// a way back to the city from the march's own pause page
+const pausePanel = document.getElementById('pause-menu-panel');
+if (pausePanel && pausePanel.appendChild) {
+  const home = document.createElement('button');
+  home.id = 'pause-citadel';
+  home.className = 'secondary-button';
+  home.textContent = 'The Citadel';
+  home.addEventListener('click', () => {
+    game.resetAll();
+    enterCitadel();
+  });
+  pausePanel.appendChild(home);
+}
 
 // the screen may sleep over a paused march, and must not over a running one
 document.addEventListener('visibilitychange', () => {
@@ -116,8 +163,8 @@ document.addEventListener('visibilitychange', () => {
 
 // pause overlay, dialogue and victory all stop the clock: no wake lock there
 const shellSync = () => {
-  if (game.modal?.isOpen || game.paused || game.finished) shell.end();
-  else if (game.started) shell.begin();
+  if (!game.started || game.modal?.isOpen || game.paused || game.finished) shell.end();
+  else shell.begin();
 };
 // cheap and complete: polls the game's own state rather than instrumenting
 // every overlay that can stop the clock
@@ -165,4 +212,4 @@ requestAnimationFrame(() => {
 });
 
 // expose for debugging in the console (handy on deployed builds)
-window.PURSUE = { engine, game, THREE };
+window.PURSUE = { engine, game, citadel, THREE };

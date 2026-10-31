@@ -945,3 +945,60 @@ wounded and their tending are asserted; every skirmish is fought to its end
 headless; a full band wins Besor, ten men lose Gilboa, an empty line loses at
 once; gauges fill and fire; production honours its hour and its eight-hour
 ceiling; and the six War Table leaves each render.
+
+---
+
+## 17. The citadel (pass 16)
+
+The last thing the reference did that we did not: it opened on a city, not on
+a camera behind a soldier. Pass 16 puts the strategy game in front.
+
+### 17a. The shape of the screen
+
+`src/world/city/CitadelScene.js` builds Ziklag as one diorama: a 46-unit walled
+plateau, an octagon of curtain wall with towers and a gatehouse on the south
+face, a gate road and a cross road, a ring road, a plaza with a well and market
+awnings, seven works, trees, flocks and fourteen inhabitants walking the ring.
+
+`src/ui/Citadel.js` is the HUD over it: a lord's name and the current charge, a
+resource bar (provisions, bronze, timber, spoil, men under arms) with the
+works' gathering as one button, a six-leaf dock, a work card with level pips,
+effect line, cost and **Raise the work**, and the vellum chart of the road
+south.
+
+### 17b. Geometry follows the campaign
+
+Each work has a builder that takes its level:
+
+| Work | What the level buys |
+| --- | --- |
+| The Hall of the March | a storey per level, a corner tower, banners, a gold finial at five |
+| The Barracks | a longer hall, more weapon racks, armoury from three, a brazier at four |
+| The Cistern | a wider kerb, more water, a dome from three |
+| The Threshing Floor | more sheaves, a mill from three |
+| The Quarry | a deeper stepped pit, more cut stone, a crane from three |
+| The Smelter | a taller chimney, a hotter mouth, more ingots |
+| The Tent of the Wounded | more tents, a herb plot, a palisade at four |
+| The Wall | a taller curtain and towers, lit braziers from three |
+
+Only the chosen site is rebuilt on an upgrade, and only geometry this module
+created is disposed — the shared `Geo` cache and the material cache belong to
+the whole game and are never freed from here.
+
+### 17c. What the player can do from the city
+
+- raise any work (spends the real stores, moves the real numbers)
+- empty the works (eight hours of idle output, capped)
+- read the charge, the band, the host, the stages, or the chart
+- take a stage from the chart or the Field leaf and fight it on the field board
+- **Take the road** into the pursuit; **The Citadel** in the pause page brings
+  you home
+
+### 17d. Verification
+
+Smoke grew from 283 to **324 checks**: the citadel's ground, wall, seven works,
+proxies and population; levels moving the city one site at a time; the camera
+rig's pitch, zoom and pan limits; a headless tick; the HUD's six leaves and
+five resource cells; selecting a work, raising it, and the city following; the
+chart's ledger; and entering/leaving the city with the march HUD stepping
+aside and the city group being added and removed from the scene.

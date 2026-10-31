@@ -4301,3 +4301,426 @@ body.touch-mode .codex-nav-btn {
     max-height: 74px;
   }
 }
+
+/* ============================================================
+   The Citadel — the strategy front end.
+   Iron frame, vellum cards, bronze rules. The city is the screen.
+   ============================================================ */
+#citadel-ui {
+  position: absolute;
+  inset: 0;
+  z-index: 32;
+  pointer-events: none;
+  font-family: var(--sans);
+  color: var(--vellum);
+}
+
+body.citadel-mode #hud,
+body.citadel-mode #radar-frame,
+body.citadel-mode #rotate-hint,
+body.citadel-mode #prompt,
+body.citadel-mode #alert-banner,
+body.citadel-mode .touch-controls {
+  display: none !important;
+}
+
+#citadel-ui.hidden {
+  display: none;
+}
+
+.cit-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+  padding: clamp(8px, 1.4vw, 16px) clamp(10px, 2vw, 22px);
+  pointer-events: auto;
+  background: linear-gradient(180deg, rgba(10, 8, 6, 0.9) 0%, rgba(10, 8, 6, 0.55) 70%, rgba(10, 8, 6, 0) 100%);
+  border-bottom: 1px solid rgba(168, 130, 60, 0.28);
+}
+
+.cit-lord {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cit-lord-sigil {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  font-family: var(--serif);
+  font-size: 20px;
+  color: #2b1d10;
+  background: radial-gradient(circle at 30% 25%, #e8cf9a, #a8823c 70%, #6a4a1e);
+  border: 1px solid rgba(82, 55, 20, 0.8);
+  border-radius: 50%;
+  box-shadow: inset 0 1px 0 rgba(255, 245, 220, 0.6);
+}
+
+.cit-lord-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.cit-lord-name {
+  font-family: var(--serif);
+  font-size: clamp(14px, 1.8vw, 17px);
+  letter-spacing: 0.01em;
+}
+
+.cit-lord-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: clamp(11px, 1.3vw, 12.5px);
+  color: rgba(231, 214, 176, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cit-res {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1 1 240px;
+  justify-content: center;
+}
+
+.cit-res-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(24, 18, 12, 0.82);
+  border: 1px solid rgba(168, 130, 60, 0.4);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.5);
+}
+
+.cit-res-glyph {
+  color: var(--bronze-light);
+  font-size: 13px;
+}
+
+.cit-res-amount {
+  font-family: var(--sans);
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(12px, 1.5vw, 14px);
+  color: var(--vellum);
+}
+
+.cit-res-chip.power .cit-res-glyph {
+  color: #e08b6a;
+}
+
+.cit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.cit-btn {
+  padding: 8px 14px;
+  cursor: pointer;
+  font-family: var(--serif);
+  font-size: clamp(12px, 1.5vw, 14px);
+  color: #2b1d10;
+  background: linear-gradient(180deg, #e6d3a8 0%, #cbb07c 100%);
+  border: 1px solid rgba(82, 55, 20, 0.7);
+  box-shadow: 0 1px 0 rgba(255, 250, 232, 0.5) inset, 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+.cit-btn:hover {
+  background: linear-gradient(180deg, #f0e0b8 0%, #d3ba88 100%);
+}
+
+.cit-btn:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.cit-btn.seal {
+  color: var(--vellum);
+  background: linear-gradient(180deg, #8c2a18 0%, #5e1a0e 100%);
+  border-color: rgba(20, 8, 4, 0.8);
+}
+
+.cit-btn.march {
+  color: #2b1d10;
+  background: linear-gradient(180deg, #d9b96a 0%, #a8823c 100%);
+}
+
+/* ---------------- dock */
+.cit-dock {
+  position: absolute;
+  left: clamp(8px, 1.6vw, 20px);
+  top: 50%;
+  transform: translateY(-46%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  pointer-events: auto;
+}
+
+.cit-dock-btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 132px;
+  padding: 9px 12px;
+  cursor: pointer;
+  text-align: left;
+  color: var(--vellum);
+  background: linear-gradient(180deg, rgba(26, 20, 14, 0.92) 0%, rgba(14, 10, 8, 0.94) 100%);
+  border: 1px solid rgba(168, 130, 60, 0.34);
+  border-left: 3px solid rgba(168, 130, 60, 0.7);
+}
+
+.cit-dock-btn:hover {
+  border-left-color: var(--bronze-light);
+  background: linear-gradient(180deg, rgba(46, 32, 20, 0.94) 0%, rgba(20, 14, 10, 0.96) 100%);
+}
+
+.cit-dock-btn.alert::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #e0bc7c;
+  box-shadow: 0 0 8px rgba(224, 188, 124, 0.9);
+}
+
+.cit-dock-label {
+  font-family: var(--serif);
+  font-size: clamp(13px, 1.6vw, 15px);
+}
+
+.cit-dock-note {
+  font-size: 10.5px;
+  color: rgba(231, 214, 176, 0.5);
+}
+
+/* ---------------- the works */
+.cit-site {
+  position: absolute;
+  right: clamp(8px, 1.6vw, 20px);
+  bottom: clamp(10px, 2vw, 24px);
+  width: min(330px, calc(100vw - 24px));
+  padding: 14px 16px;
+  pointer-events: auto;
+  color: var(--ink);
+  background:
+    radial-gradient(150% 120% at 50% 0%, rgba(255, 250, 232, 0.6) 0%, rgba(255, 250, 232, 0) 55%),
+    linear-gradient(176deg, #eddfbc 0%, #ddc79b 52%, #c2a674 100%);
+  border: 1px solid rgba(82, 55, 20, 0.6);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.cit-site.hidden {
+  display: none;
+}
+
+.cit-site-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cit-site-head h3 {
+  font-family: var(--serif);
+  font-size: clamp(15px, 1.9vw, 18px);
+}
+
+.cit-site-level {
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.cit-site-note {
+  margin: 6px 0 8px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
+.cit-pips {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.cit-pip {
+  width: 100%;
+  height: 5px;
+  background: rgba(82, 55, 20, 0.22);
+  border: 1px solid rgba(82, 55, 20, 0.35);
+}
+
+.cit-pip.on {
+  background: linear-gradient(180deg, #c8963c, #8a5f1e);
+}
+
+.cit-site-effect {
+  font-family: var(--serif);
+  font-size: 13px;
+  color: #5a3a14;
+}
+
+.cit-site-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.cit-cost {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+}
+
+.cit-stamp {
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  color: var(--wax);
+}
+
+.cit-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12px;
+  color: rgba(231, 214, 176, 0.5);
+  pointer-events: none;
+  text-align: center;
+  max-width: 90vw;
+}
+
+/* ---------------- sheets */
+.cit-sheet {
+  position: absolute;
+  inset: 0;
+  z-index: 34;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(8px, 2vw, 26px);
+  pointer-events: auto;
+  background: rgba(6, 5, 4, 0.72);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.cit-sheet.hidden {
+  display: none;
+}
+
+.cit-sheet-card {
+  width: min(880px, 100%);
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: clamp(14px, 2.2vw, 26px);
+  color: var(--vellum);
+  background: linear-gradient(178deg, rgba(28, 21, 15, 0.98) 0%, rgba(15, 11, 9, 0.99) 100%);
+  border: 1px solid rgba(168, 130, 60, 0.5);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.6), inset 0 0 60px rgba(0, 0, 0, 0.5);
+}
+
+.cit-sheet-card h2 {
+  font-family: var(--serif);
+  font-size: clamp(18px, 2.6vw, 25px);
+}
+
+.cit-sheet-note {
+  margin: 4px 0 12px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 13px;
+  color: rgba(231, 214, 176, 0.62);
+}
+
+.cit-sheet-body {
+  min-height: 120px;
+}
+
+.cit-sheet-foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.cit-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(82, 55, 20, 0.7);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.5);
+  cursor: crosshair;
+}
+
+.cit-chart-ledger {
+  margin-top: 10px;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 12.5px;
+  color: rgba(231, 214, 176, 0.62);
+}
+
+@media (max-width: 760px) {
+  .cit-dock {
+    top: auto;
+    bottom: 8px;
+    left: 8px;
+    right: 8px;
+    transform: none;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 5px;
+  }
+
+  .cit-dock-btn {
+    min-width: 96px;
+    padding: 7px 9px;
+  }
+
+  .cit-dock-note {
+    display: none;
+  }
+
+  .cit-site {
+    bottom: 84px;
+    left: 8px;
+    right: 8px;
+    width: auto;
+  }
+
+  .cit-hint {
+    display: none;
+  }
+
+  .cit-top {
+    gap: 8px;
+  }
+
+  .cit-res {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+}
