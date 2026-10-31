@@ -175,6 +175,7 @@ export class Citadel {
 
   enter() {
     this.build();
+    if (this.active) { this.refresh(); return; }
     this.active = true;
     this.scene3.add(this.city.group);
     this.city.sync(progression.get().buildings);
@@ -221,10 +222,13 @@ export class Citadel {
   }
 
   _gather() {
-    // the collect button carries its own badge, so the top bar never lies
+    // the collect button carries its own badge, so the top bar never lies —
+    // and it only touches the DOM when the number has actually moved
     if (!this.collectBtn) return;
     const { resources } = pendingProduction(progression.get());
     const total = Object.values(resources).reduce((a, b) => a + b, 0);
+    if (total === this._gatheredTotal) return;
+    this._gatheredTotal = total;
     this.collectBtn.textContent = total > 0 ? `Empty the works · ${total}` : 'The works are empty';
     this.collectBtn.disabled = total <= 0;
   }
@@ -344,7 +348,7 @@ export class Citadel {
   openDock(id) {
     if (id === 'citadel') {
       this.closeSheet();
-      this.city.camera.dist = 64;
+      this.city.camera.dist = 78;
       return;
     }
     this.sheetId = id;

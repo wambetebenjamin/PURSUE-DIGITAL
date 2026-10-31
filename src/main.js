@@ -132,7 +132,7 @@ startButton.addEventListener('click', () => {
   startScreen.classList.add('hidden');
   audio.init();
   audio.resume();
-  enterCitadel();
+  enterCitadel(); // a no-op if the city is already standing
   shell.begin();
 });
 
@@ -202,6 +202,10 @@ window.addEventListener('keydown', (e) => {
 });
 
 engine.start();
+
+// the city is already standing behind the title card: the game announces what
+// it is before the first click
+enterCitadel();
 
 // one warm-up frame so shaders compile before we drop the loading veil
 requestAnimationFrame(() => {

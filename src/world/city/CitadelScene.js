@@ -408,7 +408,7 @@ export class CitadelScene {
     this._buildScatter();
     this._buildPeople();
 
-    this.camera = { yaw: 0, pitch: 0.86, dist: 64, target: new THREE.Vector2(0, 2) };
+    this.camera = { yaw: 0, pitch: 0.8, dist: 78, target: new THREE.Vector2(0, 3) };
   }
 
   /* ------------------------------------------------------------- ground */
