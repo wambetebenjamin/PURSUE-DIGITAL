@@ -1,7 +1,495 @@
-# PURSUE-DIGITAL
+# PURSUE — 1 Samuel 30
 
-Reference build only:
+A cinematic **3D action-adventure web game** for desktop browsers, retelling the
+pursuit of the Amalekites from **1 Samuel 30–31**. Built with **Three.js + Vite** (pure WebGL,
+no game engine runtime): detailed procedural characters with sculpted anatomy, painted
+canvas surface textures, wind-swept fields, fully synthesized audio, and themed narrative
+cards — all generated at runtime, zero asset downloads. Deployable to **Vercel** as a static site.
 
-**https://github.com/wambetebenjamin/PURSUE-DIGITAL/releases/tag/game_apk**
+> Ziklag is burning. The families are taken. Two hundred men are too exhausted to cross the
+> brook — you press on with four hundred. Find the Egyptian servant. Descend upon the camp.
+> Divide the spoil. Send portions to Judah. **Recover all.**
 
-`LandofEmpires-0.1.136.apks` — 427 MB split-APK bundle.
+---
+
+## Quick start (local)
+
+```bash
+npm install
+npm run dev        # → http://localhost:5173
+```
+
+Production build & local preview:
+
+```bash
+npm run build      # emits static site into dist/
+npm run preview    # serves dist/ at http://localhost:4173
+```
+
+Headless logic test (walks the entire seven-phase state machine in Node — rigs,
+textures, and cards included):
+
+```bash
+npm run smoke
+```
+
+---
+
+## Deploy to Vercel
+
+The project is a standard Vite static build — Vercel auto-detects it:
+
+1. Push this repository to GitHub.
+2. On [vercel.com](https://vercel.com) → **Add New Project** → import the repo.
+3. Vercel presets: **Framework = Vite**, **Build = `npm run build`**, **Output = `dist`** (auto-detected).
+4. **Deploy** — the game is playable at `https://<project>.vercel.app` in any desktop browser.
+
+Or from the CLI:
+
+```bash
+npm i -g vercel
+vercel            # follow the prompts; defaults are correct
+vercel --prod     # production deployment
+```
+
+No server, database, or environment variables are required. Everything is client-side.
+
+---
+
+## Controls
+
+| Input | Action |
+| --- | --- |
+| **WASD / Arrow keys** | Move (camera-relative) |
+| **Mouse** | Orbit the third-person camera (click canvas to capture the pointer) |
+| **Shift** | Run — drains the stamina bar (15 units/sec) |
+| **C / Ctrl** | Sneak low — half speed, half silhouette, guards see you at half range |
+| **Mouse wheel** | Camera distance (3.5 – 15 units) |
+| **E / Space** | Interact, pick up, advance dialogue |
+| **Esc** | Pause / release the mouse pointer |
+| **M** | Map of Judah (full chart of the march) |
+| **P** | Clean frame — letterbox and hide the HUD for a still shot |
+| **Enter** | Begin the pursuit from the title card |
+
+### The look
+
+> *Pass 11 replaced the last of the P7 "Miami" palette — the sky stops — with a
+> physically motivated atmosphere per phase. The history is kept below because
+> the grade architecture (bloom → grade → output) is unchanged.*
+
+The P7 graphics were graded to 1986 Miami; passes 8–11 pushed the same
+machinery toward photoreal biblical realism:
+
+- **Neutral tone mapping** (Khronos PBR Neutral) so nothing clips to white when the noon sun lands on limestone
+- **Analytic skies** — Rayleigh + Mie scattering, a limb-darkened solar disc, cirrus lit from below, moon and star field after dark
+- **Seven atmospheres**, one per phase: smoke-choked golden hour, bleached noon, warm mid-afternoon, moonlit night, sunset at the brook, pale Hebron afternoon, overcast Gilboa
+- **Photographic grade** — split-toned shade and light, a filmic S-curve, per-phase dust and exposure, near-neutral saturation
+- **Layered horizons** — two pre-hazed ridge lines and a haze plain so the ground meets the sky instead of ending in fog
+
+## The Vice City interface
+
+> *Pass 8 replaced this layer with the diegetic interface described under “The
+> cinematic overhaul”: the radar is now a sheepskin scroll, the stars are wax
+> seals, and the pause screen is a vellum codex. The interaction contracts
+> (radar zoom, district banners, timer, pursuit) are unchanged.*
+
+The game plays with the interface of a classic open-world epic, rebuilt in our
+own procedural style after studying the reversed GTA III / Vice City engine
+([daynz/GTAviceCity](https://github.com/daynz/GTAviceCity)) — design patterns
+only, no copyrighted assets:
+
+- A circular **radar** bottom-left: rotating map, mission blip, north tick,
+  speed-scaled zoom (walk close, sprint wide)
+- **District banners** as you enter each phase ("Ziklag — a town in the Negev")
+- A **mission timer** and **pursuit stars** — the raiders of Amalek flare when
+  they spot you
+- **Esc** pauses into the march menu; **M** charts the **Map of Judah** with
+  all seven districts and your objective
+- A "**MISSION PASSED**" flourish when the story completes
+
+## The muster and the field
+
+Pass 15 finishes the strategy loop the reference game is built on, in our own
+register: 1 Samuel 30, not a city of farms.
+
+| The reference does | PURSUE does | Where |
+| --- | --- | --- |
+| Troops raised in a barracks, tiers gated by its level | Five companies mustered by the Barracks — the Iron Spears, the Shield Wall, the Bowmen, the Slingers, the Ranging Scouts | `src/core/muster.js` |
+| Front line / back line formations | Spears and shields forward, bows and slings behind; the order of battle is read by the fight itself | `orderOfBattle()` |
+| A field stage that fights itself | The skirmish engine: real-time lines, waves, mitigation, casualties | `src/core/skirmish.js` |
+| A dungeon stage with three heroes and a skill gauge | The mighty men stand with the band; their skills charge and fire by hand | `SKILLS`, `SkirmishBoard` |
+| Wounded recovered in a hospital | Seven in ten of the fallen are wounded, and are tended for provisions | `muster.healAll()` |
+| Idle production from city buildings | The Works: threshing floor, quarry, smelter — eight hours at most, emptied at will | `progression.collect()` |
+
+Six skirmishes run from the brook at Besor to the slope of Gilboa; each is
+priced in muster strength, pays in the resources the settlement needs, and is
+remembered in the ledger. The band fights on its own; the player's hand is on
+the heroes — David strengthens the line, Abishai rallies it, Eleazar makes it
+stand, Shammah and Benaiah break it open, Ittai holds the ford.
+
+Nothing here is a mock: the smoke suite fights every stage to its end with no
+renderer, and asserts the arithmetic — the wounded, the wages, the eight-hour
+ceiling, and that ten men do not take the slope of Gilboa.
+
+## The stronghold language
+
+Pass 14 gives the world the environment grammar of the strategy reference —
+monumental stone — built from primitives with our own materials
+(`src/world/props/MedievalKit.js`). The grammar is public architectural
+vocabulary, not its art: ashlar courses, buttresses, arrow slits, crenellations,
+drum towers, a gatehouse that is the strongest thing on screen, banners, braziers
+and the rubble of what used to stand.
+
+| Piece | Where it stands now |
+| --- | --- |
+| Ruined curtain wall (seeded gaps, ragged merlons) | Ziklag — four runs, the town the Amalekites burned |
+| Drum towers (crenellated or conical slate) | Ziklag's two survivors, Hebron's pair at the curtain's ends |
+| Gatehouse: segmental arch, corbels, raised portcullis | Hebron, intact and lit; Ziklag's, broken open |
+| Palisade of sharpened stakes | the Amalekite camp's four runs, and Gilboa's rampart |
+| Banners, braziers, siege ladders, stone steps, rubble | the gate approach, the ridge, the camp gaps |
+
+Every piece bakes to one mesh per material, so a thirty-metre curtain wall costs
+a handful of draw calls — and each one registers colliders, so the stone stops
+the camera and the player rather than being scenery.
+
+## The environments
+
+Pass 11 is an environment pass: the ground, the air and the light of the seven
+phases. Nothing is painted any more — every sky is solved from the sun's real
+elevation and the turbidity of the air above that place.
+
+| Phase | Hour | Sky | Ground |
+| --- | --- | --- | --- |
+| Ziklag | late afternoon, sun 16° | smoke-loaded air (turbidity 9.5), heavy horizon haze | ash and char over pale loess, soot scars, ember beds |
+| Desert march | white noon, sun 68° | high Rayleigh blue over a bleached horizon, violent glare | pale Negev sand and gravel, silty brook water |
+| Egyptian servant | mid-afternoon | warm, clear, a thin cirrus deck | dry wheat and field green under sand |
+| Amalekite camp | night | stars, milky band, silver moon, no disc | trodden dark earth, firelight pockets |
+| Besor at dusk | sunset, sun 6° | 10.5 turbidity, the whole western sky lit | warm sand, silt banks, long shadows |
+| Gate of Hebron | afternoon | pale, clean, high cloud | limestone flagstone, pale stone dust |
+| Gilboa | overcast | 92 % cloud deck, no sun disc, flat grey light | cold basalt, wet gravel |
+
+What is behind the look, in `src/world/`:
+
+- **`atmospheres.js`** — one preset per phase: the sun's elevation and azimuth,
+  the colour temperature of its light, turbidity (aerosols: smoke, dust,
+  sea haze), zenith and horizon radiance, moon and star levels, fog colour and
+  density, and which grade to hand the frame to. Add a phase by adding a preset.
+- **`effects/SkyDome.js`** — a single-draw-call analytic sky. Rayleigh and Mie
+  lobes decide the gradient and the glow around the sun; a horizon haze band
+  physically joins sky to ground; a limb-darkened disc, a two-scale cirrus deck
+  lit from underneath, a moon, and a hash-based star field with a faint milky
+  band carry the rest. The dome rides with the player and never clips.
+- **`effects/LightingRig.js`** — derives the hemisphere fill and the shadow-
+  casting key from the same preset, so the visible sun and the light that casts
+  the shadows are the same sun. Shadow bias tightens as the sun rises.
+- **`effects/Horizon.js`** — a 560 m haze plain under every zone plus two
+  ridge rings (300 m and 385 m) whose silhouettes are seeded noise and whose
+  vertex colours are pre-mixed with the phase's haze. Distance is drawn, not
+  fogged.
+- **`core/PostFX.js`** — the grade chain rebuilt as cinematography: split toning
+  between the colour of the shade and the colour of the light, a filmic S-curve,
+  a per-phase suspended-particulate veil, and saturation between 0.91 and 1.07
+  instead of the old 1.5.
+
+## The cinematic overhaul
+
+Pass 8 replaced the stylised look end to end: **anatomical, asymmetric
+characters** with subsurface-skinned faces, strand-card hair and beards and
+physically based gear; **lit environments** with limestone plinths, soot and
+ember beds, collapsing timbers, acacia groves, gravel micro-debris, wet stones
+and a flowing ripple-shaded brook; **atmosphere** with volumetric smoke, dust,
+god rays, heat haze, camera-motion blur, depth of field and handheld camera;
+and a **fully diegetic interface** — vellum charge strip, clay oil-lamp
+vitality, stone-and-wine breath gauge, bronze astrolabe, sheepskin scroll map,
+clay tablet clock, wax pursuit seals, a vellum codex pause screen and a
+satchel of procedurally rendered goods.
+
+The whole thing is still procedural and real-time: no image assets, no
+downloaded models, one static build. See `docs/PRODUCTION_BIBLE.md` §9 for the
+full material, geometry and shader notes.
+
+## The third-person grammar
+
+Two external references shaped pass 9, both used as design sources rather than
+asset sources:
+
+- **[conradosaud/ThirdPersonPack](https://github.com/conradosaud/ThirdPersonPack)**
+  (a Unity third-person sample) gave us the controller *grammar*: crouch as a
+  toggle with halved velocity, an animator that resolves `run / sprint / crouch
+  / air` parameters into blended locomotion, additive sprint, wheel zoom
+  clamped to the rig's limits, and a camera that probes for obstruction. Our
+  port lives in `src/player/Locomotion.js` (a state machine driven by published
+  parameters), `ThirdPersonCamera._clearDistance()` and `Player.js`. The C#
+  scripts, `.anim` clips and the pack's licensed character model are **not**
+  used — the rig would not survive the port and the model is not ours.
+- **[Fantasy RPG Icons](https://www.freegameassets.com/fantasy-rpg-icons)**
+  (2044 icons) gave us the inventory *system*: an eight-slot equipment
+  taxonomy, category grouping, rarity carried by the frame, and one shared art
+  grammar. All 18 satchel icons are painted procedurally in `src/ui/icons.js`;
+  no PNG from that pack is redistributed. Each item accepts a `file` property,
+  so a licensed pack can be dropped in later without layout changes.
+
+Crouch also changed the stealth design: in the Amalekite camp a crouched player
+is spotted at 52 % of the guard's range and only inside the cone.
+
+## The campaign — the War Table
+
+A finished run used to leave nothing behind. Pass 13 adds the long arc, drawn
+from the structure of the mobile strategy reference
+([Land of Empires: Immortal](https://apps.apple.com/fr/app/land-of-empires-immortal/id1523256630))
+and rebuilt entirely on 1 Samuel 30 — see `docs/REFERENCE_TEARDOWN.md` for what
+was ported and what was refused.
+
+Four leaves, reachable from any pause page (and, on a phone, from the new
+**codex nav** along the top of the codex):
+
+| Leaf | What it holds |
+| --- | --- |
+| **The Charge** | seven tasks, one per phase, each with its verse and reward; claim when done |
+| **The Band** | six of David's mighty men (2 Sam 23) — blade, spear and bow; drill them with bronze; locked men join at a star price |
+| **Ziklag** | the town rebuilt: hall, barracks, cistern, wall — five levels each, each level a real modifier |
+| **The Campaign** | the seven phases and the stars remembered in each (swift, silent, unseen) |
+
+A phase is a **stage**: finish it in under 150 s for *swift*, without a single
+detection for *silent*, and crouched for 12 s or more for *unseen*. Three stars
+pays 1.5× the phase's resources — and the best rating is the one that is kept.
+
+Everything persists (`localStorage['pursue.progress.v1']`), so the second
+playthrough starts different from the first: a raised wall gives more lamp, a
+dry cistern gives less breath, a drilled band hits harder. Nothing is
+purchasable, nothing gates on time, and nothing is rolled at random.
+
+## The preferences leaf
+
+Pass 10 gave the codex a fourth page: **Settings**, reached from the pause menu.
+It is a written page rather than a system dialog — three incised grooves with
+bronze hilts for the sliders, and pressed wax seals that fill crimson when set.
+
+| Leaf | Range | What it changes |
+| --- | --- | --- |
+| Look sensitivity | 40 – 200 % | `ThirdPersonCamera.sensitivity`, multiplied into the base look rate |
+| Camera distance | 3.5 – 15 m | the rig's resting distance (the wheel still overrides it in play) |
+| Sound volume | silent – 100 % | the master gain of the procedural audio graph |
+| Invert vertical look | seal | flips the pitch axis |
+| Handheld camera motion | seal | the organic sway and trauma shake amplitude |
+| God rays through the smoke | seal | the screen-space ray pass (also the sun's shadow intensity) |
+| Depth of field (desktop) | seal | the bokeh pass — off by default on phones |
+| Film grain | seal | grain and vignette |
+| Ambient sound | seal | mutes every layer without losing the stored volume |
+| Clean frame on P | seal | whether the P key is bound to cinematic mode |
+
+Everything writes through one store, `src/core/settings.js`
+(`settings.get / set / onChange / reset`), which persists to
+`localStorage['pursue.settings.v1']` and degrades to in-memory defaults when
+storage is blocked (private mode, `file://`). The panel is built by
+`src/ui/SettingsPanel.js`; main.js applies each change live, so nothing needs a
+reload and no leaf is a dead toggle.
+
+Low vitality rides the same idea as the letterbox: below ~35 % health the frame
+darkens at the edges (`#vitality-veil`) and begins to pulse, then recovers as
+the lamp is fed. Cinematic mode (`P`) letterboxes the frame to 7.5 vh bars and
+drops the HUD, radar, prompts and touch controls for a clean still.
+
+## Playing on a phone — and installing it like an app
+
+The build is an installable app, not just a page: open the Vercel link on a
+phone and the browser offers **Install** / **Add to Home Screen**. Installed, it
+launches fullscreen, locks landscape, keeps the screen awake while David is
+marching, and runs with **no network at all** after the first visit.
+
+| Piece | File | What it does |
+| --- | --- | --- |
+| Manifest | emitted by `vite.config.js` (`pursue-pwa`) | name, icons, `display: fullscreen`, `orientation: landscape`, theme colour — written at build time with the real hashed assets |
+| Service worker | `public/sw.js` + build injection | precaches every emitted file; navigations are network-first (a new deploy is picked up), assets cache-first (instant, offline) |
+| Icons | `scripts/make-icons.mjs` → `public/icons/` | 192, 512, maskable 512 and a 180 iOS icon, drawn procedurally in Node (sunset, ridgeline, wheat) — no image assets in the repo |
+| Install shell | `src/core/install.js` | `beforeinstallprompt` captured into a vellum slip, iOS "Share ▸ Add to Home Screen" hint, standalone class, landscape lock, wake lock tied to the live march |
+| Adaptive resolution | `src/core/Engine.js` | watches real frame time and steps render resolution down on weak GPUs (never the content), two slow windows at a time |
+| Build gate | `scripts/verify-build.mjs` | `npm run build` fails unless the manifest's icons, every precached file and every URL work from a sub-path |
+
+On a phone: **left half of the screen** is the movement joystick, **right side**
+drags the camera, and the buttons are *Use*, *Run*, *Low* (crouch) and *Map*.
+Portrait shows a rotate hint; the game is authored for landscape.
+
+### Playing on a phone (controls detail)
+
+The game detects touch devices and adapts automatically:
+
+- **Left thumb** — a dynamic virtual joystick appears where you touch to move (analog speed)
+- **Right thumb** — drag anywhere else to look around
+- **Run / Use / Map** — on-screen buttons; *Use* talks to people and advances dialogue
+- Portrait play widens the camera field of view and shows a gentle "turn your phone" hint
+- The desktop prompt "Press E" reads "Tap Use"
+- A lighter performance profile kicks in (pixel ratio capped at 1.3, 1024² shadows, 45% grass/particle/creature density, no MSAA) so mid-range phones stay smooth
+- Safe-area insets keep the HUD clear of notches; the layout folds down to small screens and short landscape
+
+---
+
+## The seven phases (finite state machine)
+
+Mapped 1:1 to the production master-prompt pipeline — see
+[`docs/PRODUCTION_BIBLE.md`](docs/PRODUCTION_BIBLE.md) for the full
+lighting / PBR / composition translation.
+
+| State | Phase | Core content |
+| --- | --- | --- |
+| `STATE_0_ZIKLAG` | **Ziklag in Ruins** (5600K golden hour) | Burnt mud-brick houses, black granary smoke column, ember particles, sand drifts at the gates, volumetric dust → debris trail to the **Desert Edge** waypoint |
+| `STATE_1_DESERT_MARCH` | **The Pursuit Through Besor** (6500K midday) | Sun-bleached dunes, chalky limestone walls (instanced), churning brown **Besor Brook** with foam & blinding speculars, the exhausted **200** collapsed on the left ledge, stamina-gated running |
+| `STATE_2_EGYPTIAN_SERVANT` | **The Egyptian Servant** | Seated NPC, proximity prompt *"Press E to give bread and water"*, 3-node dialogue tree, then a **3D directional arrow** unlocks toward the camp |
+| `STATE_3_AMALEKITE_RESCUE` | **Night Ambush at the Camp** (3200K starlight) | Tents, bonfires, intoxicated Amalekites on rugs, spilled wine (zero-roughness), piles of pillaged gold & silver, **vision cones** (distance + facing checks), central cage of captives → the 24-hour battle cards (1 Sam 30:17–19) |
+| `STATE_4_SPOILS_DIVISION` | **Spoils & Separation at Besor** (5200K) | Symmetric staging: the blood-stained 400 vs. the 200 with the baggage train, an instanced herd of recovered sheep/goats/cattle as the central barrier, David's outcrop → the statute of equal share (1 Sam 30:21–25) |
+| `STATE_5_DISTRIBUTION` | **Diplomatic Distribution** (4800K) | Hebron's limestone gate arch, elders in purple & madder receiving cedar tribute chests, unloading mule trains, gold & silver glare → gifts to Judah (1 Sam 30:26–31) |
+| `STATE_6_GILBOA_EPILOGUE` | **The Fall of Saul** (7000K overcast) | Steep basalt ridge, low mist & wind-whipped drizzle, the broken chariot wheel, dented bronze Saul with heavy crown, shattered shield-wall, Philistine ranks pressing up the slope → the epilogue and victory (1 Sam 31) |
+
+Persistent HUD (HTML/CSS above the canvas): **objective text · stamina meter · compass heading**,
+plus interaction prompts, alert banners, a sound toggle, and themed narrative cards with
+speaker chips and scripture citations.
+
+---
+
+## Characters, sound & themes
+
+- **Character rigs** (`src/entities/CharacterRig.js`) — 7.5-head anatomically-proportioned
+  figures with smooth-shaded sculpted skull/jaw/brow/cheek masses, eyes, noses, layered hair
+  and beards, tunics, belts, sashes, lamellar armor plates with rivets, and strapped sandals;
+  working poses (hand-mill grinding, jar-carrying) bring the villages to life. Geometry is merged
+  per material inside each animated pivot (~8 draw calls per figure). David wears leather
+  lamellar and carries a sheathed sword; Saul wears dented royal bronze under a crown.
+- **Surface textures** (`src/utils/textures.js`) — every ground, wall, cloth, wood and skin
+  material is painted at runtime on ≤512² canvases (mottled sand, grass blades, weave
+  crosshatch, wood grain, stone pocks, flesh pores).
+- **Living landscapes** — wind-swept instanced grass seas (10k+ blades per vista), wheat
+  with grain heads, wildflowers, reed beds, olive groves, layered mountain ridgelines that
+  fog into the sky, drifting cloud banks, circling bird flocks, butterflies over the meadows,
+  and grazing sheep that lift their heads. Ground meshes carry vertex-color terrain
+  variation (dry ridges, green hollows, damp patches) beneath painted surface textures.
+- **Real type** — EB Garamond and Inter (OFL, embedded at build time): literary serif for
+  scripture and titles, humanist sans for the interface. Natural sentence-case labels —
+  no letter-spaced template styling.
+- **Procedural audio** (`src/audio/AudioEngine.js`) — the Web Audio API synthesizes every
+  sound: layered ambience (wind, fire crackle, brook water, crickets, birdsong, rain),
+  tonal pads per phase, war drums under the battle cards, and SFX (stride-synced footsteps,
+  UI, alerts, victory chords). Mute with the ♪ button; nothing is downloaded.
+- **Themed cards** — each act's dialogue card carries its own palette (ember, sandstone,
+  night-fire, gold, marble, slate), an act badge, speaker chips, and scripture citations.
+- **Vice City grade** (`src/core/PostFX.js`) — a retro-Miami post chain: Unreal bloom,
+  split-toned shadows/highlights, saturation punch, edge chromatic aberration, vignette
+  and film grain, crossfading between per-phase moods (sunset · blaze · gold · neon-night ·
+  storm). Skies carry a hard sun disc with streaky sunset bands; the title screen is pure
+  80s — sun stripes, palm silhouettes, and a chrome-gradient logo under a pink/cyan HUD.
+
+---
+
+## File architecture
+
+```
+PURSUE-DIGITAL/
+├── index.html                  # canvas mount + full HTML UI overlay (HUD, modals, screens)
+├── package.json
+├── vite.config.js              # static build config (chunked vendor bundle)
+├── scripts/
+│   └── smoke.mjs               # headless Node test: boots the FSM and plays through all 7 phases
+└── src/
+    ├── main.js                 # bootstrap: engine + game + title/victory wiring
+    ├── constants.js            # FSM names, tunables (speed/stamina/vision), narrative copy
+    ├── core/
+    │   ├── Engine.js           # WebGL renderer, clock, resize, the single RAF loop
+    │   ├── PostFX.js           # Vice City post chain: bloom + grade presets
+    │   ├── Game.js             # orchestrator: FSM, phase logic, per-frame update order
+    │   ├── StateMachine.js     # generic FSM (enter/update/exit)
+    │   ├── Input.js            # keyboard + Pointer-Lock mouse, edge-triggered actions
+    │   ├── settings.js         # persisted preferences (localStorage) + change listeners
+    │   ├── progression.js      # the campaign: resources, town, band, stars, charges
+    │   ├── install.js          # install prompt, wake lock, standalone shell
+    │   └── EventBus.js         # decoupled pub/sub
+    ├── audio/
+    │   └── AudioEngine.js      # procedural Web Audio: ambience, pads, footsteps, SFX
+    ├── camera/
+    │   └── ThirdPersonCamera.js# orbit camera: mouse look, smoothing, compass bearing
+    ├── player/
+    │   ├── Player.js           # David rig (primitives), movement, collisions, gait animation
+    │   ├── Locomotion.js       # animator-style state machine (run/sprint/crouch/air + stride)
+    │   └── Stamina.js          # 0–100 run stamina, forced-walk on exhaustion
+    ├── entities/
+    │   ├── CharacterRig.js     # detailed merged-geometry humanoid builder
+    │   ├── EgyptianServant.js  # seated NPC + idle animation
+    │   └── DirectionalArrow.js # 3D chevron pointing at the active target zone
+    ├── world/
+    │   ├── World.js            # zone manager: visibility, fog/sky per phase, sun follow
+    │   ├── atmospheres.js      # the seven phase atmospheres — sun, sky, haze, fog, grade
+    │   ├── zones/
+    │   │   ├── ZiklagZone.js   # PHASE 1 environment + waypoint
+    │   │   ├── DesertZone.js   # PHASE 2 terrain (dunes/wadi/brook) + march beacon
+    │   │   ├── EgyptianZone.js # PHASE 3 plain + servant + canyon mouth
+    │   │   ├── CampZone.js     # PHASE 4 tents/fires/guards + vision-cone detection
+    │   │   ├── SpoilsZone.js   # PHASE 5 factions + instanced herd + baggage train
+    │   │   ├── GateZone.js     # PHASE 6 city gate, elders, tribute, mule train
+    │   │   └── GilboaZone.js   # PHASE 7 ridge, Saul, chariot wreck, philistines
+    │   ├── props/
+    │   │   ├── MedievalKit.js  # stronghold kit: curtain walls, towers, gatehouse,
+    │   ├── core/
+    │   │   ├── muster.js      # the five companies, tiers, the wounded
+    │   │   └── skirmish.js    # the field fight: lines, waves, hero skills
+    │   │   │                   # palisades, banners, braziers, rubble, ladders
+    │   │   └── PropFactory.js  # houses, tents, fires, cage, rocks, beacons, humanoids,
+    │   │                       # herds (instanced), wagons, chests, mules, camels, gate
+    │   └── effects/
+    │       ├── Particles.js    # pooled soft-disc particle emitters (smoke, embers, dust, sparks)
+    │       ├── SkyDome.js      # analytic Rayleigh/Mie sky: sun, moon, stars, cirrus
+    │       ├── LightingRig.js  # sky + hemisphere fill + shadow-casting sun, from a preset
+    │       └── Horizon.js      # haze plain + two pre-hazed ridge rings (aerial perspective)
+    ├── ui/
+    │   ├── HUD.js              # objective, stamina bar, compass, prompts, alerts
+    │   ├── PauseMenu.js        # codex pages + the nav: menu / chart / satchel / war / settings
+    │   ├── WarTable.js         # the campaign page: charge, band, Ziklag, stars
+    │   ├── SettingsPanel.js    # the preferences leaf (sliders, wax seals, reset)
+    │   ├── Inventory.js        # eight-slot satchel, rarity frames, detail pane, tally
+    │   ├── items.js            # the 18-item satchel data + scripture for each
+    │   ├── icons.js            # 18 procedural icon painters (no third-party PNGs)
+    │   ├── DialogueModal.js    # narrative cards + multi-step dialogue sequences
+    │   ├── VictoryScreen.js    # 1 Sam 30:18-19 overlay + Play Again
+    │   └── styles.css          # full responsive overlay styling
+    └── utils/
+        ├── math.js             # angle/damping helpers, seeded RNG, compass labels
+        ├── materials.js        # shared material & geometry cache (draw-call friendly)
+        ├── textures.js         # procedural canvas surfaces (skin, sand, grass, cloth…)
+        └── canvasText.js       # tiny canvas-texture label sprites (< 1024²)
+```
+
+---
+
+## Rendering & performance notes
+
+- **Procedural assets only** — no external models, textures, or audio downloads. The world
+  uses Lambert/Phong/Standard materials from a **shared material cache** (minimal state changes).
+- **Texture budget**: all textures are runtime-painted canvases (≤512²), far under the 1024² cap.
+- **Character budget**: figures merge to ~8 draw calls each (per-pivot, per-material);
+  fields, herds, and rocks are instanced (one draw call per system).
+- **Draw-call discipline**: rocks use `InstancedMesh` (one draw call per field); particle systems
+  are one `THREE.Points` call per emitter with a custom soft-disc shader (per-particle alpha,
+  zero textures).
+- **Phase culling**: only the active zone is visible. Lights inside hidden groups are skipped by
+  the renderer, so inactive phases cost zero GPU time.
+- **Shadows**: one PCF-soft shadow-casting sun per zone with a 1024² map and a follow-player
+  frustum (no giant static shadow maps).
+- **Pixel ratio capped at 1.75** and `dt` clamped to 50 ms for stable 60 FPS on laptops.
+- **Point lights** capped at 3 in the camp (bonfires) + 2 in Ziklag.
+
+Target: Chrome, Firefox, Edge, Safari — desktop only (keyboard + mouse required).
+
+---
+
+## Expansion seams
+
+- `StateMachine.add(name, …)` — drop in new phases without touching the loop (used for Phases 5–7).
+- `PropFactory` / zone builders return plain groups — swap primitives for glTF meshes later.
+- `EventBus` is wired for decoupled gameplay events (audio, analytics) if you grow the build.
+
+## Scripture references
+
+- Ziklag destroyed & the pursuit — 1 Samuel 30:1–6
+- The 200 at the Brook Besor — 1 Samuel 30:9–10, 21–25
+- The Egyptian servant — 1 Samuel 30:11–15
+- The 24-hour battle & full recovery — 1 Samuel 30:17–20
+- The spoil divided & the statute — 1 Samuel 30:21–25
+- Gifts to the elders of Judah — 1 Samuel 30:26–31
+- The fall of Saul on Gilboa — 1 Samuel 31:1–6

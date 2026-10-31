@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="description" content="PURSUE — a 3D action-adventure retelling of 1 Samuel 30. Play as David and recover everything." />
+    <meta name="theme-color" content="#1a1208" />
+    <meta property="og:title" content="PURSUE — 1 Samuel 30" />
+    <meta property="og:description" content="A cinematic retelling of 1 Samuel 30: pursue, and recover all." />
+    <link rel="icon" type="image/png" sizes="64x64" href="./icons/favicon-64.png" />
+
+    <!-- ============ installed-app shell (phone: Add to Home Screen) ============ -->
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="PURSUE" />
+    <meta name="application-name" content="PURSUE" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="color-scheme" content="dark" />
+    <title>PURSUE — 1 Samuel 30</title>
+  </head>
+  <body>
+    <!-- WebGL canvas is injected here by the engine -->
+    <div id="app"></div>
+
+    <!-- ===================== HTML/CSS UI OVERLAY ===================== -->
+    <div id="ui-root">
+      <!-- Sound toggle (procedural audio on/off) -->
+      <button id="audio-toggle" title="Toggle sound" aria-label="Toggle sound">♪</button>
+
+      <!-- Portrait-play hint (phones) -->
+      <div id="rotate-hint" class="hidden">Turn your phone sideways for the full view</div>
+
+      <!-- ============ DIEGETIC HUD: vellum, bronze, oil & wine ============ -->
+      <header id="hud">
+        <!-- vitality: a clay oil lamp; the flame sinks as David weakens -->
+        <div id="hud-vitals">
+          <div id="lamp-wrap" title="Vitality">
+            <svg id="lamp" viewBox="0 0 100 100" aria-hidden="true">
+              <defs>
+                <linearGradient id="bronze-lamp" x1="0" y1="0" x2="0.2" y2="1">
+                  <stop offset="0" stop-color="#e2be7c"/>
+                  <stop offset="0.3" stop-color="#b08a44"/>
+                  <stop offset="0.62" stop-color="#7a5624"/>
+                  <stop offset="1" stop-color="#3c2a12"/>
+                </linearGradient>
+                <linearGradient id="clay-lamp" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stop-color="#b8785a"/>
+                  <stop offset="0.6" stop-color="#8a4c34"/>
+                  <stop offset="1" stop-color="#4c2618"/>
+                </linearGradient>
+              </defs>
+              <!-- handle -->
+              <path d="M30 42 C 10 34, 8 66, 28 67" fill="none"
+                    stroke="url(#bronze-lamp)" stroke-width="6" stroke-linecap="round"/>
+              <!-- body of the lamp -->
+              <path d="M27 57 C 33 75, 76 77, 84 57 C 86 51, 82 47, 73 47 L 38 47 C 29 47, 25 51, 27 57 Z"
+                    fill="url(#clay-lamp)"/>
+              <!-- bronze rim + spout -->
+              <path d="M44 47 L 69 47 L 67 41 L 46 41 Z" fill="url(#bronze-lamp)"/>
+              <path d="M80 55 L 99 48 L 94 60 Z" fill="url(#bronze-lamp)"/>
+              <!-- incised wave band -->
+              <path d="M34 58 q 6 -4 12 0 t 12 0 t 12 0" fill="none"
+                    stroke="rgba(20,10,4,0.55)" stroke-width="1.6"/>
+              <!-- wick -->
+              <path d="M84 54 L 92 51" stroke="#2a1a0c" stroke-width="2.4" stroke-linecap="round"/>
+            </svg>
+            <div id="lamp-flame" aria-hidden="true"></div>
+            <span class="hud-label lamp-label">Oil</span>
+          </div>
+          <div id="hud-stamina">
+            <span class="hud-label">Breath</span>
+            <div id="stamina-track" aria-hidden="true">
+              <div id="stamina-fill"></div>
+              <span class="gauge-sheen"></span>
+            </div>
+            <div id="stance-chip" class="hidden">Low</div>
+          </div>
+        </div>
+
+        <!-- the charge: a torn vellum strip -->
+        <div id="hud-objective">
+          <span class="hud-label">The Charge</span>
+          <span id="objective-text">Reach the Desert Edge</span>
+        </div>
+
+        <!-- the charge, step by step: the task the campaign is on -->
+        <div id="hud-task" class="hidden">
+          <span class="hud-label">The Charge</span>
+          <span id="task-text"></span>
+          <span id="task-progress"></span>
+        </div>
+
+        <!-- heading: a hammered-bronze astrolabe -->
+        <div id="hud-compass">
+          <span class="hud-label">Heading</span>
+          <div id="compass-dial" aria-hidden="true">
+            <div id="compass-needle"></div>
+            <span id="compass-text">N 0°</span>
+          </div>
+        </div>
+
+        <!-- the hour on a clay tablet; the pursuit as branded seals -->
+        <div id="hud-right">
+          <div id="hud-timer-wrap">
+            <span class="hud-label">The Hour</span>
+            <span id="hud-timer">0:00</span>
+          </div>
+          <div id="pursuit" title="Amalekite pursuit">
+            <div id="pursuit-stars">
+              <span>&#10022;</span><span>&#10022;</span><span>&#10022;</span><span>&#10022;</span><span>&#10022;</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- District banner — the zone-name card of the march -->
+      <div id="zone-banner" class="hidden">
+        <span id="zone-name"></span>
+        <span id="zone-tag"></span>
+      </div>
+
+      <!-- The scroll chart, bottom-left: sheepskin, charcoal ink -->
+      <div id="radar-frame" aria-hidden="true">
+        <div id="radar-rollers"><span></span><span></span></div>
+        <div id="radar"></div>
+      </div>
+
+      <!-- Cinematic mode: letterbox bars, HUD hidden (press P) -->
+      <div id="letterbox" aria-hidden="true"><span class="bar top"></span><span class="bar bottom"></span></div>
+
+      <!-- Low-vitality veil: the edges of the frame darken and pulse -->
+      <div id="vitality-veil" aria-hidden="true"></div>
+
+      <!-- Interaction prompt (Press E ... ) -->
+      <div id="prompt" class="hidden"><span id="prompt-text"></span></div>
+
+      <!-- Transient alert (detections etc.) -->
+      <div id="alert-banner" class="hidden"><span id="alert-text"></span></div>
+
+      <!-- Narrative / dialogue modal -->
+      <div id="modal-root" class="hidden">
+        <div id="modal-card" class="theme-ziklag">
+          <span id="modal-phase"></span>
+          <h2 id="modal-title"></h2>
+          <p id="modal-speaker" class="hidden"></p>
+          <p id="modal-body"></p>
+          <cite id="modal-cite" class="hidden"></cite>
+          <div id="modal-buttons"></div>
+        </div>
+      </div>
+
+      <!-- Pointer-lock resume hint -->
+      <div id="resume-hint" class="hidden">Click to capture the mouse &nbsp;·&nbsp; ESC releases it</div>
+
+      <!-- Install invitation (phones): a wax-sealed slip, dismissible, never modal -->
+      <button id="install-pill" class="hidden" type="button">
+        <span class="install-mark" aria-hidden="true">✦</span>
+        <span id="install-text">Carry it in your pocket</span>
+      </button>
+
+      <!-- Touch controls (phones only — see ui/TouchControls.js) -->
+      <div id="touch-ui" aria-hidden="true">
+        <div id="joy-base"><div id="joy-knob"></div></div>
+        <div id="touch-buttons">
+          <button id="btn-run" class="touch-btn">Run</button>
+          <button id="btn-use" class="touch-btn">Use</button>
+          <button id="btn-crouch" class="touch-btn touch-btn-small">Low</button>
+          <button id="btn-map" class="touch-btn touch-btn-small">Map</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start / title screen -->
+    <div id="start-screen">
+      <div class="sun-disc"></div>
+      <div class="sun-stripes"></div>
+      <svg class="palm-silhouette palm-left" viewBox="0 0 240 320" aria-hidden="true">
+        <path fill="currentColor" d="M112 318 C 104 244 100 180 116 132 C 122 112 132 96 146 82 L 156 92 C 138 110 128 130 122 154 C 112 200 116 262 124 318 Z"/>
+        <path fill="currentColor" d="M148 80 C 118 50 78 36 38 40 C 76 28 124 36 152 66 Z"/>
+        <path fill="currentColor" d="M152 76 C 140 44 108 18 68 10 C 112 12 150 34 162 66 Z"/>
+        <path fill="currentColor" d="M156 74 C 162 42 184 16 220 8 C 192 22 170 46 164 76 Z"/>
+        <path fill="currentColor" d="M160 82 C 188 58 222 52 236 58 C 212 58 184 70 168 92 Z"/>
+        <path fill="currentColor" d="M150 88 C 126 78 92 82 68 96 C 98 86 130 88 154 100 Z"/>
+        <path fill="currentColor" d="M154 72 C 150 48 158 26 174 12 C 158 32 154 52 160 74 Z"/>
+      </svg>
+      <svg class="palm-silhouette palm-right" viewBox="0 0 240 320" aria-hidden="true">
+        <path fill="currentColor" d="M112 318 C 104 244 100 180 116 132 C 122 112 132 96 146 82 L 156 92 C 138 110 128 130 122 154 C 112 200 116 262 124 318 Z"/>
+        <path fill="currentColor" d="M148 80 C 118 50 78 36 38 40 C 76 28 124 36 152 66 Z"/>
+        <path fill="currentColor" d="M152 76 C 140 44 108 18 68 10 C 112 12 150 34 162 66 Z"/>
+        <path fill="currentColor" d="M156 74 C 162 42 184 16 220 8 C 192 22 170 46 164 76 Z"/>
+        <path fill="currentColor" d="M160 82 C 188 58 222 52 236 58 C 212 58 184 70 168 92 Z"/>
+        <path fill="currentColor" d="M150 88 C 126 78 92 82 68 96 C 98 86 130 88 154 100 Z"/>
+        <path fill="currentColor" d="M154 72 C 150 48 158 26 174 12 C 158 32 154 52 160 74 Z"/>
+      </svg>
+      <div class="start-card-wrap">
+      <div id="start-card">
+        <h1>PURSUE</h1>
+        <p class="subtitle">A retelling of 1 Samuel 30–31</p>
+        <p class="story">
+          Ziklag is ash. The families are gone, driven south into the wilderness.
+          Two hundred of your men are too spent to cross the brook — you go on with four hundred.
+          Find the one who knows the road. Fall upon the camp. Bring every soul home.
+          <em>Recover all.</em>
+        </p>
+        <div class="controls-grid controls-desktop">
+          <div><b>WASD / Arrows</b><span>Move</span></div>
+          <div><b>Mouse</b><span>Look around</span></div>
+          <div><b>Shift</b><span>Run (uses stamina)</span></div>
+          <div><b>C / Ctrl</b><span>Sneak low (halves your silhouette)</span></div>
+          <div><b>Wheel</b><span>Camera distance</span></div>
+          <div><b>E / Space</b><span>Interact &amp; advance</span></div>
+          <div><b>M</b><span>Map of Judah</span></div>
+          <div><b>Esc</b><span>Pause</span></div>
+        </div>
+        <div class="controls-grid controls-touch">
+          <div><b>Left thumb</b><span>Move</span></div>
+          <div><b>Right thumb</b><span>Look around</span></div>
+          <div><b>Run</b><span>Sprint (uses stamina)</span></div>
+          <div><b>Use</b><span>Interact &amp; advance</span></div>
+          <div><b>Low</b><span>Sneak (halves your silhouette)</span></div>
+          <div><b>Map</b><span>Chart of the march</span></div>
+        </div>
+        <button id="start-button" class="primary-button">Begin the Pursuit</button>
+      </div>
+      </div>
+    </div>
+
+    <!-- Victory overlay -->
+    <!-- Pause + Map of Judah (the GTA frontend MAPS page) -->
+    <div id="pause-screen" class="hidden">
+      <div id="pause-card">
+        <div id="pause-menu-panel">
+          <span class="page-mark">The March</span>
+          <h2>Paused</h2>
+          <p class="pause-sub">The wilderness waits for no one.</p>
+          <button id="pause-resume" class="primary-button">Resume the march</button>
+          <button id="pause-map" class="secondary-button">Map of Judah</button>
+          <button id="pause-satchel" class="secondary-button">The Satchel</button>
+          <button id="pause-war" class="secondary-button">The War Table</button>
+          <button id="pause-settings" class="secondary-button">Settings</button>
+          <button id="pause-restart" class="secondary-button danger">Begin again</button>
+        </div>
+        <div id="pause-map-panel" class="hidden">
+          <span class="page-mark">Chart</span>
+          <h2>Map of Judah</h2>
+          <canvas id="map-canvas"></canvas>
+          <button id="pause-resume-2" class="primary-button">Back to the march</button>
+        </div>
+        <div id="pause-settings-panel" class="hidden">
+          <span class="page-mark">Marginalia</span>
+          <h2>Settings</h2>
+          <p class="pause-sub">How the wilderness is shown and heard.</p>
+          <div id="settings-list"></div>
+          <button id="pause-resume-4" class="primary-button">Back to the march</button>
+        </div>
+
+        <div id="pause-war-panel" class="hidden">
+          <span class="page-mark">The Campaign</span>
+          <h2>The War Table</h2>
+          <p class="pause-sub">What is owed, who rides, and what has been rebuilt.</p>
+          <div id="war-table"></div>
+          <button id="pause-resume-5" class="primary-button">Back to the march</button>
+        </div>
+
+        <div id="pause-satchel-panel" class="hidden">
+          <span class="page-mark">Goods</span>
+          <h2>The Satchel</h2>
+          <p class="pause-sub">What the wilderness has given, and what it has taken.</p>
+          <div id="satchel-body">
+            <div id="satchel-grid"></div>
+            <div id="satchel-detail"></div>
+          </div>
+          <button id="pause-resume-3" class="primary-button">Back to the march</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- the field: a skirmish, fought on the war table's terms -->
+    <div id="skirmish-screen" class="hidden" aria-hidden="true"></div>
+
+    <div id="victory-screen" class="hidden">
+      <div id="victory-card">
+        <div id="mission-passed">MISSION PASSED</div>
+        <h1>Recovered All</h1>
+        <p class="verse">
+          David recovered all that the Amalekites had carried away, and rescued his two wives.
+          Nothing was missing — not one thing, small or great, sons or daughters, spoil, or
+          anything that had been taken. David recovered all.
+        </p>
+        <p class="citation">1 Samuel 30:18–19</p>
+        <hr class="verse-divider" />
+        <p class="verse epilogue">
+          To the elders of Judah he sent gifts from the spoil. And on the slopes of Gilboa,
+          Saul fell that same day — but David grew stronger, and Judah anointed him king in Hebron.
+        </p>
+        <p class="citation">1 Samuel 30:26–31 · 31:6 · 2 Samuel 2:4</p>
+        <button id="restart-button" class="primary-button">Play Again</button>
+      </div>
+    </div>
+
+    <!-- Loading indicator -->
+    <div id="loading"><div class="spinner"></div><span>Sounding the wilderness…</span></div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
