@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Build output (Vercel builds this on deploy)
+dist/
+
+# Logs & local tooling
+*.log
+.DS_Store
+.vercel
+.vite

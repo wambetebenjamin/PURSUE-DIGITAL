@@ -1,0 +1,43 @@
+{
+  "id": "./",
+  "name": "PURSUE — 1 Samuel 30",
+  "short_name": "PURSUE",
+  "description": "Pursue, and recover all. A cinematic retelling of 1 Samuel 30, played in the browser or installed like an app.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "display_override": [
+    "fullscreen",
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "landscape",
+  "background_color": "#0a0806",
+  "theme_color": "#1a1208",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
