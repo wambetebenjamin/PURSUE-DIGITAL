@@ -1,0 +1,386 @@
+/**
+ * DesertZone.js — PHASE 2: "The Pursuit & The Brook"
+ *
+ * Sun-bleached dunes, rocky valley walls (instanced), and the blue ribbon of
+ * the Brook Besor carved through a wadi. A beacon marks the arid field beyond.
+ * The brook position is exported so Game can fire the narrative trigger.
+ */
+import * as THREE from 'three';
+import { QUALITY } from '../../core/quality.js';
+import { Mat } from '../../utils/materials.js';
+import {
+  createRockField, createPalm, createDryBush, createBeacon, createRock, createHumanoid,
+  createReeds, createGrassField, createMountainRidge, createBirdFlock,
+  createButterflies, createGrazingSheep, createAcacia, createDesertScrub,
+  createPebbleField, createWetStones, createCrackedPatch,
+} from '../props/PropFactory.js';
+import { rippleBumpMap, smokeSpriteMap } from '../../utils/surfaces.js';
+import { ParticleEmitter } from '../effects/Particles.js';
+import { ATMOSPHERE } from '../atmospheres.js';
+import { createLightingRig, attachRig } from '../effects/LightingRig.js';
+import { createHorizon } from '../effects/Horizon.js';
+import { makeTextSprite } from '../../utils/canvasText.js';
+import { seededRandom } from '../../utils/math.js';
+import { applyTerrainColors } from '../../utils/terrain.js';
+
+export const DESERT = {
+  spawn: { x: 0, z: 112, yaw: 0 },
+  brookZ: 0,
+  brookTrigger: 7.5,
+  exit: { x: 0, z: -108 },
+  bounds: { minX: -52, maxX: 52, minZ: -118, maxZ: 120 },
+};
+
+/** Base rolling dunes (also used for player terrain-follow). */
+export function desertHeight(x, z) {
+  const base =
+    Math.sin(x * 0.045) * 1.8 +
+    Math.cos(z * 0.032) * 2.2 +
+    Math.sin((x + z) * 0.017) * 2.6;
+
+  // wadi carve for the brook: flatten toward banks, dig a channel at z=0
+  const wadi = Math.exp(-(z * z) / 300);
+  const bank = 1.15 + Math.sin(x * 0.02) * 0.3;
+  const channel = -2.45 * Math.exp(-(z * z) / 42);
+  return base * (1 - wadi) + (bank + channel) * wadi;
+}
+
+export function createDesertZone() {
+  const group = new THREE.Group();
+  group.name = 'ZONE_DESERT';
+  const colliders = [];
+  const updaters = [];
+
+  // ------------------------------------------------------------- sky
+  // white noon on the march — dust and glare
+  const atmo = ATMOSPHERE.desert;
+  const rig = createLightingRig(atmo, { shadowExtent: 46, shadowFar: 200 });
+  attachRig(group, rig);
+  const { sky, hemi, sun } = rig;
+  // layered ranges dissolve into this phase's haze — no fog wall at the edge
+  group.add(createHorizon(atmo));
+
+  // --------------------------------------------------------- terrain
+  const groundGeo = new THREE.PlaneGeometry(150, 300, 64, 110);
+  groundGeo.rotateX(-Math.PI / 2);
+  const pos = groundGeo.attributes.position;
+  for (let i = 0; i < pos.count; i++) {
+    const x = pos.getX(i);
+    const z = pos.getZ(i);
+    pos.setY(i, desertHeight(x, z));
+  }
+  groundGeo.computeVertexNormals();
+  applyTerrainColors(groundGeo, {
+    colorA: new THREE.Color(0xe9d5b0), colorB: new THREE.Color(0xc9a877),
+    colorC: new THREE.Color(0x9a8058), scale: 0.03, strength: 0.4, seed: 11,
+  });
+  const groundMat = Mat.sand().clone();
+  groundMat.vertexColors = true;
+  const ground = new THREE.Mesh(groundGeo, groundMat);
+  ground.receiveShadow = true;
+  group.add(ground);
+
+  // ---------------------------------------------------- Besor Brook
+  // The wadi in June: thick, silty water the colour of wet clay, carrying a
+  // blinding specular where the noon sun lands on it. Not turquoise.
+  const waterMat = Mat.water().clone();
+  waterMat.color.set(0x6b5a3c); // suspended sediment
+  waterMat.specular.set(0xfff4dc);
+  waterMat.shininess = 120;
+  waterMat.opacity = 0.94;
+  // flowing ripple field, scrolled continuously by the zone update
+  const ripple = rippleBumpMap([7, 2]);
+  waterMat.bumpMap = ripple;
+  waterMat.bumpScale = 0.55;
+  waterMat.combine = THREE.MultiplyOperation;
+  waterMat.reflectivity = 0.35;
+  waterMat.onBeforeCompile = (shader) => {
+    shader.uniforms.uTime = { value: 0 };
+    shader.vertexShader = `uniform float uTime;\n${shader.vertexShader}`.replace(
+      '#include <begin_vertex>',
+      `#include <begin_vertex>
+       transformed.y += sin(position.x * 0.55 + uTime * 1.4) * 0.06
+                      + cos(position.y * 0.4 + uTime * 1.1) * 0.05;`,
+    );
+    waterMat.userData.shader = shader;
+  };
+  const water = new THREE.Mesh(new THREE.PlaneGeometry(150, 15), waterMat);
+  water.rotation.x = -Math.PI / 2;
+  water.position.set(0, -0.32, 0);
+  water.receiveShadow = false;
+  group.add(water);
+
+  // a couple of dark stones in the stream for readability
+  for (let i = 0; i < 8; i++) {
+    const x = (seededRandom(i * 4.4) - 0.5) * 90;
+    const z = (seededRandom(i * 7.7) - 0.5) * 7;
+    const s = 0.5 + seededRandom(i * 2.2) * 1.1;
+    const stone = createRock(100 + i, true);
+    stone.position.set(x, -0.25, z);
+    stone.scale.setScalar(s);
+    group.add(stone);
+  }
+  // wet, glossy flints half-sunk in the shallows
+  const wet = createWetStones(46, 110, 5, (x, z) => desertHeight(x, z) - 0.34);
+  group.add(wet);
+  const wetBank = createWetStones(20, 90, 12, (x, z) => desertHeight(x, z) + 0.08);
+  wetBank.position.z = 7.5;
+  group.add(wetBank);
+
+  // ---------------------------------------------------- valley walls
+  // big instanced rock fields hug the playable corridor — dry, porous,
+  // crumbly limestone shale ("sharp jagged geometry and zero specularity")
+  const rocksL = createRockField(46, { minX: -88, maxX: -50, minZ: -135, maxZ: 135 }, 11);
+  const rocksR = createRockField(46, { minX: 50, maxX: 88, minZ: -135, maxZ: 135 }, 22);
+  rocksL.material = Mat.limestone();
+  rocksR.material = Mat.limestone();
+  group.add(rocksL, rocksR);
+
+  // walkable-area boulders (with colliders)
+  for (let i = 0; i < 12; i++) {
+    const x = (seededRandom(i * 3.1) - 0.5) * 62 * (seededRandom(i * 8.2) > 0.5 ? 1 : -1);
+    const z = 100 - i * 18 + (seededRandom(i * 5.5) - 0.5) * 10;
+    if (Math.abs(z) < 12) continue; // keep the brook ford open
+    const rock = createRock(200 + i);
+    const s = 0.8 + seededRandom(i * 6.6) * 1.4;
+    rock.scale.multiplyScalar(s);
+    rock.position.set(x, desertHeight(x, z), z);
+    group.add(rock);
+    colliders.push({ x, z, r: 1.1 * s });
+  }
+
+  // reed beds + green river-meadow grass along both banks
+  const reedsL = createReeds(700, { minX: -40, maxX: -8, minZ: -9, maxZ: 9 }, 61, desertHeight);
+  const reedsR = createReeds(700, { minX: 8, maxX: 40, minZ: -9, maxZ: 9 }, 62, desertHeight);
+  const bankGrass = createGrassField(2400, { minX: -46, maxX: 46, minZ: -16, maxZ: 16 }, 63,
+    desertHeight, { color: 0x8fa04c, height: 0.75, dryness: 0.3 });
+  group.add(reedsL, reedsR, bankGrass);
+  updaters.push((t) => {
+    reedsL.userData.update(t); reedsR.userData.update(t); bankGrass.userData.update(t);
+  });
+
+  // grazing sheep on the far bank + butterflies over the grass
+  [[-18, 13], [-24, -12], [14, 15], [22, -13]].forEach(([x, z], i) => {
+    const sheep = createGrazingSheep(i + 1);
+    sheep.position.set(x, desertHeight(x, z), z);
+    group.add(sheep);
+    updaters.push((t) => sheep.userData.update(t));
+  });
+  const flies = createButterflies(14, { minX: -34, maxX: 34, minZ: -14, maxZ: 14 }, desertHeight, 9);
+  group.add(flies);
+  updaters.push((t) => flies.userData.update(t));
+
+  // distant ridge lines close the horizon
+  const ridgeL = createMountainRidge(3, { width: 460, height: 52, depth: 26, color: 0xb89a72 });
+  ridgeL.position.set(-120, -4, -190);
+  ridgeL.rotation.y = 0.35;
+  const ridgeR = createMountainRidge(7, { width: 460, height: 58, depth: 26, color: 0xb89a72 });
+  ridgeR.position.set(130, -6, -200);
+  ridgeR.rotation.y = -0.4;
+  group.add(ridgeL, ridgeR);
+
+  const birds = createBirdFlock(7, new THREE.Vector3(0, 0, -40), 46, 34, 13);
+  group.add(birds);
+  updaters.push((t) => birds.userData.update(t));
+
+  // ------------------------------------ the 200 who could not cross
+  // exhausted Israelites collapsing onto the left sandstone ledge (v. 9-10)
+  const spentPalette = {
+    skin: Mat.skin(),
+    cloth: Mat.tunicCaptive(),
+    cloth2: Mat.tunicEarth(),
+    hair: Mat.hair(),
+  };
+  for (let i = 0; i < 7; i++) {
+    const x = -17 - (i % 3) * 3.4 + (seededRandom(i * 3.1) - 0.5);
+    const z = -7 + i * 2.6;
+    const man = createHumanoid(spentPalette, i % 2 === 0 ? 'seatedCaptive' : 'grieving',
+      { beard: 'full', detail: 'low' });
+    man.position.set(x, desertHeight(x, z), z);
+    man.rotation.y = Math.PI / 2 + (seededRandom(i * 5.9) - 0.5) * 0.7;
+    group.add(man);
+  }
+  // a few of the 400 already wading the torrent
+  for (let i = 0; i < 4; i++) {
+    const x = -6 + i * 4.5;
+    const z = -1.5 + (i % 2) * 3;
+    const wader = createHumanoid(spentPalette, 'standing',
+      { armor: 'leather', beard: 'full', detail: 'low' });
+    wader.position.set(x, desertHeight(x, z) - 0.55, z);
+    wader.rotation.y = Math.PI; // pushing north across the brook
+    group.add(wader);
+    updaters.push((t) => {
+      wader.rotation.z = Math.sin(t * 1.8 + i * 1.3) * 0.08; // fighting the current
+    });
+  }
+
+  // ------------------------------------------------- palms & shrubs
+  const palmSpots = [
+    [-14, 14], [16, 9], [-20, -12], [12, -16], [-30, 40], [28, -46],
+  ];
+  palmSpots.forEach(([x, z], i) => {
+    const palm = createPalm(i + 1);
+    palm.position.set(x, desertHeight(x, z), z);
+    group.add(palm);
+    colliders.push({ x, z, r: 0.5 });
+  });
+
+  // palm avenue flanking the march — the Miami skyline of the Negev
+  const avenueCount = Math.max(8, Math.round(18 * QUALITY.density));
+  for (let i = 0; i < avenueCount; i++) {
+    const side = i % 2 === 0 ? -1 : 1;
+    const x = side * (22 + (i % 3) * 2.5);
+    const z = 62 - Math.floor(i / 2) * 19;
+    if (z < -100) break;
+    const palm = createPalm(200 + i);
+    palm.position.set(x, desertHeight(x, z), z);
+    palm.scale.setScalar(1.25 + (i % 3) * 0.2);
+    palm.rotation.y = i * 0.9;
+    group.add(palm);
+    colliders.push({ x, z, r: 0.5 });
+  }
+
+  for (let i = 0; i < 16; i++) {
+    const x = (seededRandom(i * 7.3) - 0.5) * 84;
+    const z = (seededRandom(i * 9.9) - 0.5) * 220;
+    if (Math.abs(z) < 10) continue;
+    const bush = createDryBush(i + 1);
+    bush.position.set(x, desertHeight(x, z), z);
+    group.add(bush);
+  }
+
+  // ------------------------------------------------- acacias & scrub
+  // the flat-topped thorn trees that mark every wadi in the Negev
+  const acaciaSpots = [
+    [-34, 28], [30, 14], [-26, -30], [34, -44], [-40, 60], [38, 74],
+    [-18, 46], [22, -70], [-38, -76], [42, 44],
+  ];
+  acaciaSpots.forEach(([x, z], i) => {
+    if (Math.abs(z) < 11) return; // keep the ford clear
+    const acacia = createAcacia(i + 1);
+    acacia.position.set(x, desertHeight(x, z), z);
+    acacia.scale.setScalar(0.8 + seededRandom(i * 3.3) * 0.55);
+    acacia.rotation.y = seededRandom(i * 5.9) * Math.PI * 2;
+    group.add(acacia);
+    colliders.push({ x, z, r: 0.7 });
+  });
+  // sun-resistant scrub, thickest along the banks
+  for (let i = 0; i < 34; i++) {
+    const x = (seededRandom(i * 4.3) - 0.5) * 96;
+    const z = (seededRandom(i * 7.1) - 0.5) * 230;
+    const nearBank = Math.abs(z) < 16;
+    if (!nearBank && i % 3 === 0) continue;
+    const bush = createDesertScrub(i + 5);
+    bush.position.set(x, desertHeight(x, z), z);
+    bush.scale.setScalar(0.7 + seededRandom(i * 2.7) * 0.8);
+    group.add(bush);
+  }
+
+  // micro-debris: gravel and flint glinting across the path
+  const gravel = createPebbleField(260, 120, 3, desertHeight);
+  group.add(gravel);
+  const gravelBank = createPebbleField(140, 90, 9, desertHeight);
+  gravelBank.position.z = 4;
+  group.add(gravelBank);
+
+  // sun-cracked, flaking ground away from the water
+  for (let i = 0; i < 9; i++) {
+    const x = (seededRandom(i * 6.7) - 0.5) * 80;
+    const z = 18 + seededRandom(i * 8.9) * 90;
+    const patch = createCrackedPatch(i + 40, 4 + seededRandom(i) * 4);
+    patch.position.set(x, desertHeight(x, z) + 0.03, z);
+    group.add(patch);
+  }
+
+  // ---------------------------------------------------------- beacon
+  const beacon = createBeacon('Arid Field', 0xffc857);
+  beacon.position.set(DESERT.exit.x, desertHeight(DESERT.exit.x, DESERT.exit.z), DESERT.exit.z);
+  const label = makeTextSprite('THE ARID FIELD', { color: '#ffe9b8', bg: 'rgba(48,32,8,0.5)' });
+  label.position.set(0, 6.4, 0);
+  beacon.add(label);
+  group.add(beacon);
+  updaters.push((t) => beacon.userData.update(t));
+
+  // ------------------------------------------------------- particles
+  const dust = new ParticleEmitter({
+    map: smokeSpriteMap(),
+    count: 110,
+    origin: new THREE.Vector3(0, 3, 0),
+    spread: 55,
+    rise: 0.35,
+    riseJitter: 0.8,
+    drift: 1.2,
+    life: 8,
+    lifeJitter: 0.4,
+    size: 7,
+    sizeGrow: 3,
+    alpha: 0.16,
+    rate: 0,
+    color: 0xf2e2b8,
+    colorEnd: 0xd9be86,
+    additive: true,
+  });
+  // foam simulation along the churning rapids
+  const foam = new ParticleEmitter({
+    count: 90,
+    origin: new THREE.Vector3(0, -0.15, 0),
+    spread: 40,
+    rise: 0.45,
+    riseJitter: 1.2,
+    drift: 1.6,
+    life: 2.2,
+    lifeJitter: 0.5,
+    size: 9,
+    sizeGrow: 5,
+    alpha: 0.35,
+    rate: 0,
+    color: 0xf6f2e8,
+    colorEnd: 0xd9d2c2,
+    additive: true,
+  });
+  // severe dust wind-haze (opacity filter) under the overexposed sun
+  const haze = new ParticleEmitter({
+    count: 80,
+    origin: new THREE.Vector3(0, 4.5, 0),
+    spread: 48,
+    rise: 0.25,
+    riseJitter: 0.7,
+    drift: 1.8,
+    life: 10,
+    lifeJitter: 0.35,
+    size: 22,
+    sizeGrow: 12,
+    alpha: 0.1,
+    rate: 0,
+    color: 0xf6ecc9,
+    colorEnd: 0xe0d0a8,
+    additive: true,
+  });
+  group.add(dust.points, foam.points, haze.points);
+
+  return {
+    name: 'STATE_1_DESERT_MARCH',
+    group,
+    spawn: DESERT.spawn,
+    bounds: DESERT.bounds,
+    colliders,
+    fog: { color: atmo.fog.color, density: atmo.fog.density },
+    atmosphere: atmo,
+    sun,
+    sky,
+    groundHeight: desertHeight,
+    waterLevel: -0.32,
+    update(dt, time) {
+      if (waterMat.userData.shader) waterMat.userData.shader.uniforms.uTime.value = time;
+      // drift the ripple field: the Besor never holds still
+      if (waterMat.bumpMap) {
+        waterMat.bumpMap.offset.x = (waterMat.bumpMap.offset.x + dt * 0.045) % 1;
+        waterMat.bumpMap.offset.y = (waterMat.bumpMap.offset.y - dt * 0.018) % 1;
+      }
+      dust.update(dt);
+      foam.update(dt);
+      haze.update(dt);
+      for (const u of updaters) u(time);
+    },
+  };
+}
