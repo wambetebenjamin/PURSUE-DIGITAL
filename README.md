@@ -139,9 +139,41 @@ this is a teardown of the actual code rather than of the store listing.
 | 741 textures and 344 sprites extracted straight out of the repo's bundles — **no upload needed** | `tools/extract-reference-art.py` |
 | The reference's palette: gold-bronze on deep oxblood, and its hero attributes (attack speed, crit, travel speed, two defence tiers, daily upkeep) | `docs/ASSET_INGEST.md` |
 
-Two extractors live in `tools/`: `ufs-extract.py` unpacks the UnityFS bundles
-and dumps the Lua 5.3 constant tables with no desktop toolchain;
-`extract-reference-art.py` pulls the art and the palette.
+Three extractors live in `tools/`: `ufs-extract.py` unpacks the UnityFS
+bundles and dumps the Lua 5.3 constant tables with no desktop toolchain;
+`extract-reference-art.py` pulls the art and the palette;
+`extract-java-schema.py` turns the decompiled Java into a machine-readable
+wire schema — **113 Retrofit routes, 229 payload classes, 675 error-code
+vocabularies** — which is what the backend is generated from.
+
+## The server (pass 18)
+
+The brief for this pass asked for a schema recovered from the decompiled
+source, a theme mapping, a Node backend and a client architecture. All four
+are here.
+
+| What | Where |
+| --- | --- |
+| The wire schema, extracted from the Java | `docs/reference/schema/sdk-schema.json` |
+| Every original name beside ours | `docs/THEME_MAPPING.md` |
+| The server — Express + Mongoose, 44 passing tests | `game-backend/` |
+| The browser client for it, offline-first | `src/net/pursueServer.js` |
+| How the front-end talks to it, browser and Unity | `docs/CLIENT_ARCHITECTURE.md` |
+| The same server, deployed as a function | `api/[...path].js` |
+
+The server speaks the reference's own shape: `C…`/`S…` message pairs and the
+SDK's `{code, message, data}` envelope, with the SDK's own error numbers. The
+mechanics are the reference's, re-expressed in 1 Samuel 30 — the gain
+query/commit split, the capped offline accrual, the barracks that gates both
+the size of a company and its tier, the production slots that finish sooner
+and cost more when the season boon is on, and a fight that is **replayed on
+the server** rather than believed.
+
+```bash
+cd game-backend && npm install && npm test && npm start
+```
+
+The one rule, copied from the reference: *the client never invents a number.*
 
 ## The muster and the field
 
