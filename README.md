@@ -126,6 +126,42 @@ lock), the march HUD is put away, and the streets carry people. The pursuit
 itself is one button — **Take the road** — and the march's pause page carries
 **The Citadel** to come back.
 
+## The camp, in 2D (pass 19)
+
+The game now opens on **Ziklag drawn as a 2D encampment** — a Phaser 3 canvas
+that stands behind the title card and becomes the first thing the player
+touches. It is not a picture of a camp: it is drawn, every stroke of it, with
+Phaser's `Graphics`, so the camp has **no image assets at all**.
+
+| The reference does | PURSUE does | Where |
+| --- | --- | --- |
+| A farm/city screen you live in | The encampment at Ziklag: the Main Tent on the ridge, the Barracks beside it, six works along the near edge | `src/game/CampScene.js` |
+| Buildings you level by tapping | Click a work → `upgradeCamp()` → the building pulses and a line of gold rises from it | `onPlaceTap()` |
+| Buying people with a resource bar | Click a company → `recruitTroops()` — a press of ten, and the strip says what it cost | `onCompanyTap()` |
+| A battle screen with a result | **Pursue the Amalekites** → the band marches out while the server settles the fight → victory or defeat, the men still standing, and the **Loot Recovered** | `src/game/PursuitScene.js` |
+| Resources read from the server | Provisions, bronze, timber, spoil and the men under arms, all fetched in `create()` | `src/game/api.js` |
+
+The server is still the authority: the camp asks `/api/camp/detail`,
+`/api/troops`, `/api/camp/upgrade`, `/api/troops/recruit` and
+`/api/combat/pursue`, and shows what comes back. When the server cannot be
+reached the camp falls back on the browser's own campaign record — the same
+rule the reference uses: *the client never invents a number.*
+
+**The 3D game is still here.** The camp's **Take the road** hands the frame to
+the march; **the citadel ›** goes back to the city from above; and the march's
+pause page carries **The Encampment** to come home.
+
+Because a canvas cannot be looked at from a terminal, the camp is also *run*
+without a screen: Phaser boots headless inside jsdom, the scenes draw
+themselves into a canvas nobody sees, and every order the player can give is
+given — raise a work, muster a company, send the band out, come home again.
+
+```bash
+npm run camp:test   # 36 checks: the camp really stands up and obeys
+npm run camp:server # 17 checks: the camp's client against the real server
+                    # (once: cd game-backend && npm install)
+```
+
 ## The reference teardown (pass 17)
 
 The reference game's own source is now in the repo (`decompiled-source/`), so
@@ -455,9 +491,19 @@ PURSUE-DIGITAL/
 ├── package.json
 ├── vite.config.js              # static build config (chunked vendor bundle)
 ├── scripts/
-│   └── smoke.mjs               # headless Node test: boots the FSM and plays through all 7 phases
+│   ├── smoke.mjs               # headless Node test: boots the FSM and plays through all 7 phases
+│   └── camp-headless.mjs       # the 2D camp, booted headless in jsdom: every order given
 └── src/
     ├── main.js                 # bootstrap: engine + game + title/victory wiring
+    ├── game/                   # the 2D camp (Phaser 3, Graphics only — no image assets)
+    │   ├── config.js           # the Phaser config: RESIZE scale, no audio, the two scenes
+    │   ├── index.js            # launch / stop the camp; the 3D clock waits behind it
+    │   ├── session.js          # who the camp talks to, and the two ways out of it
+    │   ├── theme.js            # the palette and the type of the camp
+    │   ├── layout.js           # where everything stands (pure — testable at any size)
+    │   ├── api.js              # the camp's client: server-authoritative, offline fallback
+    │   ├── CampScene.js        # the encampment of Ziklag
+    │   └── PursuitScene.js     # the march out, and what came back
     ├── constants.js            # FSM names, tunables (speed/stamina/vision), narrative copy
     ├── core/
     │   ├── Engine.js           # WebGL renderer, clock, resize, the single RAF loop

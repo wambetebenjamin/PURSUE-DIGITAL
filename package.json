@@ -2,21 +2,26 @@
   "name": "pursue-digital",
   "version": "1.0.0",
   "private": true,
-  "description": "PURSUE \u2014 a low-poly 3D action-adventure web game based on 1 Samuel 30 (Three.js + Vite)",
+  "description": "PURSUE — a low-poly 3D action-adventure web game based on 1 Samuel 30 (Three.js + Vite)",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build && node scripts/verify-build.mjs",
+    "build": "vite build && node scripts/verify-build.mjs && node scripts/camp-headless.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "smoke": "node scripts/smoke.mjs",
+    "camp:test": "node scripts/camp-headless.mjs",
+    "camp:server": "node scripts/camp-server.mjs",
     "icons": "node scripts/make-icons.mjs",
     "verify:fn": "node scripts/verify-vercel-fn.mjs",
     "backend:test": "node --test game-backend/test/*.test.js"
   },
   "dependencies": {
+    "phaser": "^3.90.0",
     "three": "^0.170.0"
   },
   "devDependencies": {
+    "jsdom": "^30.1.3",
+    "phaser3spectorjs": "^0.0.8",
     "vite": "^5.4.11"
   }
 }

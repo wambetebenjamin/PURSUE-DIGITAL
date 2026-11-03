@@ -67,6 +67,11 @@ const citadel = new Citadel({
 
 /** Put the camera back over Ziklag, with every other zone dark. */
 function enterCitadel() {
+  if (campUp && campModule) {
+    campModule.stopCamp();
+    campUp = false;
+  }
+  engine.resume();
   game.pause.close(false);
   game.started = false;
   game.hud.setVisible(false);
@@ -128,11 +133,60 @@ input.onPointerLockChange = (locked) => {
 
 const shell = initInstallShell();
 
-startButton.addEventListener('click', () => {
+/* -------------------------------------------------------------------------
+   THE CAMP — the 2D canvas of Ziklag, and the way into the march.
+
+   The camp is the front of the house: the player comes out of the title
+   card into the encampment, works the stores there, sends the band out, and
+   when they are ready they take the road into the 3D march.
+
+   Phaser is a large library and the march does not need it, so the camp is
+   fetched on its own: the title card comes up at once and the encampment
+   arrives a moment later.
+   ---------------------------------------------------------------------- */
+
+let campModule = null;
+let campUp = false;
+
+/** Fetch the camp once, then keep it. */
+async function loadCamp() {
+  if (!campModule) campModule = await import('./game/index.js');
+  return campModule;
+}
+
+/** Hand the frame to the 2D camp. */
+async function enterCamp() {
+  citadel.exit();          // the citadel's own panel steps aside
+  engine.suspend();        // the 3D world waits behind the canvas
+  const mod = await loadCamp();
+  campUp = true;
+  const started = await mod.launchCamp({
+    onLeave: () => {
+      // "Take the road": the camp is torn down and the march begins.
+      mod.stopCamp();
+      campUp = false;
+      engine.resume();
+      game.hud.setVisible(true);
+      game.start();
+      shell.begin();
+      if (IS_TOUCH) shell.requestFullscreen();
+    },
+    onCitadel: () => {
+      // "the citadel": back to the city from above.
+      mod.stopCamp();
+      campUp = false;
+      engine.resume();
+      enterCitadel();
+    },
+  });
+  if (!started) campUp = false;   // no container: the camp never stood up
+}
+
+startButton.addEventListener('click', async () => {
   startScreen.classList.add('hidden');
   audio.init();
   audio.resume();
-  enterCitadel(); // a no-op if the city is already standing
+  await enterCamp();
   shell.begin();
 });
 
@@ -148,6 +202,17 @@ if (pausePanel && pausePanel.appendChild) {
     enterCitadel();
   });
   pausePanel.appendChild(home);
+
+  // and a way back to the camp, which is where the game begins
+  const camp = document.createElement('button');
+  camp.id = 'pause-camp';
+  camp.className = 'secondary-button';
+  camp.textContent = 'The Encampment';
+  camp.addEventListener('click', async () => {
+    game.resetAll();
+    await enterCamp();
+  });
+  pausePanel.appendChild(camp);
 }
 
 // the screen may sleep over a paused march, and must not over a running one
@@ -163,8 +228,9 @@ document.addEventListener('visibilitychange', () => {
 
 // pause overlay, dialogue and victory all stop the clock: no wake lock there
 const shellSync = () => {
-  if (!game.started || game.modal?.isOpen || game.paused || game.finished) shell.end();
-  else shell.begin();
+  const marching = game.started && !game.modal?.isOpen && !game.paused && !game.finished;
+  if (marching || campUp) shell.begin();
+  else shell.end();
 };
 // cheap and complete: polls the game's own state rather than instrumenting
 // every overlay that can stop the clock
@@ -203,9 +269,11 @@ window.addEventListener('keydown', (e) => {
 
 engine.start();
 
-// the city is already standing behind the title card: the game announces what
-// it is before the first click
-enterCitadel();
+// The camp comes up behind the title card: the encampment of Ziklag is the
+// first thing on the screen, and the 3D march waits behind it.
+enterCamp().then(() => {
+  document.body.classList.add('camp-behind');
+});
 
 // one warm-up frame so shaders compile before we drop the loading veil
 requestAnimationFrame(() => {

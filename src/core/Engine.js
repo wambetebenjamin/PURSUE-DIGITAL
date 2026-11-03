@@ -66,6 +66,7 @@ export class Engine {
     this.clock = new THREE.Clock();
     this.elapsed = 0;
     this._raf = 0;
+    this.suspended = false;
     this._onResize = this._onResize.bind(this);
     this._loop = this._loop.bind(this);
     window.addEventListener('resize', this._onResize);
@@ -82,6 +83,23 @@ export class Engine {
 
   stop() {
     cancelAnimationFrame(this._raf);
+  }
+
+  /**
+   * Stop drawing, but keep the clock running.
+   *
+   * The 2D camp takes the screen while it is up; the 3D world is still
+   * there behind it, but there is no reason to render a picture nobody is
+   * looking at. The clock keeps ticking so that waking it again does not
+   * arrive with a day of physics in one step.
+   */
+  suspend() {
+    this.suspended = true;
+  }
+
+  /** Draw again. */
+  resume() {
+    this.suspended = false;
   }
 
   _onResize() {
@@ -101,6 +119,9 @@ export class Engine {
     // Clamp dt so tab-switches never produce physics explosions.
     const dt = Math.min(this.clock.getDelta(), 0.05);
     this.elapsed += dt;
+
+    // suspended: the 2D camp has the screen, so there is nothing to draw
+    if (this.suspended) return;
 
     this.game.update(dt, this.elapsed);
     postFX.render(dt);
