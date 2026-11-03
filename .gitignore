@@ -12,3 +12,7 @@ dist/
 jadx-1.4.7.zip
 jadx-tool/
 extracted-apks/
+
+# Python tooling caches
+__pycache__/
+*.pyc
