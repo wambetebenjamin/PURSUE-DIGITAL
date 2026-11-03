@@ -1057,4 +1057,191 @@ try { await angry.upgradeWork('threshing'); } catch (e) { refusal = e; }
 ok(refusal && refusal.code === -130001, 'a refusal from the server is raised, not swallowed');
 ok(angry.state.queue.length === 0, 'and is never queued for replay');
 
+// ===========================================================================
+// THE 2D CAMP — the layout is pure arithmetic, so it can be checked here
+// ===========================================================================
+const campLayoutMod = await import('../src/game/layout.js');
+const {
+  campLayout, readouts, companyRows, levelOf, formatNumber,
+  upgradeCost, recruitCost, costLine, PLACES, STAGES,
+} = campLayoutMod;
+const CAMP_COMPANIES = campLayoutMod.COMPANIES;
+const { COLORS, CSS, TEXT, SIZES } = await import('../src/game/theme.js');
+const { CampApi, byCompany, CODE } = await import('../src/game/api.js');
+
+// -- the layout holds at every size the game can be played at ---------------
+for (const [w, h] of [[1920, 1080], [1280, 720], [1024, 640], [844, 390], [667, 375]]) {
+  const l = campLayout(w, h);
+  const label = `${w}×${h}`;
+  ok(l.scale > 0 && l.scale <= 2, `the camp scales sensibly at ${label}`);
+  ok(l.horizon > 0 && l.horizon < h, `the ridge is on the canvas at ${label}`);
+  ok(l.tent.y === l.ground && l.ground === l.horizon,
+    `the tents stand on the ridge at ${label}`);
+  ok(l.tent.x - l.tent.w / 2 >= 0 && l.tent.x + l.tent.w / 2 <= w,
+    `the main tent is on the canvas at ${label}`);
+  ok(l.barracks.x + l.barracks.w / 2 <= w, `the barracks are on the canvas at ${label}`);
+  const works = Object.values(l.works);
+  ok(works.length === PLACES.filter((p) => p.kind !== 'main' && p.kind !== 'barracks').length,
+    `every work has a place at ${label}`);
+  ok(works.every((x) => x.x - x.w / 2 >= -1 && x.x + x.w / 2 <= w + 1),
+    `the works stand on the canvas at ${label}`);
+  ok(works.every((x) => x.y - x.h >= l.horizon - 1),
+    `the works stand below the ridge at ${label}`);
+  ok(l.buttons.y + 22 * l.scale <= h + 1, `the orders sit on the canvas at ${label}`);
+  ok(l.strip.x + l.strip.w <= w + 1, `the companies fit along the bottom at ${label}`);
+  ok(l.readout.x + l.readout.w <= l.stages.x + 1,
+    `the stores and the ground-choice do not collide at ${label}`);
+  ok(l.stages.x + l.stages.w <= w + 1, `the ground-choice is on the canvas at ${label}`);
+}
+
+// -- the readouts are the server's numbers, shown plainly -------------------
+const sample = {
+  resources: { provisions: 180, bronze: 90, timber: 60, spoil: 12 },
+  works: { hall: 2, barracks: 3 },
+  troops: { companies: { spears: { count: 70, tier: 4, name: 'The Iron Spears' } } },
+};
+const rows = readouts(sample);
+ok(rows.length === 5, 'five stores are shown along the top');
+ok(rows[0].value === '180', 'the provisions are the server\'s number');
+ok(rows[4].value === '70', 'the men under arms are counted from the companies');
+ok(rows[4].label === 'MEN UNDER ARMS', 'and they are called what they are');
+ok(levelOf(sample, 'hall') === 2 && levelOf(sample, 'barracks') === 3, 'the works keep their level');
+ok(levelOf(sample, 'smelter') === 1, 'a work that has never been raised is level one');
+
+const band = companyRows(sample);
+ok(band.length === CAMP_COMPANIES.length, 'every company is in the strip');
+ok(band[0].name === 'The Iron Spears', 'the server names the company');
+ok(band[0].count === 70, 'and says how many are in it');
+ok(band[1].count === 0, 'a company that was never raised shows nothing');
+ok(formatNumber(1234567) === '1,234,567', 'big numbers are counted out');
+
+// -- the costs are the shipped game's costs ---------------------------------
+ok(upgradeCost('hall', 1).timber === 75, 'the hall costs timber and bronze');
+ok(upgradeCost('hall', 1).bronze === 40, 'and the bronze with it');
+ok(upgradeCost('barracks', 2).provisions === 80, 'the barracks cost provisions');
+ok(upgradeCost('smelter', 3).bronze === 78, 'the smelter costs bronze');
+ok(upgradeCost('nothing-here', 1) === null, 'a place that does not exist has no cost');
+ok(recruitCost('spears', 1).bronze === 26, 'a press of spears costs bronze');
+ok(recruitCost('slings', 2).timber === 18, 'two presses of slingers cost timber');
+ok(costLine({ timber: 55, provisions: 45 }) === 'timber 55 · provisions 45',
+  'the cost is written out plainly');
+ok(costLine(null) === '', 'and there is no line when there is no cost');
+
+// -- the palette and the type -----------------------------------------------
+ok(COLORS.ink !== undefined && CSS.ink.startsWith('#'), 'the palette is one set of numbers');
+ok(Object.keys(TEXT).every((k) => SIZES[k] > 0), 'every style has a size to scale with');
+ok(STAGES.length === 3, 'the camp can send the band to three grounds');
+
+// -- the camp's own client --------------------------------------------------
+const campCalls = [];
+const campFetch = async (url, opts = {}) => {
+  campCalls.push({ url, body: opts.body ? JSON.parse(opts.body) : null });
+  const path = String(url).replace('/api', '');
+  if (path === '/auth/login') {
+    return { json: async () => ({ code: 0, message: 'ok', data: {
+      session_token: 'tok_camp', player: { role_id: 'role_camp', name: 'David' } } }) };
+  }
+  if (path === '/camp/detail') {
+    return { json: async () => ({ code: 0, message: 'ok', data: {
+      camp: {
+        resources: { provisions: 180, bronze: 90, timber: 60, spoil: 0 },
+        works: { hall: 1, barracks: 1, threshing: 1, quarry: 1, smelter: 1, hospital: 1 },
+        roster: {},
+        renown: 0,
+      },
+      rate: { provisions: 24 },
+    } }) };
+  }
+  if (path === '/troops') {
+    return { json: async () => ({ code: 0, message: 'ok', data: {
+      companies: [
+        { id: 'spears', name: 'The Iron Spears', count: 40, tier: 2 },
+        { id: 'shields', name: 'The Shield Wall', count: 20, tier: 1 },
+      ],
+      order_of_battle: [],
+      power: { power: 300, men: 60 },
+      wounded: 3,
+    } }) };
+  }
+  if (path === '/camp/upgrade') {
+    return { json: async () => ({ code: 0, message: 'ok', data: { work_id: 'threshing', level: 2 } }) };
+  }
+  if (path === '/troops/recruit') {
+    return { json: async () => ({ code: 0, message: 'ok', data: { company_id: 'spears', count: 10 } }) };
+  }
+  if (path === '/combat/pursue') {
+    return { json: async () => ({ code: 0, message: 'ok', data: {
+      won: true, stars: 2, rewards: { provisions: 45, timber: 20 },
+      casualties: { standing: 55, fallen: 5 }, elapsed: 42, log: [],
+    } }) };
+  }
+  return { json: async () => ({ code: -130001, message: 'no such thing', data: null }) };
+};
+
+const api = new CampApi({ base: '/api', fetchImpl: campFetch, storage: fakeStorage(), deviceId: 'dev-camp' });
+const campState = await api.refresh();
+ok(api.online === true, 'the camp reaches the server');
+ok(campState.source === 'server', 'and the camp is kept by the server');
+ok(campState.resources.provisions === 180, 'the stores are the server\'s');
+ok(campState.works.threshing === 1, 'the works are the server\'s');
+ok(campState.troops.companies.spears.count === 40, 'the companies are the server\'s');
+ok(campState.troops.companies.spears.name === 'The Iron Spears', 'the server names them');
+ok(campCalls.some((c) => c.url.includes('/auth/login')), 'the camp logs in first');
+ok(campCalls.some((c) => c.url.includes('/camp/detail')), 'and asks for the camp');
+ok(campCalls.some((c) => c.url.includes('/troops')), 'and for the band');
+
+const campRaised = await api.upgradeCamp('threshing');
+ok(campRaised.ok === true, 'a work can be raised');
+ok(campCalls.some((c) => c.url.includes('/camp/upgrade') && c.body.work_id === 'threshing'),
+  'and the server is told which one');
+
+const mustered = await api.recruitTroops('spears', 1);
+ok(mustered.ok === true, 'a press of ten can be mustered');
+ok(campCalls.some((c) => c.url.includes('/troops/recruit') && c.body.company_id === 'spears'),
+  'and the server is told which company');
+
+const fought = await api.pursue('besor-watch');
+ok(fought.ok === true && fought.data.won === true, 'the fight is the server\'s to call');
+ok(fought.data.rewards.provisions === 45, 'and the loot is the server\'s');
+ok(campCalls.some((c) => c.url.includes('/combat/pursue') && c.body.stage_id === 'besor-watch'),
+  'the band is sent to the ground that was chosen');
+
+// -- a refusal from the server is reported, not guessed at -------------------
+const refusing = new CampApi({
+  base: '/api',
+  storage: fakeStorage(),
+  deviceId: 'dev-refuse',
+  fetchImpl: async (url) => {
+    if (String(url).includes('/auth/login')) {
+      return { json: async () => ({ code: 0, message: 'ok', data: { session_token: 't', player: {} } }) };
+    }
+    return { json: async () => ({ code: -130001, message: 'not enough in the stores', data: null }) };
+  },
+});
+const refused = await refusing.upgradeCamp('hall');
+ok(refused.ok === false, 'the server can refuse an order');
+ok(refused.message === 'not enough in the stores', 'and it says why');
+ok(refused.source === 'server', 'the refusal is the server\'s, not the camp\'s');
+
+// -- with no server, the camp keeps its own ledger --------------------------
+const alone = new CampApi({
+  base: '/api',
+  storage: fakeStorage(),
+  deviceId: 'dev-alone',
+  fetchImpl: async () => { throw new Error('network down'); },
+});
+const aloneState = await alone.refresh();
+ok(alone.online === false, 'the camp knows it is alone');
+ok(aloneState.source === 'local', 'and falls back on the browser\'s own record');
+ok(aloneState.resources && typeof aloneState.resources.provisions === 'number',
+  'the fallback still has stores');
+ok(Object.keys(aloneState.troops.companies).length === CAMP_COMPANIES.length,
+  'the fallback still has the companies');
+
+// -- the companies come keyed by id, whatever shape the server sends ---------
+ok(byCompany([{ id: 'spears', count: 10 }]).spears.count === 10, 'a list becomes a map');
+ok(byCompany({ bows: { count: 5 } }).bows.count === 5, 'a map stays a map');
+ok(byCompany(null).bows === undefined, 'nothing at all is still a map');
+ok(CODE.TOKEN_INVALID === -130002, 'the token error is the SDK\'s own number');
+
 console.log(`\nAll ${passed} checks passed.\n`);
