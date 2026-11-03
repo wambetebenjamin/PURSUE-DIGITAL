@@ -1,0 +1,15 @@
+{
+  "min_sdk_version": "3.16.0",
+  "version": "1.0.0",
+  "buildType": "2",
+  "buildTime": "2024/3/21 下午3:51:37",
+  "gitCommit": "e012263",
+  "routes": [],
+  "modules": {
+    "common": {
+      "fileName": "common.undefined",
+      "version": "0.4.4"
+    }
+  },
+  "source": "local"
+}

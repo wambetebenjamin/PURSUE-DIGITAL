@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent">
+    <com.ixigua.touchtileimageview.TouchTileImageView android:id="@+id/image_view" android:layout_width="match_parent" android:layout_height="match_parent"/>
+    <com.bytedance.ttgame.module.webview.gallery.widget.CircularProgressBar android:id="@+id/loading_progress" android:visibility="gone" android:layout_width="52dp" android:layout_height="52dp" android:layout_centerInParent="true"/>
+    <ProgressBar android:id="@+id/progress_bar" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true"/>
+</RelativeLayout>

@@ -1,0 +1,458 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="262" android:versionName="0.1.136" android:installLocation="preferExternal" android:compileSdkVersion="36" android:compileSdkVersionCodename="16" android:requiredSplitTypes="base__abi" android:splitTypes="" package="com.oasis.immortal" platformBuildVersionCode="36" platformBuildVersionName="16">
+    <uses-sdk android:minSdkVersion="24" android:targetSdkVersion="36"/>
+    <supports-screens android:anyDensity="true" android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" android:xlargeScreens="true"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-feature android:glEsVersion="0x30000"/>
+    <uses-feature android:name="android.hardware.location.gps" android:required="false"/>
+    <uses-feature android:name="android.hardware.location" android:required="false"/>
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false"/>
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false"/>
+    <uses-feature android:name="android.hardware.touchscreen.multitouch" android:required="false"/>
+    <uses-feature android:name="android.hardware.touchscreen.multitouch.distinct" android:required="false"/>
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN"/>
+        </intent>
+        <package android:name="com.facebook.katana"/>
+        <package android:name="com.google.android.googlequicksearchbox"/>
+        <package android:name="com.android.vending"/>
+        <package android:name="jp.naver.line.android"/>
+        <package android:name="com.twitter.android"/>
+        <package android:name="com.vkontakte.android"/>
+        <provider android:authorities="com.facebook.katana.provider.PlatformProvider"/>
+        <package android:name="com.huawei.appmarket"/>
+        <package android:name="com.oppo.market"/>
+        <package android:name="com.bbk.appstore"/>
+        <package android:name="com.xiaomi.market"/>
+        <package android:name="com.meizu.mstore"/>
+        <package android:name="com.sec.android.app.samsungapps"/>
+        <package android:name="com.coolapk.market"/>
+        <package android:name="com.lenovo.leos.appstore"/>
+        <package android:name="com.letv.app.appstore"/>
+        <package android:name="zte.com.market"/>
+        <package android:name="com.tencent.android.qqdownloader"/>
+        <package android:name="com.qihoo.appstore"/>
+        <package android:name="com.wandoujia.phoenix2"/>
+        <package android:name="com.baidu.appsearch"/>
+        <package android:name="com.sogou.androidtool"/>
+        <package android:name="com.yingyonghui.market"/>
+        <package android:name="com.hiapk.marketpho"/>
+        <package android:name="com.google.android.gms"/>
+        <package android:name="com.kakao.talk"/>
+        <package android:name="com.zhiliaoapp.musically"/>
+        <package android:name="com.instagram.android"/>
+        <package android:name="com.whatsapp"/>
+        <package android:name="com.ss.android.ugc.trill"/>
+        <intent>
+            <action android:name="android.intent.action.SEND"/>
+            <data android:mimeType="*/*"/>
+        </intent>
+        <intent>
+            <action android:name="com.appsflyer.referrer.INSTALL_PROVIDER"/>
+        </intent>
+        <intent>
+            <action android:name="com.android.vending.billing.InAppBillingService.BIND"/>
+        </intent>
+        <intent>
+            <action android:name="com.google.android.apps.play.billingtestcompanion.BillingOverrideService.BIND"/>
+        </intent>
+    </queries>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.READ_APP_SPECIFIC_LOCALES"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT"/>
+    <uses-permission android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"/>
+    <uses-permission android:name="com.sec.android.provider.badge.permission.READ"/>
+    <uses-permission android:name="com.sec.android.provider.badge.permission.WRITE"/>
+    <uses-permission android:name="com.htc.launcher.permission.READ_SETTINGS"/>
+    <uses-permission android:name="com.htc.launcher.permission.UPDATE_SHORTCUT"/>
+    <uses-permission android:name="com.sonyericsson.home.permission.BROADCAST_BADGE"/>
+    <uses-permission android:name="com.sonymobile.home.permission.PROVIDER_INSERT_BADGE"/>
+    <uses-permission android:name="com.anddoes.launcher.permission.UPDATE_COUNT"/>
+    <uses-permission android:name="com.majeur.launcher.permission.UPDATE_BADGE"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.CHANGE_BADGE"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.READ_SETTINGS"/>
+    <uses-permission android:name="com.huawei.android.launcher.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="com.hihonor.android.launcher.permission.CHANGE_BADGE"/>
+    <uses-permission android:name="android.permission.READ_APP_BADGE"/>
+    <uses-permission android:name="com.oppo.launcher.permission.READ_SETTINGS"/>
+    <uses-permission android:name="com.oppo.launcher.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="com.android.launcher.permission.READ_SETTINGS"/>
+    <uses-permission android:name="com.android.launcher.permission.WRITE_SETTINGS"/>
+    <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_READ"/>
+    <uses-permission android:name="me.everything.badger.permission.BADGE_COUNT_WRITE"/>
+    <uses-permission android:name="android.permission.UPDATE_APP_BADGE"/>
+    <uses-permission android:name="com.vivo.notification.permission.BADGE_ICON"/>
+    <uses-permission android:name="com.vivo.abe.permission.launcher.notification.num"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_ATTRIBUTION"/>
+    <uses-permission android:name="android.permission.ACCESS_ADSERVICES_AD_ID"/>
+    <uses-permission android:name="com.android.vending.BILLING"/>
+    <uses-permission android:name="com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE"/>
+    <instrumentation android:name="com.bytedance.common.component.CommonInstrumentation" android:targetPackage="com.oasis.immortal" android:targetProcesses="com.oasis.immortal:smp"/>
+    <permission android:name="com.oasis.immortal.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" android:protectionLevel="signature"/>
+    <uses-permission android:name="com.oasis.immortal.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>
+    <application android:theme="@style/UnityThemeSelector" android:label="@string/app_name" android:icon="@mipmap/app_icon" android:name="com.oasis.android.OasisApplication" android:allowBackup="false" android:supportsRtl="true" android:extractNativeLibs="true" android:fullBackupContent="@xml/backup_rule" android:usesCleartextTraffic="true" android:roundIcon="@mipmap/app_icon_round" android:appCategory="game" android:appComponentFactory="androidx.core.app.CoreComponentFactory" android:enableOnBackInvokedCallback="true">
+        <meta-data android:name="unityplayer.SkipPermissionsDialog" android:value="true"/>
+        <meta-data android:name="EASEMOB_APPKEY" android:value="1104190508083383#immortal-testing"/>
+        <meta-data android:name="BUGLY_APPID" android:value="4764d30f17"/>
+        <meta-data android:name="BUGLY_APP_CHANNEL" android:value="1"/>
+        <meta-data android:name="BUGLY_ENABLE_DEBUG" android:value="true"/>
+        <meta-data android:name="crash_agent_class" android:value="com.oasis.bugly.BuglyAgent"/>
+        <meta-data android:name="android.max_aspect" android:value="2.4"/>
+        <meta-data android:name="com.facebook.sdk.AutoLogAppEventsEnabled" android:value="false"/>
+        <meta-data android:name="unity.splash-mode" android:value="0"/>
+        <meta-data android:name="unity.splash-enable" android:value="false"/>
+        <meta-data android:name="unity.launch-fullscreen" android:value="true"/>
+        <meta-data android:name="unity.render-outside-safearea" android:value="true"/>
+        <meta-data android:name="notch.config" android:value="portrait|landscape"/>
+        <meta-data android:name="unity.auto-report-fully-drawn" android:value="true"/>
+        <activity android:label="@string/app_name" android:name="com.oasis.unity.OasisPlayerActivity" android:exported="true" android:launchMode="singleTask" android:screenOrientation="sensorLandscape" android:configChanges="fontScale|layoutDirection|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:hardwareAccelerated="false">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN"/>
+            </intent-filter>
+            <intent-filter>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="landofempiresoasis"/>
+                <action android:name="android.intent.action.VIEW"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="p2onlink.onelink.me" android:pathPrefix="/zD7m"/>
+                <action android:name="android.intent.action.VIEW"/>
+            </intent-filter>
+            <meta-data android:name="notch_support" android:value="true"/>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="snssdk2447"/>
+            </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="p2onlink.onelink.me"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="com.bytedance.ttgame.module.push.IntransitActivity" android:exported="true" android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="com.ss.android.sdk.snssdkgpush2447"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:name="snssdkgpush2447"/>
+            </intent-filter>
+        </activity>
+        <meta-data android:name="com.google.android.gms.games.APP_ID" android:value="@string/game_services_app_id"/>
+        <meta-data android:name="com.facebook.sdk.ApplicationId" android:value="@string/facebook_app_id"/>
+        <meta-data android:name="com.facebook.sdk.ClientToken" android:value="@string/facebook_client_token"/>
+        <provider android:name="com.facebook.FacebookContentProvider" android:exported="true" android:authorities="@string/facebook_authorities"/>
+        <activity android:theme="@style/com_facebook_activity_theme" android:label="sd" android:name="com.facebook.FacebookActivity" android:exported="true" android:configChanges="screenSize|screenLayout|orientation|keyboardHidden|keyboard"/>
+        <activity android:name="com.facebook.CustomTabActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="@string/fb_login_protocol_scheme"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="fbconnect" android:host="cct.com.oasis.immortal"/>
+            </intent-filter>
+        </activity>
+        <activity android:theme="@style/Theme.Splash.NotAnimation" android:name="com.oasis.android.SplashActivity" android:exported="true" android:launchMode="singleTask" android:screenOrientation="sensorLandscape" android:configChanges="fontScale|layoutDirection|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:hardwareAccelerated="false"/>
+        <activity android:theme="@style/Theme.AccountActivityDialogStyle" android:name="com.bytedance.ttgame.sdk.module.account.login.ui.LoginActivity" android:exported="false" android:launchMode="singleTask" android:configChanges="smallestScreenSize|screenSize|screenLayout|orientation|keyboardHidden"/>
+        <activity android:theme="@style/Theme.AccountActivityDialogStyle" android:name="com.bytedance.ttgame.sdk.module.account.accountmanage.ui.AccountManagementActivity" android:launchMode="singleTask" android:configChanges="smallestScreenSize|screenSize|screenLayout|orientation|keyboardHidden"/>
+        <activity android:name="net.openid.appauth.RedirectUriReceiverActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="com.oasis.immortal"/>
+            </intent-filter>
+        </activity>
+        <activity android:theme="@style/gsdk_godzilla_low_storage_dialog" android:name="com.bytedance.ttgame.module.godzilla.impl.ui.LowStorageTipDialogActivity" android:launchMode="singleTop"/>
+        <activity android:theme="@style/gsdk_fullscreen_transparent" android:name="com.bytedance.ttgame.channel.activity.PermissionHandleActivity" android:exported="true" android:configChanges="screenSize|screenLayout|orientation|keyboardHidden|keyboard"/>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" android:name="com.bytedance.ttgame.module.share.bridge.view.ShareTransferActivity" android:configChanges="screenSize|orientation|keyboardHidden"/>
+        <activity android:name="com.bytedance.ttgame.module.dynamic.DynamicVersionActivity" android:exported="false" android:screenOrientation="unspecified" android:configChanges="screenSize|orientation|keyboard"/>
+        <activity android:name="com.bytedance.ttgame.module.rn.DouYinEntryActivity" android:exported="true" android:launchMode="singleInstance" android:configChanges="screenSize|screenLayout|orientation"/>
+        <activity android:name="com.bytedance.ttgame.module.rn.ReplayDouYinEntryActivity" android:exported="true" android:launchMode="singleTask" android:configChanges="screenSize|screenLayout|orientation"/>
+        <activity android:theme="@style/RNTranslucentTheme" android:name="com.bytedance.react.framework.GReactNativeActivity" android:exported="false" android:screenOrientation="landscape" android:configChanges="screenSize|orientation|keyboard"/>
+        <activity android:theme="@style/RNTranslucentTheme" android:name="com.bytedance.react.framework.GReactNativeActivityPortrait" android:exported="false" android:screenOrientation="portrait" android:configChanges="screenSize|orientation|keyboard"/>
+        <activity android:theme="@style/RNTranslucentTheme" android:name="com.bytedance.react.framework.GReactNativeActivityUn" android:exported="false" android:screenOrientation="unspecified" android:configChanges="screenSize|orientation|keyboard"/>
+        <activity android:theme="@style/GsdkRnTheme.RNDebugTheme" android:name="com.facebook.react.devsupport.DevSettingsActivity" android:exported="false"/>
+        <activity android:theme="@style/permission_TranslucentStyle" android:name="com.reactnativecommunity.webview.permissions.ProxyPermissionActivity" android:configChanges="screenSize|screenLayout|orientation|keyboardHidden|keyboard"/>
+        <provider android:name="com.bytedance.react.framework.BRNFileProvider" android:exported="false" android:authorities="com.oasis.immortal.rn.brnprovider" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/brn_file_provider"/>
+        </provider>
+        <provider android:name="com.bytedance.ttgame.module.share.TTShareFileProvider" android:exported="false" android:authorities="com.oasis.immortal.fileprovider" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/tt_share_file_path"/>
+        </provider>
+        <uses-library android:name="org.apache.http.legacy" android:required="false"/>
+        <activity android:theme="@style/gsdk_share_TranslucentStyle" android:name="com.bytedance.ttgame.module.share.bridge.TransparentActivity" android:exported="true" android:launchMode="singleTask" android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:windowSoftInputMode="adjustResize"/>
+        <provider android:name="com.bytedance.ttgame.module.share.api.ShareFileProvider" android:exported="false" android:authorities="com.oasis.immortal.gsdk.share.provider" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/share_filepaths"/>
+        </provider>
+        <receiver android:name="com.appsflyer.SingleInstallBroadcastReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="com.android.vending.INSTALL_REFERRER"/>
+            </intent-filter>
+        </receiver>
+        <meta-data android:name="google_analytics_default_allow_analytics_storage" android:value="true"/>
+        <meta-data android:name="google_analytics_default_allow_ad_storage" android:value="true"/>
+        <meta-data android:name="google_analytics_default_allow_ad_user_data" android:value="true"/>
+        <meta-data android:name="google_analytics_default_allow_ad_personalization_signals" android:value="true"/>
+        <activity android:theme="@style/Theme.ActivityDialogStyle" android:name="com.bytedance.ttgame.module.compliance.impl.protocol.ui.LicenseUpdateActivity" android:exported="false" android:configChanges="smallestScreenSize|screenSize|screenLayout|orientation|keyboardHidden"/>
+        <activity android:theme="@style/Theme.licenseActivityDialogStyle" android:name="com.bytedance.ttgame.module.compliance.impl.protocol.ui.LicenseActivity" android:exported="false" android:launchMode="singleTask" android:configChanges="smallestScreenSize|screenSize|screenLayout|orientation|keyboardHidden"/>
+        <service android:name="com.bytedance.ttgame.module.push.PushFirebaseMessagingService" android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <receiver android:name="com.bytedance.ttgame.module.push.AlarmReceiver" android:exported="true"/>
+        <service android:name="com.ss.android.message.PushJobService" android:permission="android.permission.BIND_JOB_SERVICE" android:enabled="true" android:exported="false" android:process=":push"/>
+        <activity android:theme="@style/Theme.PushActivityDialogStyle" android:name="com.bytedance.ttgame.module.push.NotificationAlertDialogActivity" android:exported="false" android:configChanges="screenSize|orientation"/>
+        <provider android:name="com.bytedance.ttgame.module.push.fileprovider.BtdPushFileProvider" android:exported="false" android:authorities="com.oasis.immortal.btdpushfileprovider" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/btd_push_file_paths"/>
+        </provider>
+        <activity android:theme="@style/PreLoadStyle" android:name="com.bytedance.ttgame.rocketapi.LoadDexActivity" android:process=":nodex" android:excludeFromRecents="true" android:launchMode="singleTask" android:alwaysRetainTaskState="false"/>
+        <activity android:theme="@style/gsdk_webview_Transparent" android:name="com.bytedance.ttgame.module.webview.gallery.widget.GalleryViewPagerActivity" android:exported="true" android:process=":gsdk_webview" android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc"/>
+        <activity android:theme="@style/gsdk_webview_Transparent" android:name="com.bytedance.ttgame.module.webview.gallery.widget.MainGalleryViewPagerActivity" android:exported="true" android:multiprocess="true" android:configChanges="fontScale|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc"/>
+        <activity android:theme="@style/gsdk_webview_AppThemeFullScreen" android:name="com.bytedance.ttgame.module.webview.ByteWebActivity" android:exported="true" android:process=":gsdk_webview" android:configChanges="fontScale|layoutDirection|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:windowSoftInputMode="adjustResize">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <activity android:theme="@style/gsdk_webview_AppThemeFullScreen" android:name="com.bytedance.ttgame.module.webview.LByteWebActivity" android:exported="true" android:process=":gsdk_webview" android:screenOrientation="landscape" android:configChanges="fontScale|layoutDirection|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:windowSoftInputMode="adjustResize">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <activity android:theme="@style/gsdk_webview_AppThemeFullScreen" android:name="com.bytedance.ttgame.module.webview.PByteWebActivity" android:exported="true" android:process=":gsdk_webview" android:screenOrientation="portrait" android:configChanges="fontScale|layoutDirection|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:windowSoftInputMode="adjustResize">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <activity android:theme="@style/gsdk_webview_Transparent" android:name="com.bytedance.ttgame.module.webview.CustomByteWebActivity" android:exported="true" android:process=":gsdk_webview" android:configChanges="fontScale|uiMode|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:windowSoftInputMode="adjustResize">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <activity android:theme="@style/gsdk_webview_Transparent" android:name="com.bytedance.ttgame.module.webview.CustomMainByteWebActivity" android:exported="true" android:configChanges="fontScale|uiMode|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:windowSoftInputMode="adjustResize">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <activity android:theme="@style/gsdk_webview_AppThemeFullScreen" android:name="com.bytedance.ttgame.module.webview.MainByteWebActivity" android:exported="true" android:multiprocess="true" android:configChanges="fontScale|layoutDirection|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:windowSoftInputMode="adjustResize">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <activity android:theme="@style/gsdk_webview_AppThemeFullScreen" android:name="com.bytedance.ttgame.module.webview.LMainByteWebActivity" android:exported="true" android:multiprocess="true" android:screenOrientation="landscape" android:configChanges="fontScale|layoutDirection|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:windowSoftInputMode="adjustResize">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <activity android:theme="@style/gsdk_webview_AppThemeFullScreen" android:name="com.bytedance.ttgame.module.webview.PMainByteWebActivity" android:exported="true" android:multiprocess="true" android:screenOrientation="portrait" android:configChanges="fontScale|layoutDirection|density|smallestScreenSize|screenSize|uiMode|screenLayout|orientation|navigation|keyboardHidden|keyboard|touchscreen|locale|mnc|mcc" android:windowSoftInputMode="adjustResize">
+            <meta-data android:name="android.notch_support" android:value="true"/>
+        </activity>
+        <service android:name="com.bytedance.ttgame.module.webview.aidl.service.mainproaidl.MainProAidlService"/>
+        <activity android:theme="@style/MediaTheme" android:name="com.twitter.sdk.android.tweetui.PlayerActivity" android:configChanges="screenSize|orientation|keyboardHidden"/>
+        <activity android:theme="@style/MediaTheme" android:name="com.twitter.sdk.android.tweetui.GalleryActivity"/>
+        <activity android:name="com.twitter.sdk.android.tweetcomposer.ComposerActivity" android:exported="false" android:windowSoftInputMode="adjustResize|stateVisible"/>
+        <service android:name="com.twitter.sdk.android.tweetcomposer.TweetUploadService" android:enabled="true" android:exported="false"/>
+        <activity android:name="com.twitter.sdk.android.core.identity.OAuthActivity" android:exported="false" android:excludeFromRecents="true" android:configChanges="screenSize|orientation"/>
+        <service android:name="com.bytedance.common.wschannel.server.WsChannelService" android:exported="false" android:stopWithTask="true"/>
+        <service android:name="com.bytedance.common.wschannel.client.WsClientService" android:exported="false" android:stopWithTask="true"/>
+        <provider android:name="com.bytedance.common.wschannel.WsChannelMultiProcessSharedProvider" android:exported="false" android:authorities="com.oasis.immortal.WsChannelMultiProcessSharedProvider"/>
+        <service android:name="com.ss.android.socialbase.downloader.downloader.IndependentProcessDownloadService" android:exported="false" android:process=":downloader">
+            <intent-filter>
+                <action android:name="com.ss.android.socialbase.downloader.remote"/>
+            </intent-filter>
+        </service>
+        <service android:name="com.ss.android.socialbase.downloader.notification.DownloadNotificationService" android:stopWithTask="true"/>
+        <service android:name="com.ss.android.socialbase.downloader.downloader.DownloadService" android:stopWithTask="true"/>
+        <service android:name="com.ss.android.socialbase.downloader.impls.DownloadHandleService"/>
+        <service android:name="com.ss.android.socialbase.downloader.downloader.SqlDownloadCacheService"/>
+        <activity android:theme="@android:style/Theme.Translucent" android:name="com.bytedance.hades.downloader.impl.notification.NotificationClickActivity" android:exported="false" android:excludeFromRecents="true" android:configChanges="screenSize|uiMode|orientation|keyboardHidden|keyboard"/>
+        <service android:name="com.bytedance.hades.downloader.impl.notification.NotificationService" android:exported="false" android:stopWithTask="false"/>
+        <service android:name="com.bytedance.hades.downloader.impl.service.DownloadService" android:exported="false" android:stopWithTask="false" android:foregroundServiceType="dataSync"/>
+        <activity android:theme="@style/VK.Transparent" android:name="com.vk.api.sdk.ui.VKWebViewAuthActivity"/>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar" android:name="com.vk.api.sdk.ui.VKCaptchaActivity"/>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar" android:name="com.vk.api.sdk.ui.VKConfirmationActivity"/>
+        <provider android:name="com.vk.api.sdk.internal.VKInitProvider" android:exported="false" android:authorities="com.oasis.immortal.VKInitProvider"/>
+        <activity android:theme="@style/Theme.AppCompat" android:name="com.oasis.ui.wechatsimulation.PayMainActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <activity android:theme="@style/OasisTheme.WeChatSimulation.DialogStyle.PayPassword" android:name="com.oasis.ui.wechatsimulation.PayPasswordActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <activity android:theme="@style/Theme.AppCompat" android:name="com.oasis.ui.wechatsimulation.PaySuccessActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <activity android:theme="@style/OasisTheme.AlipaySimulation.Dialog" android:name="com.oasis.ui.alipaysimulation.PaySelectionActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="landscape"/>
+        <activity android:theme="@style/OasisTheme.AlipaySimulation.NoActionBar" android:name="com.oasis.ui.alipaysimulation.PaySuccessActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <activity android:theme="@style/OasisTheme.AlipaySimulation.NoActionBar" android:name="com.oasis.ui.alipaysimulation.PayPasswordActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <activity android:theme="@style/OasisTheme.AlipaySimulation.Dialog" android:name="com.oasis.ui.alipaysimulation.PayCancelCheckActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="landscape"/>
+        <activity android:theme="@style/OasisTheme.AlipaySimulation.NoActionBar" android:name="com.oasis.ui.alipaysimulation.PayQmfActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <activity android:theme="@style/OasisTheme.AlipaySimulation.NoActionBar" android:name="com.oasis.ui.alipaysimulation.PaySuccessQmfActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <activity android:theme="@style/OasisTheme.WeChatSimulation.DialogStyle.PayPassword" android:name="com.oasis.ui.alipaysimulation.WeChatPayPasswordActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <activity android:theme="@style/OasisTheme.AlipaySimulation.Dialog.BackgroundDim" android:name="com.oasis.ui.alipaysimulation.PayNoBalanceActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <activity android:theme="@style/OasisTheme.AlipaySimulation.NoActionBar" android:name="com.oasis.ui.alipaysimulation.WeChatPaySuccessActivity" android:exported="false" android:launchMode="singleTop" android:screenOrientation="portrait"/>
+        <provider android:name="com.oasis.android.OasisFileProvider" android:exported="false" android:authorities="com.oasis.immortal.oasis.provider" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/oasis_provider_paths"/>
+        </provider>
+        <service android:name="com.google.android.play.core.assetpacks.AssetPackExtractionService" android:enabled="false" android:exported="true">
+            <meta-data android:name="com.google.android.play.core.assetpacks.versionCode" android:value="20100"/>
+        </service>
+        <service android:name="com.google.android.play.core.assetpacks.ExtractionForegroundService" android:enabled="false" android:exported="false" android:foregroundServiceType="dataSync"/>
+        <activity android:theme="@style/Theme.AppCompat.FullScreen" android:name="com.oasis.webview.WebViewActivity" android:configChanges="screenSize|orientation|keyboardHidden"/>
+        <provider android:name="com.bytedance.ug.sdk.share.impl.provider.ShareSdkProvider" android:exported="false" android:authorities="com.oasis.immortal.ug.sdk.share.fileprovider" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/ug_sdk_share_filepaths"/>
+        </provider>
+        <activity android:theme="@style/twice_verify.ActivityDialogStyle" android:name="com.bytedance.bdturing.twiceverify.TwiceVerifyWebActivity" android:multiprocess="true" android:launchMode="singleTop" android:windowSoftInputMode="adjustResize"/>
+        <provider android:name="com.bytedance.apm.battery.dao.MonitorContentProvider" android:exported="false" android:authorities="com.oasis.immortal.apm"/>
+        <activity android:theme="@style/EasyPermissions.Transparent" android:label="" android:name="pub.devrel.easypermissions.AppSettingsDialogHolderActivity" android:exported="false"/>
+        <service android:name="com.ss.android.newmedia.redbadge.RedbadgeHandler" android:exported="true">
+            <intent-filter>
+                <action android:name="com.ss.android.redbadge.message"/>
+            </intent-filter>
+        </service>
+        <service android:name="com.ss.android.newmedia.redbadge.RedBadgePushProcessService" android:exported="false" android:process=":push"/>
+        <receiver android:name="com.bytedance.notification.NotificationDeleteBroadcastReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="com.oasis.immortal.pushsdk.notification.delete.action"/>
+            </intent-filter>
+        </receiver>
+        <activity android:theme="@style/TranslucentStyle" android:name="com.bytedance.notification.activity.BannerActivity" android:taskAffinity="com.oasis.immortal.push.banner" android:launchMode="singleInstance"/>
+        <activity android:theme="@style/TranslucentStyle" android:name="com.bytedance.notification.activity.SmpBannerActivity" android:process=":smp" android:taskAffinity="com.oasis.immortal.push.banner" android:launchMode="singleInstance"/>
+        <activity android:theme="@style/TranslucentStyle" android:name="com.bytedance.notification.activity.PushBannerActivity" android:process=":push" android:taskAffinity="com.oasis.immortal.push.banner" android:launchMode="singleInstance"/>
+        <service android:name="com.ss.android.message.NotifyService" android:exported="true" android:process=":push">
+            <intent-filter>
+                <action android:name="com.ss.android.message.action.PUSH_SERVICE"/>
+            </intent-filter>
+        </service>
+        <service android:name="com.ss.android.message.log.LogService" android:exported="false" android:process=":push"/>
+        <activity android:theme="@style/ByteDancePush_AppTheme.BG.TRS" android:name="com.bytedance.push.notification.PushActivity" android:exported="true" android:launchMode="singleTask" android:screenOrientation="behind">
+            <intent-filter>
+                <action android:name="com.oasis.immortal.pushsdk.action"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+            </intent-filter>
+        </activity>
+        <activity android:theme="@style/ByteDancePush_AppTheme.BG.TRS" android:name="com.bytedance.push.notification.PassThoughActivity" android:exported="false" android:launchMode="singleTask" android:screenOrientation="behind"/>
+        <provider android:name="com.ss.android.push.PushFileProvider" android:exported="false" android:authorities="com.oasis.immortal.push.file_provider" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/push_provider_paths"/>
+        </provider>
+        <activity android:name="com.facebook.CustomTabMainActivity"/>
+        <provider android:name="com.google.android.gms.games.provider.PlayGamesInitProvider" android:exported="false" android:authorities="com.oasis.immortal.playgamesinitprovider" android:initOrder="99"/>
+        <activity android:theme="@style/Theme.Games.Transparent" android:name="com.google.android.gms.games.internal.v2.resolution.GamesResolutionActivity" android:exported="false"/>
+        <activity android:theme="@style/Theme.Games.Transparent" android:name="com.google.android.gms.games.internal.v2.appshortcuts.PlayGamesAppShortcutsActivity" android:exported="true"/>
+        <meta-data android:name="com.google.android.gms.games.version" android:value="@string/play_games_sdk_version"/>
+        <service android:name="com.fcm.service.SSGcmListenerService" android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <service android:name="com.fcm.service.FcmRegistrationJobIntentService" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <receiver android:name="com.google.firebase.iid.FirebaseInstanceIdReceiver" android:permission="com.google.android.c2dm.permission.SEND" android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            </intent-filter>
+            <meta-data android:name="com.google.android.gms.cloudmessaging.FINISHED_AFTER_HANDLED" android:value="true"/>
+        </receiver>
+        <service android:name="com.google.firebase.messaging.FirebaseMessagingService" android:exported="false" android:directBootAware="true">
+            <intent-filter android:priority="-500">
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+        <service android:name="com.google.firebase.components.ComponentDiscoveryService" android:exported="false" android:directBootAware="true">
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.messaging.FirebaseMessagingRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.remoteconfig.FirebaseRemoteConfigKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.remoteconfig.RemoteConfigRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.iid.Registrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.analytics.connector.internal.AnalyticsConnectorRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.installations.FirebaseInstallationsRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.ktx.FirebaseCommonLegacyRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.datatransport.TransportRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.FirebaseCommonKtxRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+            <meta-data android:name="com.google.firebase.components:com.google.firebase.abt.component.AbtRegistrar" android:value="com.google.firebase.components.ComponentRegistrar"/>
+        </service>
+        <property android:name="android.adservices.AD_SERVICES_CONFIG" android:resource="@xml/ga_ad_services_config"/>
+        <meta-data android:name="com.google.android.play.billingclient.version" android:value="8.2.1"/>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar" android:name="com.android.billingclient.api.ProxyBillingActivity" android:exported="false" android:configChanges="screenSize|screenLayout|orientation|keyboardHidden|keyboard"/>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar" android:name="com.android.billingclient.api.ProxyBillingActivityV2" android:exported="false" android:configChanges="screenSize|screenLayout|orientation|keyboardHidden|keyboard"/>
+        <service android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery" android:exported="false">
+            <meta-data android:name="backend:com.google.android.datatransport.cct.CctBackendFactory" android:value="cct"/>
+        </service>
+        <activity android:name="com.ss.android.deviceregister.AActivity"/>
+        <receiver android:name="com.bytedance.applog.collector.Collector" android:enabled="true" android:exported="false"/>
+        <receiver android:name="com.google.android.gms.measurement.AppMeasurementReceiver" android:enabled="true" android:exported="false"/>
+        <service android:name="com.google.android.gms.measurement.AppMeasurementService" android:enabled="true" android:exported="false"/>
+        <service android:name="com.google.android.gms.measurement.AppMeasurementJobService" android:permission="android.permission.BIND_JOB_SERVICE" android:enabled="true" android:exported="false"/>
+        <uses-library android:name="android.ext.adservices" android:required="false"/>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar.Fullscreen" android:name="com.ss.android.ShowDialogActivity"/>
+        <provider android:name="com.ss.android.pushmanager.setting.PushMultiProcessSharedProvider" android:exported="false" android:authorities="com.oasis.immortal.push.SHARE_PROVIDER_AUTHORITY"/>
+        <service android:name="com.bytedance.common.process.service.CrossProcessServiceForMain" android:exported="false"/>
+        <service android:name="com.bytedance.common.process.service.CrossProcessServiceForPush" android:exported="false" android:process=":push"/>
+        <service android:name="com.bytedance.common.process.service.CrossProcessServiceForPushService" android:exported="false" android:process=":pushservice"/>
+        <service android:name="com.bytedance.common.process.service.CrossProcessServiceForSmp" android:exported="false" android:process=":smp"/>
+        <service android:name="com.bytedance.push.service.PushProcessService" android:process=":push"/>
+        <service android:name="com.bytedance.push.service.PushServiceProcessService" android:process=":pushservice"/>
+        <provider android:name="com.bytedance.push.settings.storage.MainProcessSettingsProvider" android:exported="false" android:authorities="com.oasis.immortal.push.settings"/>
+        <provider android:name="com.bytedance.push.settings.storage.SmpProcessSettingsProvider" android:exported="false" android:process=":smp" android:authorities="com.oasis.immortal.push.settings.smp"/>
+        <activity android:name="com.bytedance.bdinstall.migrate.MigrateDetectorActivity"/>
+        <provider android:name="com.bytedance.bdinstall.BDInstallProvider" android:exported="false" android:authorities="com.oasis.immortal.bdinstall.provider"/>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar" android:name="com.google.android.gms.auth.api.signin.internal.SignInHubActivity" android:exported="false" android:excludeFromRecents="true"/>
+        <service android:name="com.google.android.gms.auth.api.signin.RevocationBoundService" android:permission="com.google.android.gms.auth.api.signin.permission.REVOCATION_NOTIFICATION" android:exported="true" android:visibleToInstantApps="true"/>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar" android:name="com.google.android.gms.common.api.GoogleApiActivity" android:exported="false"/>
+        <provider android:name="com.google.firebase.provider.FirebaseInitProvider" android:exported="false" android:authorities="com.oasis.immortal.firebaseinitprovider" android:initOrder="100" android:directBootAware="true"/>
+        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version"/>
+        <provider android:name="com.facebook.internal.FacebookInitProvider" android:exported="false" android:authorities="com.oasis.immortal.FacebookInitProvider"/>
+        <receiver android:name="com.facebook.CurrentAccessTokenExpirationBroadcastReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="com.facebook.sdk.ACTION_CURRENT_ACCESS_TOKEN_CHANGED"/>
+            </intent-filter>
+        </receiver>
+        <receiver android:name="com.facebook.AuthenticationTokenManager.CurrentAuthenticationTokenChangedBroadcastReceiver" android:exported="false">
+            <intent-filter>
+                <action android:name="com.facebook.sdk.ACTION_CURRENT_AUTHENTICATION_TOKEN_CHANGED"/>
+            </intent-filter>
+        </receiver>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar" android:name="net.openid.appauth.AuthorizationManagementActivity" android:exported="false" android:launchMode="singleTask"/>
+        <service android:name="androidx.room.MultiInstanceInvalidationService" android:exported="false" android:directBootAware="true"/>
+        <provider android:name="androidx.startup.InitializationProvider" android:exported="false" android:authorities="com.oasis.immortal.androidx-startup">
+            <meta-data android:name="androidx.emoji2.text.EmojiCompatInitializer" android:value="androidx.startup"/>
+            <meta-data android:name="androidx.lifecycle.ProcessLifecycleInitializer" android:value="androidx.startup"/>
+        </provider>
+        <service android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.JobInfoSchedulerService" android:permission="android.permission.BIND_JOB_SERVICE" android:exported="false"/>
+        <receiver android:name="com.google.android.datatransport.runtime.scheduling.jobscheduling.AlarmManagerSchedulerBroadcastReceiver" android:exported="false"/>
+        <provider android:name="com.just.agentweb.AgentWebFileProvider" android:exported="false" android:authorities="com.oasis.immortal.AgentWebFileProvider" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/web_files_public"/>
+        </provider>
+        <activity android:theme="@style/actionActivity" android:name="com.just.agentweb.AgentActionFragment" android:exported="false" android:launchMode="standard" android:configChanges="screenSize|orientation|keyboardHidden" android:windowSoftInputMode="stateAlwaysHidden"/>
+        <provider android:name="com.ss.android.token.AuthTokenMultiProcessSharedProvider" android:exported="false" android:authorities="com.oasis.immortal.auth_token.SHARE_PROVIDER_AUTHORITY"/>
+        <activity android:theme="@style/LineSdk_AuthenticationActivity" android:name="com.linecorp.linesdk.auth.internal.LineAuthenticationActivity" android:exported="false" android:launchMode="singleTop" android:configChanges="screenSize|orientation|keyboardHidden"/>
+        <activity android:name="com.linecorp.linesdk.auth.internal.LineAuthenticationCallbackActivity" android:exported="true" android:configChanges="screenSize|orientation|keyboardHidden">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="lineauth"/>
+            </intent-filter>
+        </activity>
+        <provider android:name="com.bytedance.ttgame.library.luffy.provider.LuffyProvider" android:enabled="true" android:exported="true" android:authorities="com.oasis.immortal.library.luffy.provider"/>
+        <activity android:theme="@android:style/Theme.Translucent.NoTitleBar" android:name="com.bytedance.frameworks.gpm.util.GPUActivity"/>
+        <activity android:theme="@style/Praise.Dialog.Alert" android:name="com.bytedance.praisedialoglib.ui.PraiseDialogActivity" android:launchMode="singleTask"/>
+        <activity android:theme="@style/Theme.PlayCore.Transparent" android:name="com.google.android.play.core.common.PlayCoreDialogWrapperActivity" android:exported="false" android:stateNotNeeded="true"/>
+        <activity android:theme="@android:style/Theme.NoTitleBar.Fullscreen" android:name="com.bytedance.sdk.open.tiktok.ui.TikTokWebAuthorizeActivity" android:screenOrientation="behind"/>
+        <meta-data android:name="com.android.vending.splits.required" android:value="true"/>
+        <meta-data android:name="com.android.stamp.source" android:value="https://play.google.com/store"/>
+        <meta-data android:name="com.android.stamp.type" android:value="STAMP_TYPE_DISTRIBUTION_APK"/>
+        <meta-data android:name="com.android.vending.splits" android:resource="@xml/splits0"/>
+        <meta-data android:name="com.android.vending.derived.apk.id" android:value="2"/>
+    </application>
+</manifest>

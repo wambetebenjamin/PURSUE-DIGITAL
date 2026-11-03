@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="download_notification_complete">Download Completed</string>
+    <string name="download_notification_downloading">Downloading</string>
+    <string name="download_notification_failed">Download Failed</string>
+    <string name="download_notification_paused">Paused</string>
+    <string name="download_notification_resume">Resume</string>
+    <string name="downloading_in_background">Background download in progress</string>
+    <string name="return_game">return</string>
+</resources>

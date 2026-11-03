@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:background="@drawable/oasis_ui_wechat_tip_dialog_background" android:layout_width="wrap_content" android:layout_height="wrap_content">
+    <RelativeLayout android:gravity="center" android:id="@+id/tip_text" android:layout_width="match_parent" android:layout_height="100dp">
+        <TextView android:textSize="16sp" android:textColor="@android:color/black" android:gravity="center" android:id="@+id/title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="支付密码错误，请重试"/>
+    </RelativeLayout>
+    <View android:id="@+id/view" android:background="#ededed" android:layout_width="match_parent" android:layout_height="1dp" android:layout_below="@+id/tip_text"/>
+    <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:id="@+id/bottom" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_below="@+id/view">
+        <Button android:textSize="16sp" android:textStyle="bold" android:textColor="#000000" android:id="@+id/btn_left" android:background="@drawable/oasis_ui_wechat_tip_dialog_button_left_background" android:layout_width="0dp" android:layout_height="wrap_content" android:text="忘记密码" android:layout_weight="1" android:stateListAnimator="@null"/>
+        <View android:background="#ededed" android:layout_width="1dp" android:layout_height="match_parent"/>
+        <Button android:textSize="16sp" android:textStyle="bold" android:textColor="#576c95" android:id="@+id/btn_right" android:background="@drawable/oasis_ui_wechat_tip_dialog_button_right_background" android:layout_width="0dp" android:layout_height="wrap_content" android:text="重试" android:layout_weight="1" android:stateListAnimator="@null"/>
+    </LinearLayout>
+</RelativeLayout>

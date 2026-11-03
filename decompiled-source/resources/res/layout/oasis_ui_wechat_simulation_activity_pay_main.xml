@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:id="@+id/main_layout" android:background="#f7f7f7" android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:orientation="vertical" android:background="#f7f7f7" android:layout_width="match_parent" android:layout_height="match_parent" app:layout_constraintBottom_toBottomOf="0" app:layout_constraintEnd_toEndOf="0" app:layout_constraintStart_toStartOf="0" app:layout_constraintTop_toTopOf="0">
+        <RelativeLayout android:orientation="horizontal" android:background="#ededed" android:layout_width="match_parent" android:layout_height="36dp">
+            <ImageView android:focusable="true" android:clickable="true" android:layout_width="wrap_content" android:layout_height="match_parent" android:src="@drawable/oasis_ui_wechat_icon_x" android:scaleType="center" android:adjustViewBounds="true" android:layout_alignParentTop="true" android:layout_alignParentBottom="true" android:onClick="onExitClick" android:layout_alignParentStart="true"/>
+            <TextView android:textSize="16sp" android:textColor="#000000" android:gravity="center" android:layout_width="match_parent" android:layout_height="match_parent" android:text="支付" android:layout_alignParentTop="true" android:layout_alignParentBottom="true" android:layout_alignParentStart="true" android:layout_alignParentEnd="true"/>
+        </RelativeLayout>
+        <TextView android:textSize="16sp" android:textStyle="bold" android:textColor="#000000" android:gravity="center" android:id="@+id/item_name" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="15dp" android:text="钻石*30"/>
+        <TextView android:textSize="36sp" android:textStyle="bold" android:textColor="#000000" android:gravity="center" android:id="@+id/item_price" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="20dp" android:text="￥3.00"/>
+        <View android:background="#eeeeee" android:layout_width="match_parent" android:layout_height="1dp"/>
+        <RelativeLayout android:orientation="horizontal" android:background="#ffffff" android:layout_width="match_parent" android:layout_height="50dp">
+            <TextView android:textSize="15sp" android:textColor="#808080" android:gravity="center" android:layout_width="wrap_content" android:layout_height="match_parent" android:text="收款方" android:layout_alignParentTop="true" android:layout_alignParentBottom="true" android:layout_marginStart="20dp" android:layout_alignParentStart="true"/>
+            <TextView android:textSize="15sp" android:textColor="#000000" android:gravity="center" android:id="@+id/payee_name" android:layout_width="wrap_content" android:layout_height="match_parent" android:text="林子互娱游戏" android:layout_alignParentTop="true" android:layout_alignParentBottom="true" android:layout_marginEnd="20dp" android:layout_alignParentEnd="true"/>
+        </RelativeLayout>
+        <View android:background="#eeeeee" android:layout_width="match_parent" android:layout_height="1dp"/>
+        <View android:layout_width="match_parent" android:layout_height="20dp"/>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginStart="12dp" android:layout_marginEnd="12dp">
+            <Button android:textSize="17sp" android:textColor="#ffffff" android:background="@drawable/oasis_ui_wechat_pay_button_background" android:layout_width="match_parent" android:layout_height="50dp" android:text="立即支付" android:onClick="onPayNowClick"/>
+        </LinearLayout>
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="match_parent">
+            <TextView android:textSize="13sp" android:textColor="#808080" android:gravity="center" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="10dp" android:text="支付安全由中国人民财产保险股份有限公司承保" android:layout_alignParentBottom="true" android:layout_alignParentStart="true" android:layout_alignParentEnd="true"/>
+        </RelativeLayout>
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

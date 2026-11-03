@@ -1,0 +1,124 @@
+{
+  "region": "i18n",
+  "suite_family": "2024.3.12.1",
+  "suite_revision": "",
+  "suite_public_version": "",
+  "gsdk_app_id": "1781",
+  "components": [
+    {
+      "name": "account",
+      "version": "2024.3.12.1",
+      "abilities": "AccountCommon,AccountFacebook,AccountGoogle,AccountGooglePlay,AccountLine,AccountPass,AccountTwitter,AccountVK"
+    },
+    {
+      "name": "adattribution",
+      "version": "2024.3.12.0",
+      "abilities": "AppsFlyer,Firebase"
+    },
+    {
+      "name": "compliance",
+      "version": "2024.3.12.0",
+      "abilities": "ComplianceAgeGate,ComplianceCookie,CompliancePermission,ComplianceProtocol,ComplianceRealName"
+    },
+    {
+      "name": "core",
+      "version": "2024.3.12.0",
+      "abilities": "Core"
+    },
+    {
+      "name": "crash",
+      "version": "2024.3.12.0",
+      "abilities": "Crash"
+    },
+    {
+      "name": "dynamic",
+      "version": "2024.3.12.0",
+      "abilities": "Dynamic"
+    },
+    {
+      "name": "friendchain",
+      "version": "2024.3.12.0",
+      "abilities": "FriendChain"
+    },
+    {
+      "name": "gameprotect",
+      "version": "2024.3.12.1",
+      "abilities": "GameProtect"
+    },
+    {
+      "name": "geas",
+      "version": "2024.3.12.0",
+      "abilities": "GEAS"
+    },
+    {
+      "name": "gna",
+      "version": "2024.3.12.0",
+      "abilities": "GNA"
+    },
+    {
+      "name": "gpm",
+      "version": "2024.3.12.0",
+      "abilities": "GPM"
+    },
+    {
+      "name": "location",
+      "version": "2024.3.12.0",
+      "abilities": "Location"
+    },
+    {
+      "name": "main",
+      "version": "2024.3.12.0",
+      "abilities": "MainAbility"
+    },
+    {
+      "name": "mainextra",
+      "version": "2024.3.12.0",
+      "abilities": "CommonMonitor,TTNet"
+    },
+    {
+      "name": "mediaupload",
+      "version": "2024.3.12.0",
+      "abilities": "MediaUpload"
+    },
+    {
+      "name": "pay",
+      "version": "2024.3.12.0",
+      "abilities": "Pay"
+    },
+    {
+      "name": "push",
+      "version": "2024.3.12.0",
+      "abilities": "Push"
+    },
+    {
+      "name": "quality",
+      "version": "2024.3.12.0",
+      "abilities": "SoCompress,VMOpt"
+    },
+    {
+      "name": "rating",
+      "version": "2024.3.12.0",
+      "abilities": "AppScore"
+    },
+    {
+      "name": "rncore",
+      "version": "2024.3.12.0",
+      "abilities": "RNCore"
+    },
+    {
+      "name": "share",
+      "version": "2024.3.12.0",
+      "abilities": "ShareFacebook,ShareImage,ShareInstagram,ShareLine,ShareMessenger,ShareTiktok,ShareTwitter,ShareVK,ShareWhatsApp"
+    },
+    {
+      "name": "upgrade",
+      "version": "2024.3.12.0",
+      "abilities": "ForceUpdate"
+    },
+    {
+      "name": "webview",
+      "version": "2024.3.12.0",
+      "abilities": "Webview"
+    }
+  ]
+}

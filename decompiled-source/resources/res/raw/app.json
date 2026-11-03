@@ -1,0 +1,9 @@
+{
+  "name": "dynamic_gsdk_gameinfo",
+  "displayName": "dynamic_gsdk_gameinfo",
+  "version" : "1.0.0",
+  "buildType": "1",
+  "isHermes": true,
+  "isHermes2": false,
+  "min_sdk_version": "3.15.0"
+}

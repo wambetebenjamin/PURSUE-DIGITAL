@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:id="@+id/open_rl_container" android:layout_width="match_parent" android:layout_height="match_parent">
+    <RelativeLayout android:id="@+id/open_header_view" android:layout_width="match_parent" android:layout_height="wrap_content">
+        <ImageView android:gravity="center" android:id="@+id/cancel" android:paddingLeft="19dp" android:paddingRight="19dp" android:layout_width="wrap_content" android:layout_height="44dp" android:src="@drawable/selector_web_authorize_titlebar_back" android:scaleType="centerInside" android:paddingStart="19dp" android:paddingEnd="19dp"/>
+    </RelativeLayout>
+    <FrameLayout android:id="@+id/open_loading_group" android:visibility="gone" android:layout_width="match_parent" android:layout_height="match_parent" android:layout_below="@+id/open_header_view"/>
+</RelativeLayout>

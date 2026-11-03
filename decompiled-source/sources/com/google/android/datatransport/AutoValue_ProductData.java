@@ -1,0 +1,36 @@
+package com.google.android.datatransport;
+/* loaded from: classes2.dex */
+final class AutoValue_ProductData extends ProductData {
+    private final Integer productId;
+
+    /* JADX INFO: Access modifiers changed from: package-private */
+    public AutoValue_ProductData(Integer num) {
+        this.productId = num;
+    }
+
+    @Override // com.google.android.datatransport.ProductData
+    public Integer getProductId() {
+        return this.productId;
+    }
+
+    public String toString() {
+        return "ProductData{productId=" + this.productId + "}";
+    }
+
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (obj instanceof ProductData) {
+            Integer num = this.productId;
+            Integer productId = ((ProductData) obj).getProductId();
+            return num == null ? productId == null : num.equals(productId);
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        Integer num = this.productId;
+        return (num == null ? 0 : num.hashCode()) ^ 1000003;
+    }
+}

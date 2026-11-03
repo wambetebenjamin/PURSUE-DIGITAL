@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <plurals name="mtrl_badge_content_description">
+        <item quantity="one">%d thông báo mới</item>
+        <item quantity="other">%d thông báo mới</item>
+    </plurals>
+    <plurals name="tw__time_hours">
+        <item quantity="one">1giờ</item>
+        <item quantity="other">%dgiờ</item>
+    </plurals>
+    <plurals name="tw__time_mins">
+        <item quantity="one">1phút</item>
+        <item quantity="other">%dphút</item>
+    </plurals>
+    <plurals name="tw__time_secs">
+        <item quantity="one">1giây</item>
+        <item quantity="other">%dgiây</item>
+    </plurals>
+</resources>

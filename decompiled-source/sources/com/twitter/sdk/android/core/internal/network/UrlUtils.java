@@ -1,0 +1,91 @@
+package com.twitter.sdk.android.core.internal.network;
+
+import android.text.TextUtils;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.util.TreeMap;
+/* loaded from: classes10.dex */
+public final class UrlUtils {
+    public static final String UTF8 = "UTF8";
+
+    private UrlUtils() {
+    }
+
+    public static TreeMap<String, String> getQueryParams(URI uri, boolean z) {
+        return getQueryParams(uri.getRawQuery(), z);
+    }
+
+    public static TreeMap<String, String> getQueryParams(String str, boolean z) {
+        TreeMap<String, String> treeMap = new TreeMap<>();
+        if (str == null) {
+            return treeMap;
+        }
+        for (String str2 : str.split("&")) {
+            String[] split = str2.split("=");
+            if (split.length == 2) {
+                if (z) {
+                    treeMap.put(urlDecode(split[0]), urlDecode(split[1]));
+                } else {
+                    treeMap.put(split[0], split[1]);
+                }
+            } else if (!TextUtils.isEmpty(split[0])) {
+                if (z) {
+                    treeMap.put(urlDecode(split[0]), "");
+                } else {
+                    treeMap.put(split[0], "");
+                }
+            }
+        }
+        return treeMap;
+    }
+
+    public static String urlEncode(String str) {
+        if (str == null) {
+            return "";
+        }
+        try {
+            return URLEncoder.encode(str, UTF8);
+        } catch (UnsupportedEncodingException e2) {
+            throw new RuntimeException(e2.getMessage(), e2);
+        }
+    }
+
+    public static String urlDecode(String str) {
+        if (str == null) {
+            return "";
+        }
+        try {
+            return URLDecoder.decode(str, UTF8);
+        } catch (UnsupportedEncodingException e2) {
+            throw new RuntimeException(e2.getMessage(), e2);
+        }
+    }
+
+    public static String percentEncode(String str) {
+        int i2;
+        if (str == null) {
+            return "";
+        }
+        StringBuilder sb = new StringBuilder();
+        String urlEncode = urlEncode(str);
+        int length = urlEncode.length();
+        int i3 = 0;
+        while (i3 < length) {
+            char charAt = urlEncode.charAt(i3);
+            if (charAt == '*') {
+                sb.append("%2A");
+            } else if (charAt == '+') {
+                sb.append("%20");
+            } else if (charAt == '%' && (i2 = i3 + 2) < length && urlEncode.charAt(i3 + 1) == '7' && urlEncode.charAt(i2) == 'E') {
+                sb.append('~');
+                i3 = i2;
+            } else {
+                sb.append(charAt);
+            }
+            i3++;
+        }
+        return sb.toString();
+    }
+}

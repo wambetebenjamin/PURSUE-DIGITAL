@@ -1,0 +1,8 @@
+{
+  "target_gradle_version": "7.2",
+  "target_agp_version": "7.1.3",
+  "current_gradle_version": "7.2",
+  "current_agp_version": "7.1.3",
+  "current_ggp_version": "1.0.2",
+  "handlers": {}
+}

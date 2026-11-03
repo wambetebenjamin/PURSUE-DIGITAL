@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:gravity="center" android:layout_gravity="center" android:orientation="vertical" android:id="@+id/dialog_pass_bind_tip" android:background="@drawable/shape_dialog_allow_pass_send_email_bg" android:layout_width="280dp" android:layout_height="wrap_content" android:layoutDirection="locale">
+    <TextView android:textSize="16sp" android:textStyle="bold" android:textColor="@color/gsdk_base_color_222222" android:gravity="center" android:id="@+id/tv_title" android:layout_width="240dp" android:layout_height="wrap_content" android:layout_marginTop="24dp" android:text="@string/gsdk_account_pass_created_bind_title" android:layout_marginStart="20dp" android:layout_marginEnd="20dp"/>
+    <com.bytedance.ttgame.sdk.module.account.login.ui.view.MaxHeightScrollView android:layout_width="240dp" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:fillViewport="false" app:max_height="190dp">
+        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content">
+            <TextView android:textSize="14sp" android:textColor="@color/gsdk_base_color_222222" android:gravity="center" android:id="@+id/tv_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="@string/gsdk_account_pass_created_bind_text" android:textDirection="locale" android:lineHeight="21dp"/>
+            <LinearLayout android:gravity="start" android:orientation="horizontal" android:id="@+id/ll_send_email_wrapper" android:layout_width="match_parent" android:layout_height="wrap_content">
+                <CheckBox android:id="@+id/cb_agree" android:background="@drawable/selector_user_agreement" android:layout_width="18dp" android:layout_height="18dp" android:layout_marginTop="18dp" android:checked="true" android:button="@null"/>
+                <TextView android:textSize="14sp" android:textColor="#565b66" android:gravity="left" android:id="@+id/tv_send_email" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="16dp" android:text="@string/gsdk_account_agree_marketing_email_text" android:textDirection="locale" android:layout_marginStart="4dp" android:lineHeight="22dp"/>
+            </LinearLayout>
+        </LinearLayout>
+    </com.bytedance.ttgame.sdk.module.account.login.ui.view.MaxHeightScrollView>
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="36dp" android:layout_marginTop="20dp" android:layout_marginBottom="20dp">
+        <Button android:textSize="13sp" android:textStyle="bold" android:textColor="@color/gsdk_base_color_222222" android:gravity="center" android:id="@+id/btn_cancel" android:background="@drawable/selector_button_cancel" android:layout_width="112dp" android:layout_height="36dp" android:text="@string/gsdk_account_pass_created_bind_cancel_btn" android:textAllCaps="false" android:stateListAnimator="@null"/>
+        <Button android:textSize="13sp" android:textStyle="bold" android:textColor="@color/white" android:gravity="center" android:id="@+id/btn_confirm" android:background="@drawable/select_button_click" android:layout_width="112dp" android:layout_height="36dp" android:text="@string/gsdk_account_pass_created_bind_confirm_btn" android:textAllCaps="false" android:layout_marginStart="16dp"/>
+    </LinearLayout>
+</LinearLayout>

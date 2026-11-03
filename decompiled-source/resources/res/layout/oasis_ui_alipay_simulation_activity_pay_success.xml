@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:background="#fff5f5f5" android:layout_width="match_parent" android:layout_height="match_parent">
+    <FrameLayout android:background="#ff1677ff" android:layout_width="match_parent" android:layout_height="284dp"/>
+    <TextView android:textSize="15sp" android:textColor="#ffffffff" android:id="@+id/pay_success_complete_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="15dp" android:text="完成" android:layout_marginEnd="15dp" android:layout_alignParentEnd="true"/>
+    <RelativeLayout android:layout_width="60dp" android:layout_height="58dp" android:layout_marginTop="17dp" android:layout_centerHorizontal="true">
+        <ImageView android:layout_width="27dp" android:layout_height="27dp" android:layout_marginLeft="16dp" android:layout_marginTop="5dp" android:src="@drawable/oasis_ui_alipay_icon_logo_white"/>
+        <TextView android:textColor="#ffffffff" android:gravity="center" android:layout_width="60dp" android:layout_height="20dp" android:text="支付成功" android:layout_alignParentBottom="true"/>
+    </RelativeLayout>
+    <RelativeLayout android:layout_width="wrap_content" android:layout_height="58dp" android:layout_marginTop="75dp" android:layout_centerHorizontal="true">
+        <TextView android:textSize="44sp" android:textColor="#ffffffff" android:gravity="center" android:id="@+id/pay_success_amount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0.01" android:includeFontPadding="false" android:layout_toRightOf="@+id/pay_success_symbol" android:layout_alignBaseline="@+id/pay_success_symbol" android:fontFamily="@font/alipay_number_font"/>
+        <TextView android:textSize="30sp" android:textColor="#ffffffff" android:id="@+id/pay_success_symbol" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:text="￥" android:includeFontPadding="false" android:fontFamily="@font/alipay_number_font"/>
+    </RelativeLayout>
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="53dp" android:layout_marginTop="153dp">
+        <TextView android:textSize="14sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="24dp" android:layout_marginTop="8dp" android:text="上海源庄数码科技有限公司"/>
+        <TextView android:textSize="14sp" android:textColor="#ffffffff" android:id="@+id/pay_success_amount_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:layout_marginRight="24dp" android:text="￥0.01" android:fontFamily="@font/alipay_number_font" android:layout_alignParentEnd="true"/>
+        <TextView android:textSize="14sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="24dp" android:text="付款方式" android:layout_alignParentBottom="true"/>
+        <TextView android:textSize="14sp" android:textColor="#ffffffff" android:id="@+id/pay_success_card" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginRight="24dp" android:text="招商银行储蓄卡(9883)" android:layout_alignParentBottom="true" android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+    <LinearLayout android:orientation="vertical" android:background="@drawable/pay_success_background" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="12dp" android:layout_marginTop="222dp" android:layout_marginRight="12dp">
+        <TextView android:textStyle="bold" android:textColor="#ff333333" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="10dp" android:layout_marginTop="12dp" android:text="支付有福利"/>
+        <LinearLayout android:orientation="vertical" android:id="@+id/pay_success_welfare_list" android:background="@drawable/pay_success_background" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    </LinearLayout>
+    <TextView android:textSize="16sp" android:textColor="#ffffffff" android:gravity="center" android:id="@+id/pay_success_complete" android:background="@drawable/pay_success_background_blue" android:layout_width="match_parent" android:layout_height="50dp" android:layout_marginLeft="86dp" android:layout_marginRight="86dp" android:layout_marginBottom="24dp" android:text="完成" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
+</RelativeLayout>

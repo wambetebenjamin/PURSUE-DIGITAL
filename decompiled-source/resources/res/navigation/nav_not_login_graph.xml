@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" app:startDestination="@+id/main">
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.login.ui.fragment.LoginMainFragment" android:id="@+id/main">
+        <action android:id="@+id/action_login_main_to_more" app:destination="@+id/login_more"/>
+    </fragment>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.login.ui.fragment.SwitchAccountFragment" android:id="@+id/switch_account">
+        <action android:id="@+id/action_to_main" app:destination="@+id/main"/>
+        <action android:id="@+id/action_to_more" app:destination="@+id/login_more"/>
+        <action android:id="@+id/action_to_main_muti_check_box" app:destination="@+id/main_muti_check_box"/>
+        <action android:id="@+id/login_more_muti_check_box" app:destination="@+id/login_more_muti_check_box"/>
+        <action android:id="@+id/action_switch_to_pass_address" app:destination="@+id/login_pass_address"/>
+    </fragment>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.login.ui.fragment.LoginMoreFragment" android:id="@+id/login_more">
+        <action android:id="@+id/action_back_to_main" app:popUpTo="@+id/main"/>
+    </fragment>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.login.ui.fragment.BindGuestFragment" android:id="@+id/bind_guest"/>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.login.ui.muticheckboxfragment.MutiCheckBoxLoginMainFragment" android:id="@+id/main_muti_check_box">
+        <action android:id="@+id/action_login_main_to_more" app:destination="@+id/login_more_muti_check_box"/>
+        <action android:id="@+id/action_login_main_to_compliance_muti_check_box" app:destination="@+id/compliance_muti_check_box"/>
+    </fragment>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.login.ui.fragment.LoginMoreFragment" android:id="@+id/login_more_muti_check_box">
+        <action android:id="@+id/action_back_to_main_muti_check_box" app:popUpTo="@+id/main_muti_check_box"/>
+        <action android:id="@+id/action_login_main_to_compliance_muti_check_box" app:destination="@+id/compliance_muti_check_box"/>
+    </fragment>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.login.ui.muticheckboxfragment.MutiCheckBoxComplianceFragment" android:id="@+id/compliance_muti_check_box">
+        <action android:id="@+id/action_back_to_main_muti_check_box" app:popUpTo="@+id/main_muti_check_box"/>
+    </fragment>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.login.ui.fragment.LoginPassAddressFragment" android:id="@+id/login_pass_address">
+        <action android:id="@+id/action_pass_address_to_code" app:destination="@+id/login_pass_code"/>
+    </fragment>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.login.ui.fragment.LoginPassCodeFragment" android:id="@+id/login_pass_code"/>
+</navigation>

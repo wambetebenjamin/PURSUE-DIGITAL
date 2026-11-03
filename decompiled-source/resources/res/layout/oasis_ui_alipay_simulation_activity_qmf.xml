@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:background="#fff5f8f9" android:layout_width="match_parent" android:layout_height="match_parent">
+    <RelativeLayout android:background="#ffffffff" android:layout_width="match_parent" android:layout_height="48dp">
+        <FrameLayout android:id="@+id/frameLayout_backButton" android:layout_width="wrap_content" android:layout_height="44dp" android:layout_marginLeft="8dp" android:layout_centerVertical="true">
+            <ImageView android:layout_gravity="center" android:id="@+id/activity_qmf_close_1" android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/oasis_ui_alipay_qmf_left_arrow"/>
+        </FrameLayout>
+        <FrameLayout android:id="@+id/frameLayout_homeButton" android:layout_width="wrap_content" android:layout_height="44dp" android:layout_marginLeft="18dp" android:layout_toRightOf="@+id/frameLayout_backButton" android:layout_centerVertical="true">
+            <ImageView android:layout_gravity="center" android:id="@+id/activity_qmf_home" android:layout_width="22dp" android:layout_height="22dp" android:src="@drawable/oasis_ui_alipay_qmf_home"/>
+        </FrameLayout>
+        <FrameLayout android:layout_width="wrap_content" android:layout_height="match_parent" android:layout_marginRight="6dp" android:layout_alignParentEnd="true">
+            <RelativeLayout android:layout_gravity="center" android:background="@drawable/qmf_icon_wrapper_background" android:layout_width="82dp" android:layout_height="30dp">
+                <ImageView android:layout_width="18dp" android:layout_height="18dp" android:layout_marginLeft="12dp" android:src="@drawable/oasis_ui_alipay_qmf_more" android:layout_centerVertical="true"/>
+                <ImageView android:background="#ffc4c4c4" android:layout_width="1px" android:layout_height="match_parent" android:layout_marginTop="7dp" android:layout_marginBottom="7dp" android:layout_centerInParent="true"/>
+                <ImageView android:layout_width="22dp" android:layout_height="22dp" android:layout_marginRight="10dp" android:src="@drawable/oasis_ui_alipay_qmf_close" android:layout_centerVertical="true" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
+        </FrameLayout>
+        <RelativeLayout android:background="@drawable/qmf_icon_wrapper_background" android:layout_width="30dp" android:layout_height="30dp" android:layout_marginRight="96dp" android:layout_centerVertical="true" android:layout_alignParentEnd="true">
+            <ImageView android:id="@+id/activity_qmf_star" android:layout_width="18dp" android:layout_height="18dp" android:src="@drawable/oasis_ui_alipay_qmf_star" android:layout_centerInParent="true"/>
+        </RelativeLayout>
+    </RelativeLayout>
+    <RelativeLayout android:background="#ffffffff" android:layout_width="match_parent" android:layout_height="50dp" android:layout_marginTop="48dp">
+        <ImageView android:id="@+id/activity_qmf_close_2" android:layout_width="22dp" android:layout_height="22dp" android:layout_marginLeft="8dp" android:src="@drawable/oasis_ui_alipay_qmf_left_arrow_bold" android:layout_centerVertical="true"/>
+        <TextView android:textSize="18sp" android:textColor="#ff333333" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="支付" android:layout_centerInParent="true"/>
+    </RelativeLayout>
+    <RelativeLayout android:background="@drawable/qmf_order_background" android:layout_width="match_parent" android:layout_height="196dp" android:layout_marginLeft="14dp" android:layout_marginTop="108dp" android:layout_marginRight="14dp">
+        <ImageView android:id="@+id/alipay_qmf_status_icon" android:layout_width="50dp" android:layout_height="50dp" android:layout_marginTop="50dp" android:src="@drawable/oasis_ui_alipay_qmf_waiting" android:layout_centerHorizontal="true"/>
+        <TextView android:textSize="18sp" android:textStyle="bold" android:textColor="#ff333333" android:id="@+id/alipay_qmf_tv" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="120dp" android:text="正在获取支付单..." android:layout_centerHorizontal="true"/>
+    </RelativeLayout>
+    <TextView android:textSize="18sp" android:textColor="#ffffffff" android:gravity="center" android:id="@+id/activity_qmf_repay" android:background="@drawable/qmf_textview_background_r" android:visibility="invisible" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginLeft="14dp" android:layout_marginTop="435dp" android:layout_marginRight="14dp" android:text="重新支付"/>
+    <TextView android:textSize="18sp" android:textColor="#ff0191ff" android:gravity="center" android:id="@+id/activity_qmf_back" android:background="@drawable/qmf_textview_background" android:layout_width="match_parent" android:layout_height="48dp" android:layout_marginLeft="14dp" android:layout_marginTop="500dp" android:layout_marginRight="14dp" android:text="返回商户页面"/>
+</RelativeLayout>

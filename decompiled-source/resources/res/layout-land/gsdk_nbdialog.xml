@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" android:id="@+id/login_panel_background" android:layout_width="@dimen/gsdk_base_layout_landscape_width" android:layout_height="@dimen/gsdk_base_layout_landscape_height"/>

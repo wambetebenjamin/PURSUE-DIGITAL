@@ -1,0 +1,251 @@
+package com.facebook.drawee.debug;
+
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.Matrix;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
+import com.facebook.drawee.debug.listener.ImageLoadingTimeListener;
+import com.facebook.drawee.drawable.ScalingUtils;
+import javax.annotation.Nullable;
+/* loaded from: classes8.dex */
+public class DebugControllerOverlayDrawable extends Drawable implements ImageLoadingTimeListener {
+    private static final float IMAGE_SIZE_THRESHOLD_NOT_OK = 0.5f;
+    private static final float IMAGE_SIZE_THRESHOLD_OK = 0.1f;
+    private static final int MAX_LINE_WIDTH_EM = 8;
+    private static final int MAX_NUMBER_OF_LINES = 9;
+    private static final int MAX_TEXT_SIZE_PX = 40;
+    private static final int MIN_TEXT_SIZE_PX = 10;
+    private static final String NO_CONTROLLER_ID = "none";
+    private static final int OUTLINE_COLOR = -26624;
+    private static final int OUTLINE_STROKE_WIDTH_PX = 2;
+    static final int OVERLAY_COLOR_IMAGE_ALMOST_OK = 1728026624;
+    static final int OVERLAY_COLOR_IMAGE_NOT_OK = 1727284022;
+    static final int OVERLAY_COLOR_IMAGE_OK = 1716301648;
+    private static final int TEXT_COLOR = -1;
+    private static final int TEXT_LINE_SPACING_PX = 8;
+    private static final int TEXT_PADDING_PX = 10;
+    private String mControllerId;
+    private int mCurrentTextXPx;
+    private int mCurrentTextYPx;
+    private long mFinalImageTimeMs;
+    private int mFrameCount;
+    private int mHeightPx;
+    private String mImageFormat;
+    private String mImageId;
+    private int mImageSizeBytes;
+    private int mLineIncrementPx;
+    private int mLoopCount;
+    private String mOrigin;
+    private ScalingUtils.ScaleType mScaleType;
+    private int mStartTextXPx;
+    private int mStartTextYPx;
+    private int mWidthPx;
+    private int mTextGravity = 80;
+    private final Paint mPaint = new Paint(1);
+    private final Matrix mMatrix = new Matrix();
+    private final Rect mRect = new Rect();
+    private final RectF mRectF = new RectF();
+
+    @Override // android.graphics.drawable.Drawable
+    public int getOpacity() {
+        return -3;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setAlpha(int i2) {
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void setColorFilter(ColorFilter colorFilter) {
+    }
+
+    public DebugControllerOverlayDrawable() {
+        reset();
+    }
+
+    public void reset() {
+        this.mWidthPx = -1;
+        this.mHeightPx = -1;
+        this.mImageSizeBytes = -1;
+        this.mFrameCount = -1;
+        this.mLoopCount = -1;
+        this.mImageFormat = null;
+        setControllerId(null);
+        this.mFinalImageTimeMs = -1L;
+        this.mOrigin = null;
+        invalidateSelf();
+    }
+
+    public void setTextGravity(int i2) {
+        this.mTextGravity = i2;
+        invalidateSelf();
+    }
+
+    public void setControllerId(@Nullable String str) {
+        if (str == null) {
+            str = "none";
+        }
+        this.mControllerId = str;
+        invalidateSelf();
+    }
+
+    public void setImageId(@Nullable String str) {
+        this.mImageId = str;
+        invalidateSelf();
+    }
+
+    public void setDimensions(int i2, int i3) {
+        this.mWidthPx = i2;
+        this.mHeightPx = i3;
+        invalidateSelf();
+    }
+
+    public void setAnimationInfo(int i2, int i3) {
+        this.mFrameCount = i2;
+        this.mLoopCount = i3;
+        invalidateSelf();
+    }
+
+    public void setOrigin(String str) {
+        this.mOrigin = str;
+        invalidateSelf();
+    }
+
+    public void setImageSize(int i2) {
+        this.mImageSizeBytes = i2;
+    }
+
+    public void setImageFormat(@Nullable String str) {
+        this.mImageFormat = str;
+    }
+
+    public void setScaleType(ScalingUtils.ScaleType scaleType) {
+        this.mScaleType = scaleType;
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    protected void onBoundsChange(Rect rect) {
+        super.onBoundsChange(rect);
+        prepareDebugTextParameters(rect, 9, 8);
+    }
+
+    @Override // android.graphics.drawable.Drawable
+    public void draw(Canvas canvas) {
+        Rect bounds = getBounds();
+        this.mPaint.setStyle(Paint.Style.STROKE);
+        this.mPaint.setStrokeWidth(2.0f);
+        this.mPaint.setColor(OUTLINE_COLOR);
+        canvas.drawRect(bounds.left, bounds.top, bounds.right, bounds.bottom, this.mPaint);
+        this.mPaint.setStyle(Paint.Style.FILL);
+        this.mPaint.setColor(determineOverlayColor(this.mWidthPx, this.mHeightPx, this.mScaleType));
+        canvas.drawRect(bounds.left, bounds.top, bounds.right, bounds.bottom, this.mPaint);
+        this.mPaint.setStyle(Paint.Style.FILL);
+        this.mPaint.setStrokeWidth(0.0f);
+        this.mPaint.setColor(-1);
+        this.mCurrentTextXPx = this.mStartTextXPx;
+        this.mCurrentTextYPx = this.mStartTextYPx;
+        String str = this.mImageId;
+        if (str != null) {
+            addDebugText(canvas, "IDs: %s, %s", this.mControllerId, str);
+        } else {
+            addDebugText(canvas, "ID: %s", this.mControllerId);
+        }
+        addDebugText(canvas, "D: %dx%d", Integer.valueOf(bounds.width()), Integer.valueOf(bounds.height()));
+        addDebugText(canvas, "I: %dx%d", Integer.valueOf(this.mWidthPx), Integer.valueOf(this.mHeightPx));
+        addDebugText(canvas, "I: %d KiB", Integer.valueOf(this.mImageSizeBytes / 1024));
+        String str2 = this.mImageFormat;
+        if (str2 != null) {
+            addDebugText(canvas, "i format: %s", str2);
+        }
+        int i2 = this.mFrameCount;
+        if (i2 > 0) {
+            addDebugText(canvas, "anim: f %d, l %d", Integer.valueOf(i2), Integer.valueOf(this.mLoopCount));
+        }
+        ScalingUtils.ScaleType scaleType = this.mScaleType;
+        if (scaleType != null) {
+            addDebugText(canvas, "scale: %s", scaleType);
+        }
+        long j2 = this.mFinalImageTimeMs;
+        if (j2 >= 0) {
+            addDebugText(canvas, "t: %d ms", Long.valueOf(j2));
+        }
+        String str3 = this.mOrigin;
+        if (str3 != null) {
+            addDebugText(canvas, "origin: %s", str3);
+        }
+    }
+
+    private void prepareDebugTextParameters(Rect rect, int i2, int i3) {
+        int min = Math.min(40, Math.max(10, Math.min(rect.width() / i3, rect.height() / i2)));
+        this.mPaint.setTextSize(min);
+        int i4 = min + 8;
+        this.mLineIncrementPx = i4;
+        if (this.mTextGravity == 80) {
+            this.mLineIncrementPx = i4 * (-1);
+        }
+        this.mStartTextXPx = rect.left + 10;
+        this.mStartTextYPx = this.mTextGravity == 80 ? rect.bottom - 10 : rect.top + 10 + 10;
+    }
+
+    private void addDebugText(Canvas canvas, String str, @Nullable Object... objArr) {
+        if (objArr == null) {
+            canvas.drawText(str, this.mCurrentTextXPx, this.mCurrentTextYPx, this.mPaint);
+        } else {
+            canvas.drawText(String.format(str, objArr), this.mCurrentTextXPx, this.mCurrentTextYPx, this.mPaint);
+        }
+        this.mCurrentTextYPx += this.mLineIncrementPx;
+    }
+
+    int determineOverlayColor(int i2, int i3, @Nullable ScalingUtils.ScaleType scaleType) {
+        int width = getBounds().width();
+        int height = getBounds().height();
+        if (width > 0 && height > 0 && i2 > 0 && i3 > 0) {
+            if (scaleType != null) {
+                Rect rect = this.mRect;
+                rect.top = 0;
+                rect.left = 0;
+                this.mRect.right = width;
+                this.mRect.bottom = height;
+                this.mMatrix.reset();
+                scaleType.getTransform(this.mMatrix, this.mRect, i2, i3, 0.0f, 0.0f);
+                RectF rectF = this.mRectF;
+                rectF.top = 0.0f;
+                rectF.left = 0.0f;
+                this.mRectF.right = i2;
+                this.mRectF.bottom = i3;
+                this.mMatrix.mapRect(this.mRectF);
+                width = Math.min(width, (int) this.mRectF.width());
+                height = Math.min(height, (int) this.mRectF.height());
+            }
+            float f2 = width;
+            float f3 = f2 * 0.1f;
+            float f4 = f2 * 0.5f;
+            float f5 = height;
+            float f6 = 0.1f * f5;
+            float f7 = f5 * 0.5f;
+            int abs = Math.abs(i2 - width);
+            int abs2 = Math.abs(i3 - height);
+            float f8 = abs;
+            if (f8 < f3 && abs2 < f6) {
+                return OVERLAY_COLOR_IMAGE_OK;
+            }
+            if (f8 < f4 && abs2 < f7) {
+                return OVERLAY_COLOR_IMAGE_ALMOST_OK;
+            }
+        }
+        return OVERLAY_COLOR_IMAGE_NOT_OK;
+    }
+
+    public void setFinalImageTimeMs(long j2) {
+        this.mFinalImageTimeMs = j2;
+    }
+
+    @Override // com.facebook.drawee.debug.listener.ImageLoadingTimeListener
+    public void onFinalImageSet(long j2) {
+        this.mFinalImageTimeMs = j2;
+        invalidateSelf();
+    }
+}

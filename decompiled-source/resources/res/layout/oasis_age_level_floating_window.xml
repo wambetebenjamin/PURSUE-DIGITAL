@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:background="@android:color/transparent" android:layout_width="wrap_content" android:layout_height="wrap_content">
+    <ImageView android:id="@+id/age_level_floating_imageview" android:background="@android:color/transparent" android:layout_width="match_parent" android:layout_height="match_parent" android:src="@drawable/oasis_age_level_floating_window_image" android:adjustViewBounds="true"/>
+</LinearLayout>

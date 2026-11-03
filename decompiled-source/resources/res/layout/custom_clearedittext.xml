@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:gravity="center" android:id="@+id/custom_clear_edittext" android:background="@drawable/shape_email_input_box" android:layout_width="match_parent" android:layout_height="44dp">
+    <EditText android:textSize="14sp" android:textStyle="bold" android:textColor="@color/gsdk_base_color_222222" android:textColorHint="@color/gsdk_account_8A8F99" android:ellipsize="end" android:gravity="center" android:id="@+id/et_pass" android:background="@null" android:layout_width="match_parent" android:layout_height="44dp" android:hint="@string/gsdk_account_pass_email_input_hint" android:maxLines="1" android:singleLine="true" android:imeOptions="flagNoExtractUi|flagNoFullscreen|actionDone" android:paddingStart="26dp" android:paddingEnd="26dp"/>
+    <ImageView android:id="@+id/img_clear" android:background="@drawable/icon_clear" android:visibility="gone" android:layout_width="16dp" android:layout_height="16dp" android:layout_centerVertical="true" android:layout_marginEnd="10dp" android:layout_alignParentEnd="true"/>
+</RelativeLayout>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:background="@android:color/transparent" android:layout_width="match_parent" android:layout_height="match_parent">
+    <RelativeLayout android:background="@drawable/custom_alipay_dialog_background" android:layout_width="wrap_content" android:layout_height="50dp" android:layout_centerInParent="true">
+        <com.google.android.material.progressindicator.CircularProgressIndicator android:layout_width="20dp" android:layout_height="20dp" android:layout_marginLeft="16dp" android:indeterminate="true" android:layout_centerVertical="true" app:indicatorColor="#ff419bbd" app:indicatorInset="0dp" app:indicatorSize="24dp" app:trackColor="#ffffffff" app:trackThickness="1dp"/>
+        <TextView android:textSize="16sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginLeft="48dp" android:layout_marginRight="16dp" android:text="去支付宝付款" android:layout_centerVertical="true"/>
+    </RelativeLayout>
+</RelativeLayout>

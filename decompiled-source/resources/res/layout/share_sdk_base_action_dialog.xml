@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:id="@+id/dialog_root" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="8dp" android:layout_marginRight="8dp" android:layout_marginBottom="8dp">
+    <ViewStub android:id="@+id/long_image_layout" android:layout="@layout/share_sdk_long_image_layout" android:layout_width="match_parent" android:layout_height="0dp" android:layout_marginLeft="50dp" android:layout_marginTop="20dp" android:layout_marginRight="50dp" android:layout_marginBottom="20dp" android:layout_weight="1"/>
+    <LinearLayout android:orientation="vertical" android:id="@+id/panel_rows" android:background="@drawable/share_sdk_share_board_bg" android:layout_width="match_parent" android:layout_height="wrap_content"/>
+    <TextView android:textSize="17sp" android:textColor="@color/share_sdk_ssxinzi1_selector" android:gravity="center" android:id="@+id/cancel_btn" android:background="@drawable/share_sdk_share_action_dialog_cancel_btn_bg" android:layout_width="match_parent" android:layout_height="44dp" android:layout_marginTop="8dp" android:text="@string/share_sdk_cancel"/>
+</LinearLayout>

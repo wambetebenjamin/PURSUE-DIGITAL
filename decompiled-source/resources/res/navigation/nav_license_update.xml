@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" app:startDestination="@+id/license_update">
+    <fragment android:name="com.bytedance.ttgame.module.compliance.impl.protocol.ui.LicenseUpdateMainFragment" android:id="@+id/license_update">
+        <action android:id="@+id/license_update_to_protocol" app:destination="@+id/license_update_to_protocol"/>
+    </fragment>
+</navigation>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" app:startDestination="@+id/account_management">
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.accountmanage.ui.AccountManagementFragment" android:id="@+id/account_management"/>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.accountmanage.ui.BindPassAddressFragment" android:id="@+id/bind_pass_address">
+        <action android:id="@+id/action_pass_address_to_code" app:destination="@+id/bind_pass_code"/>
+    </fragment>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.accountmanage.ui.BindPassCodeFragment" android:id="@+id/bind_pass_code">
+        <action android:id="@+id/action_back_to_account_management" app:destination="@+id/account_management" app:popUpTo="@+id/account_management" app:popUpToInclusive="true"/>
+        <action android:id="@+id/action_to_bind_pass_fail" app:destination="@+id/bind_pass_fail"/>
+    </fragment>
+    <fragment android:name="com.bytedance.ttgame.sdk.module.account.accountmanage.ui.BindPassFailFragment" android:id="@+id/bind_pass_fail"/>
+</navigation>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:background="#ffffffff" android:fitsSystemWindows="true" android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="20dp" android:layout_centerHorizontal="true">
+        <ImageView android:layout_gravity="center_vertical" android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/oasis_ui_alipay_wechat"/>
+        <TextView android:textSize="18dp" android:textStyle="bold" android:textColor="#ff1ebe1f" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="支付成功" android:paddingStart="5dp"/>
+    </LinearLayout>
+    <TextView android:textSize="16sp" android:textStyle="bold" android:textColor="#ff000000" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="140dp" android:text="深圳市林子互娱科技有限公司" android:layout_centerHorizontal="true"/>
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="180dp">
+        <com.oasis.ui.alipaysimulation.ExcludeFontPaddingTextView android:textSize="28sp" android:textStyle="bold" android:textColor="#ff000000" android:paddingTop="5dp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="￥" android:includeFontPadding="false" android:layout_toLeftOf="@+id/pay_success_amount" android:layout_alignTop="@+id/pay_success_amount" android:fontFamily="@font/alipay_number_font"/>
+        <com.oasis.ui.alipaysimulation.ExcludeFontPaddingTextView android:textSize="46sp" android:textColor="#ff000000" android:id="@+id/pay_success_amount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="3.00" android:includeFontPadding="false" android:layout_centerInParent="true" android:fontFamily="@font/alipay_number_font"/>
+    </RelativeLayout>
+    <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="180dp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true">
+        <ImageView android:layout_gravity="center_vertical" android:layout_width="20dp" android:layout_height="20dp" android:src="@drawable/oasis_ui_alipay_wechat_gongyi"/>
+        <TextView android:textColor="#aa000000" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="为环保工人送爱心餐" android:paddingStart="4dp"/>
+        <ImageView android:layout_gravity="center_vertical" android:layout_width="12dp" android:layout_height="12dp" android:src="@drawable/oasis_ui_right_arrow"/>
+    </LinearLayout>
+    <TextView android:textStyle="bold" android:textColor="#ff000000" android:gravity="center" android:id="@+id/pay_success_complete" android:background="@drawable/dialog_background_gray" android:layout_width="190dp" android:layout_height="50dp" android:layout_marginBottom="100dp" android:text="完成" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
+</RelativeLayout>

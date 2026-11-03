@@ -1,0 +1,7 @@
+com.bytedance.ttgame.sdk.module.account.platform.facebook.Proxy__FacebookAuthorizeService
+com.bytedance.ttgame.sdk.module.account.platform.google.Proxy__GoogleAuthorizeService
+com.bytedance.ttgame.sdk.module.account.platform.google_play.Proxy__GooglePlayAuthorizeService
+com.bytedance.ttgame.sdk.module.account.platform.line.Proxy__LineAuthorizeService
+com.bytedance.ttgame.sdk.module.account.platform.pass.Proxy__PassAuthorizeService
+com.bytedance.ttgame.sdk.module.account.platform.twitter.Proxy__TwitterAuthorizeService
+com.bytedance.ttgame.sdk.module.account.platform.vk.Proxy__VkAuthorizeService

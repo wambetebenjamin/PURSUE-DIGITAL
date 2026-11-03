@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_checked="true">
+        <layer-list>
+            <item android:gravity="center" android:left="32.5dp" android:top="28dp" android:right="32.5dp">
+                <shape>
+                    <solid android:color="@color/gsdk_base_theme_color_red"/>
+                    <corners android:radius="2.5dp"/>
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

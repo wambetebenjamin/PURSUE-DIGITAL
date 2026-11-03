@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:background="@android:color/transparent" android:layout_width="match_parent" android:layout_height="match_parent">
+    <LinearLayout android:orientation="vertical" android:background="@drawable/dialog_background" android:layout_width="319dp" android:layout_height="307dp" android:layout_centerInParent="true">
+        <FrameLayout android:layout_width="match_parent" android:layout_height="50dp">
+            <ImageView android:layout_gravity="center_vertical" android:id="@+id/pay_selection_close" android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/oasis_ui_wechat_icon_x" android:layout_marginStart="16dp"/>
+            <TextView android:textSize="17sp" android:textColor="#ff222222" android:layout_gravity="center" android:id="@+id/pay_selection_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/pay_selection_title_text"/>
+        </FrameLayout>
+        <View android:id="@+id/pay_selection_divider" android:background="#1e161823" android:layout_width="match_parent" android:layout_height="1dp"/>
+        <RelativeLayout android:layout_width="match_parent" android:layout_height="60dp">
+            <TextView android:textSize="38sp" android:textColor="#ff222222" android:id="@+id/pay_selection_amount" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="2dp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true" android:layout_marginEnd="2dp"/>
+            <TextView android:textSize="22sp" android:textColor="#ff222222" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/pay_selection_money_unit" android:layout_alignBaseline="@+id/pay_selection_amount" android:layout_toStartOf="@+id/pay_selection_amount"/>
+        </RelativeLayout>
+        <TextView android:textSize="12sp" android:textColor="#ff808080" android:gravity="center_horizontal" android:id="@+id/pay_selection_description" android:layout_width="match_parent" android:layout_height="18dp" android:layout_marginTop="2dp"/>
+        <LinearLayout android:orientation="vertical" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginLeft="16dp" android:layout_marginTop="12dp" android:layout_marginRight="16dp">
+            <RelativeLayout android:id="@+id/pay_selection_1" android:background="@drawable/dialog_background_gray" android:layout_width="match_parent" android:layout_height="64dp">
+                <ImageView android:id="@+id/pay_selection_1_icon" android:layout_width="24dp" android:layout_height="24dp" android:layout_marginLeft="16dp" android:layout_marginRight="16dp" android:src="@drawable/oasis_ui_alipay_icon_logo" android:layout_centerVertical="true"/>
+                <TextView android:textSize="16sp" android:textColor="#ff404040" android:id="@+id/pay_selection_1_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="支付宝" android:layout_centerVertical="true" android:layout_toEndOf="@+id/pay_selection_1_icon"/>
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/oasis_ui_right_arrow" android:layout_centerVertical="true" android:layout_marginEnd="7dp" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
+            <RelativeLayout android:id="@+id/pay_selection_2" android:background="@drawable/dialog_background_gray" android:layout_width="match_parent" android:layout_height="64dp" android:layout_marginTop="6dp">
+                <ImageView android:id="@+id/pay_selection_2_icon" android:layout_width="24dp" android:layout_height="24dp" android:layout_marginLeft="16dp" android:layout_marginRight="16dp" android:src="@drawable/oasis_ui_wechat_icon_logo" android:layout_centerVertical="true"/>
+                <TextView android:textSize="16sp" android:textColor="#ff404040" android:id="@+id/pay_selection_2_name" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="微信" android:layout_centerVertical="true" android:layout_toEndOf="@+id/pay_selection_2_icon"/>
+                <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/oasis_ui_right_arrow" android:layout_centerVertical="true" android:layout_marginEnd="7dp" android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
+        </LinearLayout>
+    </LinearLayout>
+    <ProgressBar android:id="@+id/pay_selection_progressbar" android:visibility="gone" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_centerInParent="true" android:indeterminateTint="#ff999999"/>
+</RelativeLayout>

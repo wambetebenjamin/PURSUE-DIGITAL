@@ -1,0 +1,20 @@
+[Asset Bundles]18
+art_assets/cutropegame/dynamicresource
+art_assets/cutropegame/materials
+art_assets/cutropegame/physicsmaterials
+art_assets/cutropegame/postprocessing
+art_assets/cutropegame/ui
+art_assets/cutropegame/effects
+art_assets/cutropegame/gameelements
+art_assets/cutropegame/levels/1xxx
+art_assets/cutropegame/levels/2xxx
+art_assets/cutropegame/levels/3xxx
+art_assets/cutropegame/levels/oldlevel
+art_assets/cutropegame/models
+art_assets/cutropegame/characters/c_rope_t2
+art_assets/cutropegame/characters/c_spider
+art_assets/cutropegame/characters/c_wizard
+art_assets/cutropegame/characters/l_nubia_rope
+art_assets/cutropegame/characters/l_odysseus_rope
+art_assets/cutropegame/characters/l_valkiri_rope
+[Asset Files]0

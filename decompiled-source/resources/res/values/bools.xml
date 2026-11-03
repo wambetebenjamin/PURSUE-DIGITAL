@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="abc_action_bar_embed_tabs">true</bool>
+    <bool name="abc_config_actionMenuItemAllCaps">true</bool>
+    <bool name="active_oasis_age_level_floating_window">false</bool>
+    <bool name="debug">false</bool>
+    <bool name="enable_logger_file">false</bool>
+    <bool name="hades_downloader_auto_init">true</bool>
+    <bool name="has_compliance_module">true</bool>
+    <bool name="is_auto_open_quality_vm_opt">false</bool>
+    <bool name="mtrl_btn_textappearance_all_caps">true</bool>
+    <bool name="openLog">false</bool>
+    <bool name="rocketi18n_push_enable">true</bool>
+    <bool name="tgrp_downloader_auto_init">true</bool>
+    <bool name="upgrade_use_custom_ui">true</bool>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:background="@color/gsdk_webview_DEFAULT_ssxinmian2" android:layout_width="match_parent" android:layout_height="wrap_content">
+    <TextView android:textSize="16sp" android:textColor="@drawable/ssxinzi1_selector" android:gravity="center" android:id="@+id/tv_save_image" android:background="@drawable/image_long_press_cancel_btn_bg" android:layout_width="match_parent" android:layout_height="44dp" android:text="@string/gsdk_webview_save_image"/>
+    <View android:background="@color/gsdk_webview_DEFAULT_ssxinmian2" android:layout_width="match_parent" android:layout_height="4dp"/>
+    <TextView android:textSize="16sp" android:textColor="@drawable/ssxinzi1_selector" android:gravity="center" android:id="@+id/tv_cancel" android:background="@drawable/image_long_press_cancel_btn_bg" android:layout_width="match_parent" android:layout_height="44dp" android:text="@string/gsdk_account_cancel"/>
+</LinearLayout>

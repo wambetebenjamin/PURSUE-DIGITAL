@@ -1,0 +1,101 @@
+gsdk2 {
+    gsdkAppId "1781"
+    gsdkVersion "2024.3.12.1"
+    region "i18n"
+    extras {
+    }
+    components {
+        account {
+            version "2024.3.12.1"
+            abilities "AccountCommon,AccountFacebook,AccountGoogle,AccountGooglePlay,AccountLine,AccountPass,AccountTwitter,AccountVK"
+        }
+        adattribution {
+            version "2024.3.12.0"
+            abilities "AppsFlyer,Firebase"
+        }
+        compliance {
+            version "2024.3.12.0"
+            abilities "ComplianceAgeGate,ComplianceCookie,CompliancePermission,ComplianceProtocol,ComplianceRealName"
+        }
+        core {
+            version "2024.3.12.0"
+            abilities "Core"
+        }
+        crash {
+            version "2024.3.12.0"
+            abilities "Crash"
+        }
+        dynamic {
+            version "2024.3.12.0"
+            abilities "Dynamic"
+        }
+        friendchain {
+            version "2024.3.12.0"
+            abilities "FriendChain"
+        }
+        gameprotect {
+            version "2024.3.12.1"
+            abilities "GameProtect"
+        }
+        geas {
+            version "2024.3.12.0"
+            abilities "GEAS"
+        }
+        gna {
+            version "2024.3.12.0"
+            abilities "GNA"
+        }
+        gpm {
+            version "2024.3.12.0"
+            abilities "GPM"
+        }
+        location {
+            version "2024.3.12.0"
+            abilities "Location"
+        }
+        main {
+            version "2024.3.12.0"
+            abilities "MainAbility"
+        }
+        mainextra {
+            version "2024.3.12.0"
+            abilities "CommonMonitor,TTNet"
+        }
+        mediaupload {
+            version "2024.3.12.0"
+            abilities "MediaUpload"
+        }
+        pay {
+            version "2024.3.12.0"
+            abilities "Pay"
+        }
+        push {
+            version "2024.3.12.0"
+            abilities "Push"
+        }
+        quality {
+            version "2024.3.12.0"
+            abilities "SoCompress,VMOpt"
+        }
+        rating {
+            version "2024.3.12.0"
+            abilities "AppScore"
+        }
+        rncore {
+            version "2024.3.12.0"
+            abilities "RNCore"
+        }
+        share {
+            version "2024.3.12.0"
+            abilities "ShareFacebook,ShareImage,ShareInstagram,ShareLine,ShareMessenger,ShareTiktok,ShareTwitter,ShareVK,ShareWhatsApp"
+        }
+        upgrade {
+            version "2024.3.12.0"
+            abilities "ForceUpdate"
+        }
+        webview {
+            version "2024.3.12.0"
+            abilities "Webview"
+        }
+    }
+}

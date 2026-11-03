@@ -9,3 +9,6 @@ dist/
 .DS_Store
 .vercel
 .vite
+jadx-1.4.7.zip
+jadx-tool/
+extracted-apks/

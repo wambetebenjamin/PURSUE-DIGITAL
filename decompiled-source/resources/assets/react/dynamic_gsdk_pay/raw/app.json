@@ -1,0 +1,9 @@
+{
+  "name": "dynamic_gsdk_pay",
+  "displayName": "dynamic_gsdk_pay",
+  "version" : "1.0.0",
+  "buildType": "2",
+  "isHermes": true,
+  "isHermes2": false,
+  "min_sdk_version": "3.16.0"
+}

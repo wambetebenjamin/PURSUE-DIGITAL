@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:background="@android:color/transparent" android:layout_width="match_parent" android:layout_height="match_parent">
+    <RelativeLayout android:background="@drawable/custom_wechat_dialog_background" android:layout_width="120dp" android:layout_height="120dp" android:layout_centerInParent="true">
+        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:layout_marginTop="16dp" android:src="@drawable/oasis_ui_alipay_wechat_white" android:layout_centerHorizontal="true"/>
+        <TextView android:textSize="16sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="62dp" android:text="微信支付" android:layout_centerHorizontal="true"/>
+        <ImageView android:id="@+id/wechat_waiting_dot_0" android:layout_width="8dp" android:layout_height="8dp" android:layout_marginTop="96dp" android:src="@drawable/oasis_ui_alipay_qmf_circle_dot_0" android:layout_marginStart="43dp"/>
+        <ImageView android:id="@+id/wechat_waiting_dot_1" android:layout_width="8dp" android:layout_height="8dp" android:layout_marginTop="96dp" android:src="@drawable/oasis_ui_alipay_qmf_circle_dot_1" android:layout_centerHorizontal="true"/>
+        <ImageView android:id="@+id/wechat_waiting_dot_2" android:layout_width="8dp" android:layout_height="8dp" android:layout_marginTop="96dp" android:src="@drawable/oasis_ui_alipay_qmf_circle_dot_2" android:layout_marginEnd="43dp" android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+</RelativeLayout>

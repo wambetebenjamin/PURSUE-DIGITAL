@@ -1,0 +1,72 @@
+{
+  "app": {
+    "is_debug": false,
+    "app_id": "2447",
+    "channel": "GooglePlay",
+    "app_name": "immortal",
+    "adjust_app_token": "iwlv9uaarpxc",
+    "screen_orientation": "sensorLandscape",
+    "main_activity": "com.oasis.unity.OasisPlayerActivity",
+    "secret_id": 1,
+    "info1": 1102924926,
+    "info2": 1536907735,
+    "info3": 2075601064,
+    "info4": 1250112469,
+    "server_region": 10,
+    "push": {
+      "enable": true,
+      "auto_request_permission": false,
+      "push_channel_id": "landofglory",
+      "push_channel_name": "landofglory",
+      "push_app_name": "landofglory",
+      "app_oversea_host": "https://i.isnssdk.com",
+      "red_badge_show": true,
+      "red_max_show_times": 4,
+      "red_show_strategy": "default_strategy"
+    },
+    "update_version_code": 100,
+    "im": {
+      "fpid": 89,
+      "aid": 2447,
+      "appKey": "e0f82475ab9dbf5717d18b4a9c0d7fd0",
+      "wsHost": "wss://frontier-va.byteoversea.com/ws/v2",
+      "service": 2,
+      "method": 1,
+      "httpHost": "https://imapi-va-oth.isnssdk.com/",
+      "inboxes": [
+        0
+      ]
+    },
+    "device_register_optimization": false,
+    "af_dev_key": "CwUshB5HFUr5UBbAZPCkkZ",
+    "share": {
+      "panelId": "2447_text_image_1",
+      "share_keys": {
+        "twitter": {
+          "key": "JbgujPKGjljSreq0ja5u1nE7T",
+          "secret": "faXHMNf6pJWGuegLkWPlhOVIt8brslJItYHYWMPuUdj6g2r4Ae"
+        }
+      }
+    }
+  },
+  "channel": {
+    "account": {
+      "google_id": "746918294252-sno17ukl0s4tac6kp2h0031iaimf7gmv.apps.googleusercontent.com",
+      "google_web_id": "746918294252-qbejg3vunp8l110mturvn1lg54clq432.apps.googleusercontent.com",
+      "google_platForm_id": "597",
+      "facebook_platform_id": "598",
+      "vk_platfrom_id": "1684",
+      "google_play_platform_id": "1845",
+      "google_play_id": "746918294252-sno17ukl0s4tac6kp2h0031iaimf7gmv.apps.googleusercontent.com",
+      "sort": [
+        "vk",
+        "facebook",
+        "google",
+        "google_play"
+      ]
+    },
+    "pay": {
+      "iap_key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgGRG0Ak0nCk/mGOh7VtZ3P5AnliJ+KCww66oKLxmcPEtvwsJBRB7u4F/5/Np+dATGF9E88UJjrlYcqiwhXfamxTbKhS/AFDXOC00hwvb1XvuqvjwP66qssc36xlC44Tem/VSzEo/VJuTEBwbYyfMq/TmxPRS4Hm5RgRJjNHJRQKogvOUoiDAXrxy+S03SDxlzc2P6P376U4+yYqeF//oQbyUYG0KOAWMeMILzreE656YYa1u03QD4BNyFfwYkGJtU2HzLjgu0gVZOVPMsT4m2ai8CqVA8PVRvz+sHn31yqMdv4sMh2uBxTgzgwflUdMSFLPs1ISpPsxjKYbNkTNQMwIDAQAB"
+    }
+  }
+}

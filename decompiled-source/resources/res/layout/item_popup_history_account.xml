@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" android:orientation="vertical" android:layout_width="wrap_content" android:layout_height="wrap_content">
+    <RelativeLayout android:background="@drawable/shape_history_account_bg" android:layout_width="272dp" android:layout_height="212dp">
+        <androidx.recyclerview.widget.RecyclerView android:id="@+id/ry_history_account" android:visibility="visible" android:scrollbars="none" android:layout_width="match_parent" android:layout_height="168dp" android:overScrollMode="never"/>
+        <LinearLayout android:id="@+id/ll_operation" android:layout_width="match_parent" android:layout_height="44dp" android:layout_below="@+id/ry_history_account">
+            <LinearLayout android:id="@+id/ll_delete_or_add" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                <LinearLayout android:gravity="center" android:id="@+id/btn_delete" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                    <ImageView android:background="@drawable/icon_minus" android:layout_width="16dp" android:layout_height="16dp"/>
+                    <TextView android:textSize="14sp" android:textColor="@color/gsdk_account_565B66" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/gsdk_account_delete_record" android:layout_marginStart="4dp"/>
+                </LinearLayout>
+                <ImageView android:layout_gravity="center" android:background="@color/gsdk_account_E6E9F0" android:layout_width="1dp" android:layout_height="14dp"/>
+                <LinearLayout android:gravity="center" android:id="@+id/btn_add" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1">
+                    <ImageView android:background="@drawable/icon_add" android:layout_width="16dp" android:layout_height="16dp"/>
+                    <TextView android:textSize="14sp" android:textColor="@color/gsdk_account_theme_purple" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/gsdk_account_more" android:layout_marginStart="4dp"/>
+                </LinearLayout>
+            </LinearLayout>
+            <TextView android:textSize="14sp" android:textColor="@color/gsdk_account_theme_purple" android:gravity="center" android:id="@+id/btn_done" android:visibility="gone" android:layout_width="0dp" android:layout_height="match_parent" android:text="@string/gsdk_account_done" android:layout_weight="1"/>
+        </LinearLayout>
+        <ImageView android:background="@drawable/shape_history_account_dividing_line" android:layout_width="match_parent" android:layout_height="10dp" android:layout_above="@+id/ll_operation"/>
+    </RelativeLayout>
+</LinearLayout>

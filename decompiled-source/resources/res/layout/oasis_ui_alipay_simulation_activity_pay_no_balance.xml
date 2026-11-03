@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android" android:background="@android:color/transparent" android:layout_width="match_parent" android:layout_height="match_parent">
+    <RelativeLayout android:background="@drawable/pay_success_background" android:layout_width="319dp" android:layout_height="190dp" android:layout_centerInParent="true">
+        <TextView android:textSize="17sp" android:textColor="#ff222222" android:gravity="center_horizontal" android:layout_width="260dp" android:layout_height="wrap_content" android:layout_marginTop="32dp" android:text="银行卡可用余额不足（如信用卡则为可透支额度不足），请核实后再试" android:layout_centerHorizontal="true"/>
+        <View android:background="#1e161823" android:layout_width="match_parent" android:layout_height="1px" android:layout_marginBottom="52dp" android:layout_alignParentBottom="true"/>
+        <View android:background="#1e161823" android:layout_width="1px" android:layout_height="52dp" android:layout_alignParentBottom="true" android:layout_centerHorizontal="true"/>
+        <TextView android:textColor="#ff222222" android:gravity="center" android:id="@+id/tv_cancel" android:layout_width="159dp" android:layout_height="52dp" android:text="取消" android:layout_alignParentBottom="true" android:layout_alignParentStart="true"/>
+        <TextView android:textColor="#ff222222" android:gravity="center" android:layout_width="159dp" android:layout_height="52dp" android:text="添加新卡" android:layout_alignParentBottom="true" android:layout_alignParentEnd="true"/>
+    </RelativeLayout>
+</RelativeLayout>

@@ -1,0 +1,430 @@
+[
+  {
+    "key": "__gsdk_manifest_component__account__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account__impl__i18n__release\\nversion=4.3.31480\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__impl__toutiao",
+    "value": "name=toutiao\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_toutiao__impl__i18n__release\\nversion=4.3.31487\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__impl__platform_facebook",
+    "value": "name=platform_facebook\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_platform_facebook__impl__i18n__release\\nversion=1.0.56\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__impl__platform_google",
+    "value": "name=platform_google\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_platform_google__impl__i18n__release\\nversion=1.0.68\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__impl__platform_google_play",
+    "value": "name=platform_google_play\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_platform_google_play__impl__i18n__release\\nversion=1.0.48\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__impl__platform_line",
+    "value": "name=platform_line\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_platform_line__impl__i18n__release\\nversion=1.0.51\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__impl__platform_pass",
+    "value": "name=platform_pass\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_platform_pass__impl__i18n__release\\nversion=1.0.9\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__impl__platform_twitter",
+    "value": "name=platform_twitter\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_platform_twitter__impl__i18n__release\\nversion=1.0.50\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__impl__platform_vk",
+    "value": "name=platform_vk\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_platform_vk__impl__i18n__release\\nversion=1.0.50\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__main__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__main__impl__i18n__release\\nversion=5.3.31488\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=main"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__api__platform",
+    "value": "name=platform\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_platform__api__i18n__release\\nversion=16.2.3\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__api__toutiao",
+    "value": "name=toutiao\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account_toutiao__api__i18n__release\\nversion=47.5.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account__bridge__i18n__release\\nversion=4.3.3943\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__bridge__realname",
+    "value": "name=realname\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_realname__bridge__i18n__release\\nversion=1.0.41\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__bridge__agegate",
+    "value": "name=agegate\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_agegate__bridge__i18n__release\\nversion=1.0.54\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__bridge__cookie",
+    "value": "name=cookie\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_cookie__bridge__i18n__release\\nversion=1.0.53\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__bridge__permission",
+    "value": "name=permission\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_permission__bridge__i18n__release\\nversion=1.0.50\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__bridge__protocol",
+    "value": "name=protocol\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_protocol__bridge__i18n__release\\nversion=1.0.55\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__gameprotect__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__gameprotect__bridge__i18n__release\\nversion=1.0.44\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=gameprotect"
+  },
+  {
+    "key": "__gsdk_manifest_component__main__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__main__bridge__i18n__release\\nversion=5.2.78\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=main"
+  },
+  {
+    "key": "__gsdk_manifest_component__pay__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__pay__bridge__i18n__release\\nversion=3.12.62\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=pay"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share__bridge__i18n__release\\nversion=4.2.45\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_component__dynamic__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__dynamic__impl__i18n__release\\nversion=1.0.73\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=dynamic"
+  },
+  {
+    "key": "__gsdk_manifest_component__rncore__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__rncore__impl__i18n__release\\nversion=1.0.90\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=rncore"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share__impl__i18n__release\\nversion=4.3.116\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__impl__facebook",
+    "value": "name=facebook\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share_facebook__impl__i18n__release\\nversion=4.1.51\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__impl__twitter",
+    "value": "name=twitter\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share_twitter__impl__i18n__release\\nversion=4.1.52\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share__api__i18n__release\\nversion=14.0.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_component__adattribution__impl__appsflyer",
+    "value": "name=appsflyer\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__adattribution_appsflyer__impl__i18n__release\\nversion=1.0.70\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=adattribution"
+  },
+  {
+    "key": "__gsdk_manifest_component__adattribution__impl__firebase",
+    "value": "name=firebase\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__adattribution_firebase__impl__i18n__release\\nversion=1.0.56\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=adattribution"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__impl__agegate",
+    "value": "name=agegate\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_agegate__impl__i18n__release\\nversion=1.0.63\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__impl__cookie",
+    "value": "name=cookie\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_cookie__impl__i18n__release\\nversion=1.0.58\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__impl__permission",
+    "value": "name=permission\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_permission__impl__i18n__release\\nversion=1.0.53\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__impl__protocol",
+    "value": "name=protocol\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_protocol__impl__i18n__release\\nversion=1.0.73\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__impl__realname",
+    "value": "name=realname\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_realname__impl__i18n__release\\nversion=1.0.58\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__crash__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__crash__impl__i18n__release\\nversion=4.8.75\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=crash"
+  },
+  {
+    "key": "__gsdk_manifest_component__gameprotect__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__gameprotect__impl__i18n__release\\nversion=1.0.62\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=gameprotect"
+  },
+  {
+    "key": "__gsdk_manifest_component__pay__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__pay__impl__i18n__release\\nversion=3.12.77\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=pay"
+  },
+  {
+    "key": "__gsdk_manifest_component__pay__impl__toutiao",
+    "value": "name=toutiao\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__pay_toutiao__impl__i18n__release\\nversion=3.12.83\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=pay"
+  },
+  {
+    "key": "__gsdk_manifest_component__push__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__push__impl__i18n__release\\nversion=3.6.152\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=push"
+  },
+  {
+    "key": "__gsdk_manifest_component__quality__impl__boost",
+    "value": "name=boost\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__quality_boost__impl__i18n__release\\nversion=1.0.55\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=quality"
+  },
+  {
+    "key": "__gsdk_manifest_component__rating__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__rating__impl__i18n__release\\nversion=3.5.107\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=rating"
+  },
+  {
+    "key": "__gsdk_manifest_component__main__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__main__api__i18n__release\\nversion=112.1.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=main"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__api__realname",
+    "value": "name=realname\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_realname__api__i18n__release\\nversion=1.0.38\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__cloudgame__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__cloudgame__api__i18n__release\\nversion=4.0.27\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=cloudgame"
+  },
+  {
+    "key": "__gsdk_manifest_component__account__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__account__api__i18n__release\\nversion=94.0.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=account"
+  },
+  {
+    "key": "__gsdk_manifest_component__adattribution__bridge__appsflyer",
+    "value": "name=appsflyer\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__adattribution_appsflyer__bridge__i18n__release\\nversion=1.0.33\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=adattribution"
+  },
+  {
+    "key": "__gsdk_manifest_component__adattribution__api__appsflyer",
+    "value": "name=appsflyer\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__adattribution_appsflyer__api__i18n__release\\nversion=21.0.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=adattribution"
+  },
+  {
+    "key": "__gsdk_manifest_component__adattribution__bridge__firebase",
+    "value": "name=firebase\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__adattribution_firebase__bridge__i18n__release\\nversion=1.0.21\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=adattribution"
+  },
+  {
+    "key": "__gsdk_manifest_component__adattribution__api__firebase",
+    "value": "name=firebase\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__adattribution_firebase__api__i18n__release\\nversion=13.0.1\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=adattribution"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__api__agegate",
+    "value": "name=agegate\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_agegate__api__i18n__release\\nversion=7.1.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__api__cookie",
+    "value": "name=cookie\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_cookie__api__i18n__release\\nversion=1.0.16\\nregion=i18n\\npluginVersion=12.13\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__api__permission",
+    "value": "name=permission\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_permission__api__i18n__release\\nversion=3.0.0\\nregion=i18n\\npluginVersion=12.14\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__api__protocol",
+    "value": "name=protocol\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_protocol__api__i18n__release\\nversion=16.0.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__pay__api__toutiao",
+    "value": "name=toutiao\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__pay_toutiao__api__i18n__release\\nversion=10.2.10\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=pay"
+  },
+  {
+    "key": "__gsdk_manifest_component__webview__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__webview__impl__i18n__release\\nversion=3.6.31464\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=webview"
+  },
+  {
+    "key": "__gsdk_manifest_component__pay__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__pay__api__i18n__release\\nversion=22.2.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=pay"
+  },
+  {
+    "key": "__gsdk_manifest_component__core__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__core__impl__i18n__release\\nversion=4.4.31471\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=core"
+  },
+  {
+    "key": "__gsdk_manifest_component__geas__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__geas__impl__i18n__release\\nversion=1.0.61\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=geas"
+  },
+  {
+    "key": "__gsdk_manifest_component__gpm__impl__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__gpm__impl__i18n__release\\nversion=1.0.50\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=gpm"
+  },
+  {
+    "key": "__gsdk_manifest_component__core__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__core__api__i18n__release\\nversion=94.1.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=core"
+  },
+  {
+    "key": "__gsdk_manifest_component__crash__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__crash__bridge__i18n__release\\nversion=4.0.30\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=crash"
+  },
+  {
+    "key": "__gsdk_manifest_component__crash__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__crash__api__i18n__release\\nversion=31.0.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=crash"
+  },
+  {
+    "key": "__gsdk_manifest_component__dynamic__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__dynamic__bridge__i18n__release\\nversion=1.0.22\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=dynamic"
+  },
+  {
+    "key": "__gsdk_manifest_component__dynamic__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__dynamic__api__i18n__release\\nversion=5.1.9\\nregion=i18n\\npluginVersion=12.13\\ncomponent=dynamic"
+  },
+  {
+    "key": "__gsdk_manifest_component__gameprotect__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__gameprotect__api__i18n__release\\nversion=1.0.11\\nregion=i18n\\npluginVersion=12.13\\ncomponent=gameprotect"
+  },
+  {
+    "key": "__gsdk_manifest_component__geas__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__geas__bridge__i18n__release\\nversion=1.0.20\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=geas"
+  },
+  {
+    "key": "__gsdk_manifest_component__geas__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__geas__api__i18n__release\\nversion=1.0.13\\nregion=i18n\\npluginVersion=12.13\\ncomponent=geas"
+  },
+  {
+    "key": "__gsdk_manifest_component__gpm__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__gpm__api__i18n__release\\nversion=2.0.9\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=gpm"
+  },
+  {
+    "key": "__gsdk_manifest_component__mainextra__impl__commonmonitor",
+    "value": "name=commonmonitor\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__mainextra_commonmonitor__impl__i18n__release\\nversion=1.0.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=mainextra"
+  },
+  {
+    "key": "__gsdk_manifest_component__mainextra__api__commonmonitor",
+    "value": "name=commonmonitor\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__mainextra_commonmonitor__api__i18n__release\\nversion=2.0.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=mainextra"
+  },
+  {
+    "key": "__gsdk_manifest_component__mainextra__impl__ttnet",
+    "value": "name=ttnet\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__mainextra_ttnet__impl__i18n__release\\nversion=1.0.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=mainextra"
+  },
+  {
+    "key": "__gsdk_manifest_component__mainextra__api__ttnet",
+    "value": "name=ttnet\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__mainextra_ttnet__api__i18n__release\\nversion=1.0.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=mainextra"
+  },
+  {
+    "key": "__gsdk_manifest_component__push__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__push__bridge__i18n__release\\nversion=3.6.30\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=push"
+  },
+  {
+    "key": "__gsdk_manifest_component__push__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__push__api__i18n__release\\nversion=9.2.0\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=push"
+  },
+  {
+    "key": "__gsdk_manifest_component__quality__api__boost",
+    "value": "name=boost\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__quality_boost__api__i18n__release\\nversion=1.0.16\\nregion=i18n\\npluginVersion=12.13\\ncomponent=quality"
+  },
+  {
+    "key": "__gsdk_manifest_component__rating__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__rating__bridge__i18n__release\\nversion=3.5.24\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=rating"
+  },
+  {
+    "key": "__gsdk_manifest_component__rating__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__rating__api__i18n__release\\nversion=16.0.1\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=rating"
+  },
+  {
+    "key": "__gsdk_manifest_component__rncore__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__rncore__bridge__i18n__release\\nversion=1.0.24\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=rncore"
+  },
+  {
+    "key": "__gsdk_manifest_component__rncore__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__rncore__api__i18n__release\\nversion=21.1.1\\nregion=i18n\\npluginVersion=12.14\\ncomponent=rncore"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__api__facebook",
+    "value": "name=facebook\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share_facebook__api__i18n__release\\nversion=1.1.4\\nregion=i18n\\npluginVersion=12.13\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__api__twitter",
+    "value": "name=twitter\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share_twitter__api__i18n__release\\nversion=1.0.4\\nregion=i18n\\npluginVersion=12.13\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_component__webview__bridge__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__webview__bridge__i18n__release\\nversion=3.6.29\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=webview"
+  },
+  {
+    "key": "__gsdk_manifest_component__webview__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__webview__api__i18n__release\\nversion=3.12.1\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=webview"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__impl__instagram",
+    "value": "name=instagram\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share_instagram__impl__i18n__release\\nversion=4.1.27\\nregion=i18n\\npluginVersion=12.13\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__impl__vk",
+    "value": "name=vk\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share_vk__impl__i18n__release\\nversion=4.1.27\\nregion=i18n\\npluginVersion=12.13\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__impl__whatsapp",
+    "value": "name=whatsapp\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share_whatsapp__impl__i18n__release\\nversion=4.1.27\\nregion=i18n\\npluginVersion=12.13\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_library__tt_channel_i18n_adapter_account",
+    "value": "name=tt_channel_i18n_adapter_account\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__tt_channel_i18n_adapter_account__i18n__release\\nversion=1.11.0-rc3\\nregion=i18n\\npluginVersion=12.17-rc2"
+  },
+  {
+    "key": "__gsdk_manifest_library__channel_api_i18n",
+    "value": "name=channel_api_i18n\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__channel_api_i18n__i18n__release\\nversion=4.3.0\\nregion=i18n\\npluginVersion=12.17-rc2"
+  },
+  {
+    "key": "__gsdk_manifest_library__api_monitor",
+    "value": "name=api_monitor\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__api_monitor__common__release\\nversion=1.1.1\\nregion=i18n\\npluginVersion=12.13"
+  },
+  {
+    "key": "__gsdk_manifest_library__boot_manager",
+    "value": "name=boot_manager\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__boot_manager__common__release\\nversion=2.1.3-rc2\\nregion=i18n\\npluginVersion=12.13"
+  },
+  {
+    "key": "__gsdk_manifest_library__module_manager",
+    "value": "name=module_manager\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__module_manager__common__release\\nversion=6.0.0-rc1\\nregion=i18n\\npluginVersion=12.13"
+  },
+  {
+    "key": "__gsdk_manifest_component__qrcode__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__qrcode__api__i18n__release\\nversion=4.0.3\\nregion=i18n\\npluginVersion=12.13\\ncomponent=qrcode"
+  },
+  {
+    "key": "__gsdk_manifest_component__appset__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__appset__api__i18n__release\\nversion=0.0.1\\nregion=i18n\\npluginVersion=12.17-rc3\\ncomponent=appset"
+  },
+  {
+    "key": "__gsdk_manifest_component__voice__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__voice__api__i18n__release\\nversion=6.2.5\\nregion=i18n\\npluginVersion=12.13\\ncomponent=voice"
+  },
+  {
+    "key": "__gsdk_manifest_component__quality__api__compress",
+    "value": "name=compress\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__quality_compress__api__i18n__release\\nversion=2.0.4\\nregion=i18n\\npluginVersion=12.13\\ncomponent=quality"
+  },
+  {
+    "key": "__gsdk_manifest_component__asr__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__asr__api__i18n__release\\nversion=4.2.5\\nregion=i18n\\npluginVersion=12.13\\ncomponent=asr"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__api__antiaddiction",
+    "value": "name=antiaddiction\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_antiaddiction__api__i18n__release\\nversion=2.0.9\\nregion=i18n\\npluginVersion=12.6\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__compliance__api__privacy",
+    "value": "name=privacy\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__compliance_privacy__api__i18n__release\\nversion=2.0.12\\nregion=i18n\\npluginVersion=12.6\\ncomponent=compliance"
+  },
+  {
+    "key": "__gsdk_manifest_component__unitelive__api__DEFAULT",
+    "value": "name=DEFAULT\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__unitelive__api__i18n__release\\nversion=1.0.8\\nregion=i18n\\npluginVersion=12.13\\ncomponent=unitelive"
+  },
+  {
+    "key": "__gsdk_manifest_component__share__api__tiktok",
+    "value": "name=tiktok\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__module__share_tiktok__api__i18n__release\\nversion=4.2.7\\nregion=i18n\\npluginVersion=12.13\\ncomponent=share"
+  },
+  {
+    "key": "__gsdk_manifest_library__api_common",
+    "value": "name=api_common\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__api_common__common__release\\nversion=1.2.2\\nregion=i18n\\npluginVersion=12.13"
+  },
+  {
+    "key": "__gsdk_manifest_library__base_utils",
+    "value": "name=base_utils\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__base_utils__i18n__release\\nversion=1.1.3-rc5\\nregion=i18n\\npluginVersion=12.17-rc3"
+  },
+  {
+    "key": "__gsdk_manifest_library__gbridge_base",
+    "value": "name=gbridge_base\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__gbridge_base__common__release\\nversion=2.1.1-rc1\\nregion=i18n\\npluginVersion=12.17-rc2"
+  },
+  {
+    "key": "__gsdk_manifest_library__glog_lib",
+    "value": "name=glog_lib\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__glog_lib__i18n__release\\nversion=2.1.12-rc1\\nregion=i18n\\npluginVersion=12.17-rc3"
+  },
+  {
+    "key": "__gsdk_manifest_library__boot_manager_api",
+    "value": "name=boot_manager_api\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__boot_manager_api__common__release\\nversion=1.0.5\\nregion=i18n\\npluginVersion=12.13"
+  },
+  {
+    "key": "__gsdk_manifest_library__glog_api",
+    "value": "name=glog_api\\ngroup=com.bytedance.ttgame\\nartifact=gsdk__library__glog_api__common__release\\nversion=3.0.10-rc2\\nregion=i18n\\npluginVersion=12.17-rc2"
+  }
+]

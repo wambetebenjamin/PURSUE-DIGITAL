@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <bool name="active_oasis_age_level_floating_window">true</bool>
+</resources>

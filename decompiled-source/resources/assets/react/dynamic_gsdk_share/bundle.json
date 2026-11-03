@@ -1,0 +1,15 @@
+{
+  "min_sdk_version": "3.16.0",
+  "version": "1.0.0",
+  "buildType": "2",
+  "buildTime": "10/17/2022, 12:48:21 PM",
+  "gitCommit": "e16a9a7",
+  "routes": [],
+  "modules": {
+    "common": {
+      "fileName": "common.undefined",
+      "version": "0.4.4"
+    }
+  },
+  "source": "local"
+}

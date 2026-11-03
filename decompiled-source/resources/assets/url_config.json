@@ -1,0 +1,49 @@
+{
+  "urls": {
+    "log_url": "https://log.byteoversea.net/",
+    "passport_host_merge": "gsdk-sg.bytegsdk.com",
+    "passport_host_merge_sandbox": "https://gsdk-sg-sandbox.bytegsdk.com",
+    "passport_host": "bsdk-sg.bytegsdk.com",
+    "passport_host_merge_va": "gsdk-va.bytegsdk.com",
+    "passport_host_merge_va_sandbox": "https://gsdk-va-sandbox.bytegsdk.com",
+    "passport_host_va": "bsdk-va.bytegsdk.com",
+    "account_privatization" : "https://login-sg.bytegsdk.com/",
+    "account_privatization_sandbox" : "https://login-sandbox-sg.bytegsdk.com/",
+    "account_logout_url" : "",
+
+    "bsdk_server_url" : "https://bsdk-sg.bytegsdk.com/",
+    "gsdk_server_url" : "https://gsdk-sg.bytegsdk.com/",
+
+    "gsdk_server_url_sandbox" : "https://gsdk-sg-sandbox.bytegsdk.com/",
+    "gsdk_server_url_boe" : "http://gsdk-sg.bytegsdk.com.boe-gateway.byted.org/",
+
+    "gsdk_server_url_boe_va" : "http://gsdk-va.bytegsdk.com.boe-gateway.byted.org/",
+    "bsdk_server_url_boe_va" : "http://bsdk-va.bytegsdk.com.boe-gateway.byted.org/",
+    "bsdk_server_url_boe" : "http://bsdk-sg.bytegsdk.com.boe-gateway.byted.org/",
+    "bsdk_server_url_sandbox" : "http://bsdk-sg-sandbox.bytegsdk.com/",
+
+    "bsdk_host_va" : "bsdk-va.bytegsdk.com",
+    "bsdk_host" : "bsdk-sg.bytegsdk.com",
+    "gsdk_host_va" : "gsdk-va.bytegsdk.com",
+    "gsdk_host" : "gsdk-sg.bytegsdk.com",
+    "gsdk_host_va_sandbox" : "gsdk-va-sandbox.bytegsdk.com",
+    "gsdk_host_sandbox" : "gsdk-sg-sandbox.bytegsdk.com",
+
+    "common_token_host" : ["bytegsdk.com","sgsnssdk.com"],
+    "byte_token_host_va" : ["bytegsdk.com","vasnssdk.com"],
+
+    "pay_host" : "https://pay-sg.bytegsdk.com/",
+    "pay_host_sandbox" : "https://pay-sandbox-sg.bytegsdk.com/",
+    "pay_host_va" : "https://pay-ca.bytegsdk.com/",
+
+    "geas_host_sg" : "https://gsdk-sg.bytegsdk.com/",
+    "geas_host_va" : "https://gsdk-va.bytegsdk.com/",
+
+    "realtime_event_report_url": "https://dis-sg.bytegsdk.com/put_log_shared_1",
+    "realtime_event_report_url_sandbox": "https://dis-sg.bytegsdk.com/put_log_sandbox",
+
+    "asr_config_url": "https://mon.isnssdk.com/monitor/appmonitor/v2/settings",
+    "asr_report_url": "https://mon.isnssdk.com/monitor/collect/",
+    "asr_address": "wss://speech-alisg.bytedance.com"
+  }
+}
