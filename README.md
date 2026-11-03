@@ -126,6 +126,23 @@ lock), the march HUD is put away, and the streets carry people. The pursuit
 itself is one button — **Take the road** — and the march's pause page carries
 **The Citadel** to come back.
 
+## The reference teardown (pass 17)
+
+The reference game's own source is now in the repo (`decompiled-source/`), so
+this is a teardown of the actual code rather than of the store listing.
+
+| What we found | Where |
+| --- | --- |
+| Nine documents: runtime & config, the asset pipeline, all 113 Retrofit endpoints, the real protobuf protocol, the recovered game logic, the Unity architecture, the backend plan, the GDD, the roadmap | `docs/reference/` |
+| The game's real API is **protobuf RPC over a socket** (`msg.gs.<module>.C<Action>` / `S<Action>`), not REST — recovered from the shipped Lua | `docs/reference/04-game-protocol.md` |
+| The recovered module map, the production loop, the offline cap, the red-dot tree, the battle-pass accelerator arithmetic | `docs/reference/05-game-logic.md` |
+| 741 textures and 344 sprites extracted straight out of the repo's bundles — **no upload needed** | `tools/extract-reference-art.py` |
+| The reference's palette: gold-bronze on deep oxblood, and its hero attributes (attack speed, crit, travel speed, two defence tiers, daily upkeep) | `docs/ASSET_INGEST.md` |
+
+Two extractors live in `tools/`: `ufs-extract.py` unpacks the UnityFS bundles
+and dumps the Lua 5.3 constant tables with no desktop toolchain;
+`extract-reference-art.py` pulls the art and the palette.
+
 ## The muster and the field
 
 Pass 15 finishes the strategy loop the reference game is built on, in our own
