@@ -1,0 +1,17 @@
+{
+  "name": "pursue-backend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "PURSUE \u2014 the server for Ziklag. Same mechanics as the reference, 1 Samuel 30.",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.5.1"
+  }
+}

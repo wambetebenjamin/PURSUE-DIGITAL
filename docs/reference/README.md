@@ -62,6 +62,20 @@ Nothing in this pack is guesswork dressed as fact: where a number is inferred
 from the reference's genre conventions rather than read from the files, it says
 so.
 
+## The extracted schema
+
+`docs/reference/schema/sdk-schema.json` is the machine-readable form of
+Phase 1: every Retrofit route (verb, path, Java method, parameters), every
+`@SerializedName` payload class with its JSON field names and Java types,
+and every error-code vocabulary in the SDK. It is generated, not hand-copied:
+
+```bash
+python3 tools/extract-java-schema.py
+```
+
+The backend in `game-backend/` is written against that file — the envelope,
+the error numbers and the `Role` bean's field names all come from it.
+
 ## Reproducing the extraction
 
 `tools/ufs-extract.py` (new) unpacks UnityFS bundles and dumps the Lua constant

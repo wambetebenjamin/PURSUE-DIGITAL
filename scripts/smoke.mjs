@@ -977,4 +977,84 @@ ok(cit2.active === false, 'it can be left for the march');
 ok(!document.body.classList.contains('citadel-mode'), 'and the march gets its HUD back');
 ok(!citScene.children.includes(cit2.city.group), 'the city comes out of the scene');
 
+
+// ---- the server client: the C/S conversation, and what happens offline
+const { PursueServer } = await import('../src/net/pursueServer.js');
+
+function fakeStorage() {
+  const bag = new Map();
+  return {
+    getItem: (k) => (bag.has(k) ? bag.get(k) : null),
+    setItem: (k, v) => bag.set(k, String(v)),
+    removeItem: (k) => bag.delete(k),
+  };
+}
+
+/** A server that answers, and can be taken down. */
+function fakeServer() {
+  const calls = [];
+  let up = true;
+  const camp = { resources: { provisions: 180, bronze: 90, timber: 60, spoil: 0 } };
+  const fetchImpl = async (url, opts = {}) => {
+    if (!up) throw new Error('network down');
+    calls.push({ url, body: opts.body ? JSON.parse(opts.body) : null });
+    const path = String(url).replace('/api', '');
+    const msg = (opts.body && JSON.parse(opts.body).msg) || {};
+    if (path === '/auth/login') {
+      return { json: async () => ({ code: 0, message: 'ok', data: {
+        session_token: 'tok_1', player: { role_id: 'role_1', name: 'David' }, servers: [] } }) };
+    }
+    if (path.endsWith('/encampment/GetDetail')) {
+      return { json: async () => ({ code: 0, message: 'ok', data: { camp } }) };
+    }
+    if (path.endsWith('/encampment/GainQuery')) {
+      return { json: async () => ({ code: 0, message: 'ok', data: { can_gain: true, resources: { provisions: 24 } } }) };
+    }
+    if (path.endsWith('/encampment/Upgrade')) {
+      return { json: async () => ({ code: 0, message: 'ok', data: { work_id: msg.work_id, level: 2 } }) };
+    }
+    return { json: async () => ({ code: 0, message: 'ok', data: {} }) };
+  };
+  return {
+    calls,
+    fetchImpl,
+    setUp: (v) => { up = v; },
+  };
+}
+
+const srv = fakeServer();
+const net = new PursueServer({ fetchImpl: srv.fetchImpl, storage: fakeStorage(), deviceId: 'dev-smoke' });
+ok(net.online === false, 'the client starts out not knowing whether the server is there');
+const who = await net.login('David');
+ok(who && who.role_id === 'role_1', 'the client logs in and keeps the role');
+ok(net.state.token === 'tok_1', 'and keeps the session token');
+const gain = await net.queryGain();
+ok(gain && gain.can_gain === true, 'the client asks what is ready');
+ok(srv.calls.some((c) => c.url.includes('/rpc/encampment/GainQuery')), 'and asks it the reference\'s way');
+
+// the network dies: the action is held, not lost
+srv.setUp(false);
+const held = await net.upgradeWork('threshing');
+ok(held === null, 'a call that cannot reach the server returns nothing');
+ok(net.online === false, 'and the client knows it is alone');
+ok(net.state.queue.length === 1, 'the action is held for later');
+ok(net.state.queue[0].action === 'Upgrade', 'in the order it was taken');
+
+// the network comes back: the held actions are replayed
+srv.setUp(true);
+const flushed = await net.flush();
+ok(flushed === 1, 'the held action is replayed');
+ok(net.state.queue.length === 0, 'and the queue is empty afterwards');
+ok(srv.calls.filter((c) => c.url.includes('/rpc/encampment/Upgrade')).length === 1, 'the server saw it');
+
+// a server error is not a network error: it is reported, not queued
+const angry = new PursueServer({
+  storage: fakeStorage(),
+  fetchImpl: async () => ({ json: async () => ({ code: -130001, message: 'not enough in the stores' }) }),
+});
+let refusal = null;
+try { await angry.upgradeWork('threshing'); } catch (e) { refusal = e; }
+ok(refusal && refusal.code === -130001, 'a refusal from the server is raised, not swallowed');
+ok(angry.state.queue.length === 0, 'and is never queued for replay');
+
 console.log(`\nAll ${passed} checks passed.\n`);
