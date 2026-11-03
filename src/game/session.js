@@ -13,6 +13,21 @@ let onLeave = null;
 let onCitadel = null;
 
 /**
+ * Where the server is. The camp is served from the same place as the
+ * function, so the path is taken from the page itself — a build served
+ * from a sub-path still finds its own server.
+ * @returns {string}
+ */
+export function defaultBase() {
+  try {
+    if (typeof document !== 'undefined' && document.baseURI) {
+      return new URL('api', document.baseURI).pathname.replace(/\/+$/, '');
+    }
+  } catch (_e) { /* no document: the root path it is */ }
+  return '/api';
+}
+
+/**
  * Open the session.
  * @param {object} [opts]
  * @param {string} [opts.base]        where the server is
@@ -20,7 +35,7 @@ let onCitadel = null;
  * @param {Function} [opts.onCitadel] called when the player asks for the citadel
  */
 export function openSession(opts = {}) {
-  if (!api) api = new CampApi({ base: opts.base || '/api' });
+  if (!api) api = new CampApi({ base: opts.base || defaultBase() });
   if (opts.onLeave) onLeave = opts.onLeave;
   if (opts.onCitadel) onCitadel = opts.onCitadel;
   return api;
